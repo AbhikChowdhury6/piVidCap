@@ -8,6 +8,7 @@ deviceName = os.getenv("DEVICE_NAME", "notSet")
 if deviceName == "notSet":
     print("no device name set")
 
+user = os.getenv("USER", "pi")
 # what do we need to do
     # keep track of how many frames there are and save a video every 1.8k frames  
     # save to a folder called deviceName-date in a folder called collectedData
@@ -15,6 +16,11 @@ if deviceName == "notSet":
 
 # the chron job can come in and send off that folder to 
 # /home/{remoteUsername}/Documents/videoData/{year-month}/ in the storage and processing server
+# open chrontab for editing with chrontab -e
+# run the script at 3 am ngl I'm pretty sure everyone in the house will be pretty asleep
+# add the line
+# 0 3 * * * /home/pi/Documents/videoProcessing/send.sh
+
 
 # Define the codec and create a VideoWriter object
 def writer_worker(input_queue, output_queue):
@@ -55,7 +61,7 @@ def writer_worker(input_queue, output_queue):
             else:
                 endIndex = 1800
             
-            pathToFile = "/home/pi/Documents/collectedData/" + \
+            pathToFile = "/home/" + user + "/Documents/collectedData/" + \
                         deviceName + "_" + timestamps[0].strftime('%Y-%m-%d') + "/"
             os.makedirs(pathToFile, exist_ok=True)
 
