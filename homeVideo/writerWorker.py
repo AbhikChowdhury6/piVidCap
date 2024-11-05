@@ -7,8 +7,10 @@ import os
 deviceName = os.getenv("DEVICE_NAME", "notSet")
 if deviceName == "notSet":
     print("no device name set")
+    sys.stdout.flush()
 
 user = os.getenv("USER", "pi")
+sys.stdout.flush()
 # what do we need to do
     # keep track of how many frames there are and save a video every 1.8k frames  
     # save to a folder called deviceName-date in a folder called collectedData
@@ -24,6 +26,8 @@ user = os.getenv("USER", "pi")
 
 # Define the codec and create a VideoWriter object
 def writer_worker(input_queue, output_queue):
+    print("in writer worker")
+    sys.stdout.flush()
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
     timestamps = []
     frames = []
@@ -41,13 +45,12 @@ def writer_worker(input_queue, output_queue):
             first = False
             frameWidth = int(newFrames[0].shape[1])
             frameHeight = int(newFrames[0].shape[0])
-            lastVideoDay = newTimestmaps[0].day
             
 
         frames.extend(newFrames)
         timestamps.extend(newTimestmaps)
 
-        if frames[0].day < frames[-1].day:
+        if timestamps[0].day < timestamps[-1].day:
             crossesMidnight = True
         else:
             crossesMidnight = False
@@ -56,18 +59,18 @@ def writer_worker(input_queue, output_queue):
  
             if crossesMidnight:
                 endIndex = len(frames)
-                while frames[0].day < frames[endIndex].day:
+                while timestamps[0].day < timestamps[endIndex].day:
                     endIndex -= 1
             else:
                 endIndex = 1800
             
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
-                        deviceName + "_" + timestamps[0].strftime('%Y-%m-%d') + "/"
+                        deviceName + "_" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
             os.makedirs(pathToFile, exist_ok=True)
 
             fileName = deviceName + "_" + \
-                        timestamps[0].strftime('%Y-%m-%dT%H%M%S%z') + "_" + \
-                        timestamps[endIndex-1].strftime('%Y-%m-%dT%H%M%S%z')
+                        timestamps[0].strftime('%Y-%m-%dT%H%M%S-%f%z') + "_" + \
+                        timestamps[endIndex-1].strftime('%Y-%m-%dT%H%M%S-%f%z')
 
             #save frames to a video
             output = cv2.VideoWriter(pathToFile + fileName + ".mp4", 
@@ -83,6 +86,7 @@ def writer_worker(input_queue, output_queue):
             tsdf = pd.DataFrame(data=timestamps[:endIndex], columns=['sampleDT'])
             tsdf.to_parquet(pathToFile + fileName + ".parquet")
             timestamps = timestamps[endIndex:]
+            # sys.stdout.flush()
 
 
         

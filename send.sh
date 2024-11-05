@@ -10,8 +10,8 @@
 # at 3am
 # send yesterdays folder to 
 
-#TODO
-#transfer all folders except for the one for the current day
+# TODO later
+# transfer all folders except for the one for the current day
 
 DEVICE_NAME=${DEVICE_NAME:-"notSet"}
 
