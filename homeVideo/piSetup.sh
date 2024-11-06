@@ -10,6 +10,8 @@ echo "enter the local username"
 read LOCAL_USERNAME
 echo "enter the remote username"
 read REMOTE_USERNAME
+echo "enter the remote host name"
+read REMOTE_HOSTNAME
 echo "enter enter the remote password"
 read REMOTE_PASSWORD
 
@@ -32,6 +34,7 @@ pip install fastparquet
 # update the .bashrc
 echo "export DEVICE_NAME=${DEVICE_NAME}" >> /home/$LOCAL_USERNAME/.bashrc
 echo "export REMOTE_USERNAME=${REMOTE_USERNAME}" >> /home/$LOCAL_USERNAME/.bashrc
+echo "export REMOTE_HOSTNAME=${REMOTE_HOSTNAME}" >> /home/$LOCAL_USERNAME/.bashrc
 echo "export REMOTE_PASSWORD=${REMOTE_PASSWORD}" >> /home/$LOCAL_USERNAME/.bashrc
 echo "source /home/$LOCAL_USERNAME/vision/bin/activate" >> /home/$LOCAL_USERNAME/.bashrc
 
