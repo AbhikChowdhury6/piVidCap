@@ -6,6 +6,8 @@
 
 echo "enter the device name"
 read DEVICE_NAME
+echo "enter the local username"
+read LOCAL_USERNAME
 echo "enter the remote username"
 read REMOTE_USERNAME
 echo "enter enter the remote password"
@@ -28,20 +30,21 @@ pip install fastparquet
 
 
 # update the .bashrc
-echo "export DEVICE_NAME=${DEVICE_NAME}" >> ~/.bashrc
-echo "export REMOTE_USERNAME=${REMOTE_USERNAME}" >> ~/.bashrc
-echo "export REMOTE_PASSWORD=${REMOTE_PASSWORD}" >> ~/.bashrc
-echo "source ~/vision/bin/activate" >> ~/.bashrc
+echo "export DEVICE_NAME=${DEVICE_NAME}" >> /home/$LOCAL_USERNAME/.bashrc
+echo "export REMOTE_USERNAME=${REMOTE_USERNAME}" >> /home/$LOCAL_USERNAME/.bashrc
+echo "export REMOTE_PASSWORD=${REMOTE_PASSWORD}" >> /home/$LOCAL_USERNAME/.bashrc
+echo "source /home/$LOCAL_USERNAME/vision/bin/activate" >> /home/$LOCAL_USERNAME/.bashrc
 
 # add the chron job
-chrontab -e 0 3 * * * /home/$USER/Documents/videoProcessing/send.sh
+chrontab -e 0 3 * * * /home/$LOCAL_USERNAME/Documents/videoProcessing/send.sh
 
-source ~/.bashrc
+
 # last manually restart
 
 # then add running the vidCap.py script to /etc/rc.local once ready
 # before exit 0
 # source /home/pi/vision/bin/activate
-# sudo -u pi python /home/pi/Documents/videoProcessing/homeVideo/vidCap.py
+# "export LOCAL_USERNAME=${LOCAL_USERNAME}"
+# sudo -u pi python /home/$LOCAL_USERNAME/Documents/videoProcessing/homeVideo/vidCap.py
 
 
