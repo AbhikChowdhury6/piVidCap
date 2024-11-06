@@ -38,6 +38,8 @@ def writer_worker(input_queue, output_queue):
         newTimestmaps, newFrames = input_queue.get()  # Get frame from the input queue
         
         if newFrames is None:  # None is the signal to exit
+            print("exiting writer worker")
+            sys.stdout.flush()
             output.release()
             break
         

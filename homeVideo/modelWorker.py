@@ -31,6 +31,8 @@ def model_worker(input_queue, output_queue):
         # sys.stdout.flush()
         frame = input_queue.get()  # Get frame from the input queue
         if frame is None:  # None is the signal to exit
+            print("exiting model worker")
+            sys.stdout.flush()
             break
         
         # print("got frame!")

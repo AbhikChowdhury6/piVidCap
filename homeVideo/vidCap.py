@@ -3,12 +3,26 @@ from datetime import datetime
 import time
 import tzlocal
 import pandas as pd
+import signal
+import sys
 
 import torch.multiprocessing as mp
 from modelWorker import model_worker
 from writerWorker import writer_worker
 
+
+
 if __name__ == "__main__":
+    #the spawend processes will build up unless exited
+    def handle_sigint(signal_received, frame):
+        print("SIGINT received. Exiting gracefully...")
+        model_input_queue.put(None)
+        writer_input_queue.put(None)
+        sys.exit(130)  # Exit code 130 is commonly used for SIGINT
+    # Set up the signal handler for SIGINT
+    signal.signal(signal.SIGINT, handle_sigint)
+
+
     timeBeforeCapDefined = datetime.now() 
     cap = cv2.VideoCapture(1)
     timeAfterCapDefined = datetime.now() 
