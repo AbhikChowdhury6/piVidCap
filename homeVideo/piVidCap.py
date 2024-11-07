@@ -1,5 +1,4 @@
-from picamera.array import PiRGBArray
-from picamera import PiCamera
+from picamera2 import Picamera2
 import cv2
 from datetime import datetime
 import time
@@ -24,10 +23,12 @@ if __name__ == "__main__":
     # Set up the signal handler for SIGINT
     signal.signal(signal.SIGINT, handle_sigint)
 
+    picam2 = Picamera2()
+    picam2.configure(picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
+    picam2.start()
 
     initalFrameReadStart = datetime.now()
-    camera.capture(rawCapture, format="bgr")
-    frame = rawCapture.array
+    frame = picam2.capture_array()
     if not ret:
         print("Error: Could not read frame.")
 
@@ -76,8 +77,7 @@ if __name__ == "__main__":
     time.sleep((14 - (currTime.second % 15)) + (1 - currTime.microsecond/1_000_000))
 
     readTimes = [datetime.now(tzlocal.get_localzone())]
-    camera.capture(rawCapture, format="bgr")
-    frame = rawCapture.array
+    frame = picam2.capture_array()
     mybuffer = [frame]
     model_input_queue.put(frame)
 
@@ -95,8 +95,7 @@ if __name__ == "__main__":
         
         #logging and frame cap
         readTimes.append(datetime.now(tzlocal.get_localzone()))
-        camera.capture(rawCapture, format="bgr")
-        frame = rawCapture.array
+        frame = picam2.capture_array()
         mybuffer.append(frame)
 
         if (datetime.now().second + 1) % 15 == 0 and datetime.now().microsecond > 900_000:
@@ -120,8 +119,7 @@ if __name__ == "__main__":
             print(f"done with timeperiod starting at {readTimes[0]}")
             lrt = readTimes
             readTimes = [datetime.now(tzlocal.get_localzone())]
-            camera.capture(rawCapture, format="bgr")
-            frame = rawCapture.array
+            frame = picam2.capture_array()
             lb = mybuffer
             mybuffer = [frame]
             model_input_queue.put(frame)
