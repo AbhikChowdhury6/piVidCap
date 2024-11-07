@@ -17,17 +17,19 @@ read REMOTE_PASSWORD
 
 #install video capture dependencies
 # make and activate a virtual enviroment
-python -m venv ~/vision
-source ~/vision/bin/activate
+# python -m venv ~/vision
+# source ~/vision/bin/activate
 
-pip install ultralytics[export]
+conda install -y ultralytics
 # installs torch
 # installs opencv-python # maybe not proprietry codecs?
 # also intalls most things under the sun and takes for ever to resolve an enviroment on the pi
-pip install tzlocal
-pip install pandas
-pip install pyarrow
-pip install fastparquet
+conda install -y tzlocal
+conda install -y pytorch
+conda install -y torchvision
+# pip install pandas
+conda install -y pyarrow
+conda install -y fastparquet
 # pip install opencv-contrib-python
 
 
