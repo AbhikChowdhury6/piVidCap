@@ -46,7 +46,12 @@ def model_worker(input_queue, output_queue):
             # sys.stdout.flush()
             # print("got results!")
             # sys.stdout.flush()
-            output_queue.put(len(result[0].names) > 0)
+            # sys.stdout.flush()
+            # print(result[0].boxes.data)
+            # sys.stdout.flush()
+            print(f"the number of items in the data field of boxes is {len(result[0].boxes.data)}")
+            sys.stdout.flush()
+            output_queue.put(len(result[0].boxes.data) > 0)
         except Exception as e:
             print(f"Error processing frame: {e}")
             sys.stdout.flush()

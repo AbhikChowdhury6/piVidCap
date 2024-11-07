@@ -113,16 +113,21 @@ if __name__ == "__main__":
             # if there was people then save the last 15 seconds
             mr = modelResult()
             if mr:
+                print("saw someone!")
                 if not lastModelResult:
-                    writer_input_queue.put((lrt.extend(readTimes), lb.extend(mybuffer))) 
+                    lrt.extend(readTimes)
+                    lb.extend(mybuffer)
+                    # print(lrt)
+                    # print(len(lb))
+                    writer_input_queue.put((lrt, lb)) 
                 else:
                     writer_input_queue.put((readTimes, mybuffer))
             else:
                 # else just save the one frame analyzed for a timelapse
-                writer_input_queue.put((readTimes,[mybuffer[0]]))
+                writer_input_queue.put(([readTimes[0]],[mybuffer[0]]))
             
             delayTill100ms()
-            print(readTimes[0])
+            print(f"done with timeperiod starting at {readTimes[0]}")
             lrt = readTimes
             readTimes = [datetime.now(tzlocal.get_localzone())]
             ret, frame = cap.read()

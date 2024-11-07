@@ -36,7 +36,11 @@ def writer_worker(input_queue, output_queue):
     first = True
     while True:
         newTimestmaps, newFrames = input_queue.get()  # Get frame from the input queue
-        
+        # print(newTimestmaps)
+        print(f"recived {len(newFrames)} new frames!")
+        sys.stdout.flush()
+
+
         if newFrames is None:  # None is the signal to exit
             print("exiting writer worker")
             sys.stdout.flush()
@@ -65,6 +69,7 @@ def writer_worker(input_queue, output_queue):
                     endIndex -= 1
             else:
                 endIndex = 1800
+
             
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
                         deviceName + "_" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
@@ -73,6 +78,10 @@ def writer_worker(input_queue, output_queue):
             fileName = deviceName + "_" + \
                         timestamps[0].strftime('%Y-%m-%dT%H%M%S-%f%z') + "_" + \
                         timestamps[endIndex-1].strftime('%Y-%m-%dT%H%M%S-%f%z')
+
+            print(f"writing {endIndex} frames to the name " + fileName)
+            sys.stdout.flush()
+
 
             #save frames to a video
             output = cv2.VideoWriter(pathToFile + fileName + ".mp4", 
