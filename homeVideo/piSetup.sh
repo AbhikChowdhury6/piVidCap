@@ -30,6 +30,7 @@ conda install -y torchvision
 # pip install pandas
 conda install -y pyarrow
 conda install -y fastparquet
+pip install 
 # pip install opencv-contrib-python
 
 
