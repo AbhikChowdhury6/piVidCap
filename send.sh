@@ -39,15 +39,15 @@ if ! command -v sshpass &> /dev/null; then
 fi
 
 # Create remote directory if it doesn't exist
-sshpass -p "$REMOTE_PASS" ssh "$REMOTE_USER@$REMOTE_HOST" "mkdir -p $REMOTE_FOLDER"
+sshpass -p "$REMOTE_PASS" ssh "$REMOTE_USER@192.168.1.242" "mkdir -p $REMOTE_FOLDER"
 
 # Use sshpass with scp to copy the local folder to the remote server
-sshpass -p "$REMOTE_PASS" scp -r "$LOCAL_FOLDER" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_FOLDER"
+sshpass -p "$REMOTE_PASS" scp -r "$LOCAL_FOLDER" "$REMOTE_USER@192.168.1.242:$REMOTE_FOLDER"
 
 # Check if the transfer was successful and delete yesterdays files locally
 if [[ $? -eq 0 ]]; then
-    echo "Folder successfully transferred to $REMOTE_USER@$REMOTE_HOST:$REMOTE_FOLDER"
-    rm -rf $LOCAL_FOLDER
+    echo "Folder successfully transferred to $REMOTE_USER@192.168.1.242:$REMOTE_FOLDER"
+    # rm -rf $LOCAL_FOLDER
 else
     echo "Failed to transfer the folder."
 fi

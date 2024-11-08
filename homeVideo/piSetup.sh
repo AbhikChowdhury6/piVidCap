@@ -30,7 +30,9 @@ conda install -y torchvision
 # pip install pandas
 conda install -y pyarrow
 conda install -y fastparquet
-sudo apt install python3-
+sudo apt install -y libcap-dev libcamera-dev
+pip install picamera2
+pip install rpi-libcamera
 # pip install opencv-contrib-python
 
 

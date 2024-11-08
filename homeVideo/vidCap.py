@@ -35,6 +35,8 @@ if __name__ == "__main__":
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
     print(f"The cap took {timeAfterCapDefined - timeBeforeCapDefined} to initialize")
+    del timeAfterCapDefined
+    del timeBeforeCapDefined
 
     initalFrameReadStart = datetime.now()
     ret, frame = cap.read()
@@ -43,6 +45,8 @@ if __name__ == "__main__":
 
     initalFrameReadEnd = datetime.now()
     print(f"The first Frame took {initalFrameReadEnd - initalFrameReadStart} to capture")
+    del initalFrameReadEnd
+    del initalFrameReadStart
     # ret, frame = cap.read()
 
 
@@ -72,6 +76,8 @@ if __name__ == "__main__":
 
     print(f"the model took {modelEndTime - modelStartTime} to run")
     print("Model output:", result)
+    del modelEndTime
+    del modelStartTime
 
 
     writer_input_queue = mp.Queue()
@@ -81,7 +87,6 @@ if __name__ == "__main__":
     writer_process.start()
 
     # actual capture code
-    frameCount = 0
 
     # wait till a round 15 seconds
     currTime = datetime.now()
@@ -106,6 +111,8 @@ if __name__ == "__main__":
         
         #logging and frame cap
         readTimes.append(datetime.now(tzlocal.get_localzone()))
+        del ret
+        del frame
         ret, frame = cap.read()
         mybuffer.append(frame)
 
@@ -119,21 +126,34 @@ if __name__ == "__main__":
                     lb.extend(mybuffer)
                     # print(lrt)
                     # print(len(lb))
+                    print(f"sending {len(lrt)} frames")
                     writer_input_queue.put((lrt, lb)) 
                 else:
+                    print(f"sending {len(readTimes)} frames")
                     writer_input_queue.put((readTimes, mybuffer))
             else:
                 # else just save the one frame analyzed for a timelapse
+                print("sending 1 frame")
                 writer_input_queue.put(([readTimes[0]],[mybuffer[0]]))
             
             delayTill100ms()
             print(f"done with timeperiod starting at {readTimes[0]}")
+            lrt = []
+            lrt.clear()
             lrt = readTimes
+            readTimes.clear()
             readTimes = [datetime.now(tzlocal.get_localzone())]
+            del frame
+            del ret
             ret, frame = cap.read()
+            lb = []
+            lb.clear()
             lb = mybuffer
+            mybuffer.clear()
             mybuffer = [frame]
             model_input_queue.put(frame)
             lastModelResult = mr
+            print(f"is model alive?: {model_process.is_alive()}")
+            print(f"is writer alive?: {writer_process.is_alive()}")
+            print()
 
-        frameCount += 1

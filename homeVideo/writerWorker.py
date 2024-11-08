@@ -2,6 +2,7 @@ import sys
 import cv2
 import pandas as pd
 import os
+from datetime import datetime
 
 #set these in /etc/enviroment by adding the line DEVICE_NAME="testCam" for example
 deviceName = os.getenv("DEVICE_NAME", "notSet")
@@ -55,16 +56,22 @@ def writer_worker(input_queue, output_queue):
 
         frames.extend(newFrames)
         timestamps.extend(newTimestmaps)
+        del newFrames
+        del newTimestmaps
+        print(f"have {len(frames)} total frames!")
+        sys.stdout.flush()
 
         if timestamps[0].day < timestamps[-1].day:
             crossesMidnight = True
+            print(f"crossed midnight!")
+            sys.stdout.flush()
         else:
             crossesMidnight = False
 
         if len(frames) >= 1800 or crossesMidnight:
  
             if crossesMidnight:
-                endIndex = len(frames)
+                endIndex = len(frames)-1
                 while timestamps[0].day < timestamps[endIndex].day:
                     endIndex -= 1
             else:
@@ -88,15 +95,28 @@ def writer_worker(input_queue, output_queue):
                                     fourcc, 
                                     30.0, 
                                     (frameWidth, frameHeight))
+            writeStartTime = datetime.now()
             for frame in frames[:endIndex]:
                 output.write(frame)
             output.release()
-            frames = frames[endIndex:]
+            print(f"writing took {datetime.now() - writeStartTime}")
+            sys.stdout.flush()
+            del writeStartTime
+
+            leftoverFrames = frames[endIndex:]
+            del frames
+            frames = leftoverFrames
+            del leftoverFrames
+            print(f"{len(frames)} is the number of frames left")
+            sys.stdout.flush()
 
             # also save timestamps
             tsdf = pd.DataFrame(data=timestamps[:endIndex], columns=['sampleDT'])
             tsdf.to_parquet(pathToFile + fileName + ".parquet")
-            timestamps = timestamps[endIndex:]
+            leftoverTimestamps = timestamps[endIndex:]
+            del timestamps
+            timestamps = leftoverTimestamps
+            del leftoverTimestamps
             # sys.stdout.flush()
 
 
