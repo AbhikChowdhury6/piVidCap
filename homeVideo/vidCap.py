@@ -156,4 +156,8 @@ if __name__ == "__main__":
             print(f"is model alive?: {model_process.is_alive()}")
             print(f"is writer alive?: {writer_process.is_alive()}")
             print()
+            #TODO 
+            # if either process dies, then exit this one
+            # it was probably the write buffer that was filling up after the process died
+            
 
