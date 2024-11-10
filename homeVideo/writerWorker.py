@@ -72,18 +72,18 @@ def writer_worker(input_queue, output_queue):
  
             if crossesMidnight:
                 endIndex = len(frames)-1
-                while timestamps[0].day < timestamps[endIndex].day:
+                while timestamps[0].day < timestamps[endIndex-1].day:
                     endIndex -= 1
             else:
                 endIndex = 1800
 
             
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
-                        deviceName + "_" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
+                        deviceName + "-" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
             os.makedirs(pathToFile, exist_ok=True)
 
-            fileName = deviceName + "_" + \
-                        timestamps[0].strftime('%Y-%m-%dT%H%M%S-%f%z') + "_" + \
+            fileName = deviceName + "-" + \
+                        timestamps[0].strftime('%Y-%m-%dT%H%M%S-%f%z') + "-" + \
                         timestamps[endIndex-1].strftime('%Y-%m-%dT%H%M%S-%f%z')
 
             print(f"writing {endIndex} frames to the name " + fileName)
