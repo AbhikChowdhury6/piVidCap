@@ -9,11 +9,7 @@ read DEVICE_NAME
 echo "enter the local username"
 read LOCAL_USERNAME
 echo "enter the remote username"
-read REMOTE_USERNAME
-echo "enter the remote host name"
-read REMOTE_HOSTNAME
-echo "enter enter the remote password"
-read REMOTE_PASSWORD
+
 
 #install video capture dependencies
 # make and activate a virtual enviroment
@@ -38,14 +34,12 @@ pip install rpi-libcamera
 
 # update the .bashrc
 echo "export DEVICE_NAME=${DEVICE_NAME}" >> /home/$LOCAL_USERNAME/.bashrc
-echo "export REMOTE_USERNAME=${REMOTE_USERNAME}" >> /home/$LOCAL_USERNAME/.bashrc
-echo "export REMOTE_HOSTNAME=${REMOTE_HOSTNAME}" >> /home/$LOCAL_USERNAME/.bashrc
-echo "export REMOTE_PASSWORD=${REMOTE_PASSWORD}" >> /home/$LOCAL_USERNAME/.bashrc
+
 echo "source /home/$LOCAL_USERNAME/vision/bin/activate" >> /home/$LOCAL_USERNAME/.bashrc
 
-# add the chron job
+# add the chron job to send the files
 chrontab -e 0 3 * * * /home/$LOCAL_USERNAME/Documents/videoProcessing/send.sh
-
+#TODO also add a chron job to restart the vidcap proces since there appear to be some memory leaks still
 
 # last manually restart
 

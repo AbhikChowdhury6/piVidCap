@@ -21,7 +21,7 @@ REMOTE_PASS=${REMOTE_PASS:-""}
 REMOTE_HOST=${REMOTE_HOST:-""}
 
 YESTERDAY=$(date -d "yesterday" +"%Y-%m-%d")
-LOCAL_FOLDER=${LOCAL_FOLDER:-"/home/${USER}/Documents/collectedData/${DEVICE_NAME}_${YESTERDAY}"}
+LOCAL_FOLDER=${LOCAL_FOLDER:-"/home/${USER}/Documents/collectedData/${DEVICE_NAME}-${YESTERDAY}"}
 
 YEAR_MONTH=$(date +"%Y-%m")
 REMOTE_FOLDER=${REMOTE_FOLDER:-"/home/${REMOTE_USER}/Documents/videoData/${YEAR_MONTH}/"}
