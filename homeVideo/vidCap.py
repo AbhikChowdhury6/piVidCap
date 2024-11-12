@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
 
     timeBeforeCapDefined = datetime.now() 
-    cap = cv2.VideoCapture(sys.argv[1])
+    cap = cv2.VideoCapture(int(sys.argv[1]))
     timeAfterCapDefined = datetime.now() 
 
     # Check if the webcam is opened correctly

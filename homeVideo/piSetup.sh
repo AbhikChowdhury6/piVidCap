@@ -1,6 +1,17 @@
 #!/bin/bash
 
+
+# copy key with ssh-copy-id
+# ssh in
+
+# sudo apt update
+# if needed: sudo rm -r /var/lib/apt/lists/*
+# sudo apt upgrade -y
+
 # first manually clone repo
+# sudo apt install git
+# git clone https://github.com/AbhikChowdhury6/videoProcessing.git ~/Documents/videoProcessing
+# run 
 
 #in this script
 
@@ -11,22 +22,8 @@ read LOCAL_USERNAME
 echo "enter the remote username"
 
 
-# sudo rm -r /var/lib/apt/lists/*
-# sudo apt update
-# sudo apt install -y rpicam-apps
+sudo apt install -y  rpicam-apps
 
-# for framing
-# on pi
-# libcamera-vid -t 0 --inline --listen -o tcp://0.0.0.0:8888
-# on installing machine
-# got to tcp/h264://XXX.XXX.XXX.XXX:8888/ in VLC > Media > open network stream
-
-sudo modprobe bcm2835-v4l2
-
-
-sudo apt install -y git
-mkdir -p ~/Documents/collectedData
-git clone https://github.com/AbhikChowdhury6/videoProcessing.git
 
 #install miniconda
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh
@@ -37,18 +34,38 @@ source ~/.bashrc
 
 conda create --name vision
 conda activate vision
+conda install -y ultralytics pytorch torchvision pyarrow fastparquet tzlocal
+
+# I am here
+# test vidcap and figure out how to get to the camera in v4l2
+
+export DEVICE_NAME=cam1Test
+sudo modprobe bcm2835-v4l2
+
+mkdir -p ~/Documents/collectedData
+
+
+# things left to do
+# add exporting the envrionment variables to the .bashrc
+echo "export DEVICE_NAME=${DEVICE_NAME}" >> /home/$LOCAL_USERNAME/.bashrc
+
+# add activating the vision environment to the .bashrc
+echo "source /home/$LOCAL_USERNAME/vision/bin/activate" >> /home/$LOCAL_USERNAME/.bashrc
+
+# add chron jobs for sending data and restarting processes
+
+# update etc/rc.local to start vidcap on boot up
 
 
 
-conda install -y ultralytics
-conda install -y tzlocal
-conda install -y pytorch
-conda install -y torchvision
-# pip install pandas
-conda install -y pyarrow
-conda install -y fastparquet
 
 
+
+# for framing
+# on pi
+# libcamera-vid -t 0 --inline --listen -o tcp://0.0.0.0:8888
+# on installing machine
+# got to tcp/h264://XXX.XXX.XXX.XXX:8888/ in VLC > Media > open network stream
 
 
 sudo apt install -y libcap-dev libcamera-dev
@@ -58,9 +75,6 @@ pip install rpi-libcamera
 
 
 # update the .bashrc
-echo "export DEVICE_NAME=${DEVICE_NAME}" >> /home/$LOCAL_USERNAME/.bashrc
-
-echo "source /home/$LOCAL_USERNAME/vision/bin/activate" >> /home/$LOCAL_USERNAME/.bashrc
 
 # add the chron job to send the files
 chrontab -e 0 3 * * * /home/$LOCAL_USERNAME/Documents/videoProcessing/send.sh
