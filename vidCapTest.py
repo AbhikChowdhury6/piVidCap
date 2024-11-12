@@ -13,7 +13,7 @@ if not cap.isOpened():
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Use 'mp4v' for MP4 format
 out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (640, 480))  # Adjust resolution as needed
 
-feameCount = 0
+frameCount = 0
 
 while frameCount < 300:
     # Capture frame-by-frame
