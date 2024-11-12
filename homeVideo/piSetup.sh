@@ -11,21 +11,46 @@ read LOCAL_USERNAME
 echo "enter the remote username"
 
 
-#install video capture dependencies
-# make and activate a virtual enviroment
-# python -m venv ~/vision
-# source ~/vision/bin/activate
+# sudo rm -r /var/lib/apt/lists/*
+# sudo apt update
+# sudo apt install -y rpicam-apps
+
+# for framing
+# on pi
+# libcamera-vid -t 0 --inline --listen -o tcp://0.0.0.0:8888
+# on installing machine
+# got to tcp/h264://XXX.XXX.XXX.XXX:8888/ in VLC > Media > open network stream
+
+sudo modprobe bcm2835-v4l2
+
+
+sudo apt install -y git
+mkdir -p ~/Documents/collectedData
+git clone https://github.com/AbhikChowdhury6/videoProcessing.git
+
+#install miniconda
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh
+bash Miniforge3-Linux-aarch64.sh
+rm Miniforge3-Linux-aarch64.sh
+source ~/.bashrc
+
+
+conda create --name vision
+conda activate vision
+
+
 
 conda install -y ultralytics
-# installs torch
-# installs opencv-python # maybe not proprietry codecs?
-# also intalls most things under the sun and takes for ever to resolve an enviroment on the pi
 conda install -y tzlocal
 conda install -y pytorch
 conda install -y torchvision
 # pip install pandas
 conda install -y pyarrow
 conda install -y fastparquet
+
+
+
+
 sudo apt install -y libcap-dev libcamera-dev
 pip install picamera2
 pip install rpi-libcamera

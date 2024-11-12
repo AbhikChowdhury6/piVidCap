@@ -1,3 +1,12 @@
+#process for setting up remote user
+# as root
+# useradd -m uploadingGuest
+# passwd <strong password here>
+
+#process for setting up local
+# ssh-keygen -t rsa
+# ssh-copy-id uploadingGuest@<remote ip>
+
 import os
 import subprocess
 import sys
