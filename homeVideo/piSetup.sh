@@ -42,6 +42,8 @@ conda install -y ultralytics pytorch torchvision pyarrow fastparquet tzlocal
 export DEVICE_NAME=cam1Test
 sudo modprobe bcm2835-v4l2
 
+# bruh I did sudo rpi-update and a reboot and now at least I'm getting frames
+
 mkdir -p ~/Documents/collectedData
 
 
