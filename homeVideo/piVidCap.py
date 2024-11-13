@@ -24,11 +24,15 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, handle_sigint)
 
     picam2 = Picamera2()
-    picam2.configure(picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
+    # we're really gonna have to dive into this config
+    # buffersize = 1
+    # in a BGR 24 bit format i believe
+
+    picam2.configure(picam2.create_preview_configuration(main={"size": (640, 480)}))
     picam2.start()
 
     initalFrameReadStart = datetime.now()
-    frame = picam2.capture_array()
+    frame = picam2.capture_array()[:,:,:3]
 
 
     initalFrameReadEnd = datetime.now()
@@ -76,7 +80,7 @@ if __name__ == "__main__":
     time.sleep((14 - (currTime.second % 15)) + (1 - currTime.microsecond/1_000_000))
 
     readTimes = [datetime.now(tzlocal.get_localzone())]
-    frame = picam2.capture_array()
+    frame = picam2.capture_array()[:,:,:3]
     mybuffer = [frame]
     model_input_queue.put(frame)
 
@@ -94,7 +98,7 @@ if __name__ == "__main__":
         
         #logging and frame cap
         readTimes.append(datetime.now(tzlocal.get_localzone()))
-        frame = picam2.capture_array()
+        frame = picam2.capture_array()[:,:,:3]
         mybuffer.append(frame)
 
         if (datetime.now().second + 1) % 15 == 0 and datetime.now().microsecond > 900_000:
@@ -118,7 +122,7 @@ if __name__ == "__main__":
             print(f"done with timeperiod starting at {readTimes[0]}")
             lrt = readTimes
             readTimes = [datetime.now(tzlocal.get_localzone())]
-            frame = picam2.capture_array()
+            frame = picam2.capture_array()[:,:,:3]
             lb = mybuffer
             mybuffer = [frame]
             model_input_queue.put(frame)
@@ -150,7 +154,7 @@ if __name__ == "__main__":
     del timeBeforeCapDefined
 
     initalFrameReadStart = datetime.now()
-    frame = picam2.capture_array()
+    frame = picam2.capture_array()[:,:,:3]
     initalFrameReadEnd = datetime.now()
     print(f"The first Frame took {initalFrameReadEnd - initalFrameReadStart} to capture")
     del initalFrameReadEnd
@@ -200,7 +204,7 @@ if __name__ == "__main__":
     time.sleep((14 - (currTime.second % 15)) + (1 - currTime.microsecond/1_000_000))
 
     readTimes = [datetime.now(tzlocal.get_localzone())]
-    frame = picam2.capture_array()
+    frame = picam2.capture_array()[:,:,:3]
     mybuffer = [frame]
     model_input_queue.put(frame)
 
@@ -219,7 +223,7 @@ if __name__ == "__main__":
         #logging and frame cap
         readTimes.append(datetime.now(tzlocal.get_localzone()))
         del frame
-        frame = picam2.capture_array()
+        frame = picam2.capture_array()[:,:,:3]
         mybuffer.append(frame)
 
         if (datetime.now().second + 1) % 15 == 0 and datetime.now().microsecond > 900_000:
@@ -250,7 +254,7 @@ if __name__ == "__main__":
             readTimes.clear()
             readTimes = [datetime.now(tzlocal.get_localzone())]
             del frame
-            frame = picam2.capture_array()
+            frame = picam2.capture_array()[:,:,:3]
             lb = []
             lb.clear()
             lb = mybuffer

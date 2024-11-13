@@ -63,6 +63,7 @@ echo "source /home/$LOCAL_USERNAME/vision/bin/activate" >> /home/$LOCAL_USERNAME
 # update etc/rc.local to start vidcap on boot up
 
 
+
 echo "/usr/lib/python3/dist-packages" >> /home/pi/miniforge3/envs/v2/lib/python3.11/site-packages/conda.pth
 
 
