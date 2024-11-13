@@ -31,4 +31,3 @@ while frameCount < 300:
 # Release everything when done
 cap.release()
 out.release()
-cv2.destroyAllWindows()

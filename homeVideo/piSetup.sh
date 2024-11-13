@@ -31,6 +31,8 @@ bash Miniforge3-Linux-aarch64.sh
 rm Miniforge3-Linux-aarch64.sh
 source ~/.bashrc
 
+# apt install picamera2
+# let conda see site packages
 
 conda create --name vision
 conda activate vision
@@ -38,6 +40,8 @@ conda install -y ultralytics pytorch torchvision pyarrow fastparquet tzlocal
 
 # I am here
 # test vidcap and figure out how to get to the camera in v4l2
+
+# check gpu mem vcgencmd get_mem gpu
 
 export DEVICE_NAME=cam1Test
 sudo modprobe bcm2835-v4l2
@@ -59,6 +63,7 @@ echo "source /home/$LOCAL_USERNAME/vision/bin/activate" >> /home/$LOCAL_USERNAME
 # update etc/rc.local to start vidcap on boot up
 
 
+echo "/usr/lib/python3/dist-packages" >> /home/pi/miniforge3/envs/v2/lib/python3.11/site-packages/conda.pth
 
 
 
