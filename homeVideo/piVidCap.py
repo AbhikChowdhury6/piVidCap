@@ -26,8 +26,9 @@ if __name__ == "__main__":
 
     timeBeforeCapDefined = datetime.now() 
     picam2 = Picamera2()
-    picam2.configure(picam2.create_preview_configuration(main={"queue": False, "size": (640, 480)}))
-    picam2.start()
+    picam2.preview_configuration.size = (640, 480)
+    picam2.preview_configuration.queue = False
+    picam2.start("preview")
     timeAfterCapDefined = datetime.now() 
 
 
