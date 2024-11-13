@@ -44,12 +44,14 @@ conda install -y ultralytics pytorch torchvision pyarrow fastparquet tzlocal
 # check gpu mem vcgencmd get_mem gpu
 
 export DEVICE_NAME=cam1Test
-sudo modprobe bcm2835-v4l2
+# sudo modprobe bcm2835-v4l2
 
 # bruh I did sudo rpi-update and a reboot and now at least I'm getting frames
 
 mkdir -p ~/Documents/collectedData
 
+sudo nano /usr/share/libcamera/pipeline/rpi/vc4/rpi_apps.yaml 
+# add     "camera_timeout_value_ms":    10000000,
 
 # things left to do
 # add exporting the envrionment variables to the .bashrc
