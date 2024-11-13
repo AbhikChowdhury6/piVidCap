@@ -29,8 +29,7 @@ if __name__ == "__main__":
 
     initalFrameReadStart = datetime.now()
     frame = picam2.capture_array()
-    if not ret:
-        print("Error: Could not read frame.")
+
 
     initalFrameReadEnd = datetime.now()
     print(f"The first Frame took {initalFrameReadEnd - initalFrameReadStart} to capture")
@@ -219,7 +218,6 @@ if __name__ == "__main__":
         
         #logging and frame cap
         readTimes.append(datetime.now(tzlocal.get_localzone()))
-        del ret
         del frame
         frame = picam2.capture_array()
         mybuffer.append(frame)
@@ -252,7 +250,6 @@ if __name__ == "__main__":
             readTimes.clear()
             readTimes = [datetime.now(tzlocal.get_localzone())]
             del frame
-            del ret
             frame = picam2.capture_array()
             lb = []
             lb.clear()
