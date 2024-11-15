@@ -53,6 +53,9 @@ mkdir -p ~/Documents/collectedData
 sudo nano /usr/share/libcamera/pipeline/rpi/vc4/rpi_apps.yaml 
 # add     "camera_timeout_value_ms":    10000000,
 
+sudo nano /etc/dphys-swapfile
+# update swap to 3000
+
 # things left to do
 # add exporting the envrionment variables to the .bashrc
 echo "export DEVICE_NAME=${DEVICE_NAME}" >> /home/$LOCAL_USERNAME/.bashrc
