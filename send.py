@@ -24,6 +24,7 @@ pathToCollectedData = "/home/" + os.getlogin() + "/Documents/collectedData/"
 
 foldersInCollectedData = os.listdir(pathToCollectedData)
 nameOfTodaysFolder = deviceName + "-" + datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d%z")
+startTime = datetime.now()
 for folderName in foldersInCollectedData:
     if folderName == nameOfTodaysFolder:
         continue
@@ -50,3 +51,6 @@ for folderName in foldersInCollectedData:
     else:
         print(f"there was a problem sending {source} not deleting")
         print(o)
+
+print(f"done sending in {datetime.now() - startTime}!")
+print(f"the time is {datetime.now()}")

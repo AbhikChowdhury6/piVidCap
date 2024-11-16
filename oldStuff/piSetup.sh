@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+# ssh-keygen -t rsa
 # copy key with ssh-copy-id
 # ssh in
 
