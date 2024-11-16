@@ -24,7 +24,7 @@ import logging.handlers
 
 logger = logging.getLogger('home-video-uploader')
 logger.setLevel(logging.INFO)
-handler = logging.handlers.SysLogHandler(address='/dev/log/home-video-uploader.log')
+handler = logging.handlers.SysLogHandler(address='/var/log/home-video-uploader.log')
 formatter = logging.Formatter('%(name)s: %(levelname)s: %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
