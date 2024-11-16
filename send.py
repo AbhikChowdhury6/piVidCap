@@ -13,16 +13,17 @@ import sys
 from datetime import datetime
 import tzlocal
 
-if len(sys.argv) > 1:
-    deviceName = sys.argv[1]
-else: 
-    deviceName = "notSet"
+
 
 serverip = "192.168.1.113"
 
 pathToCollectedData = "/home/" + os.getlogin() + "/Documents/collectedData/"
 
 foldersInCollectedData = os.listdir(pathToCollectedData)
+if len(foldersInCollectedData) == 0:
+    print("no files found")
+    sys.exit()
+deviceName = foldersInCollectedData[0].split("-")[0]
 nameOfTodaysFolder = deviceName + "-" + datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d%z")
 startTime = datetime.now()
 for folderName in foldersInCollectedData:
@@ -38,7 +39,7 @@ for folderName in foldersInCollectedData:
     print(f"the returncode for uploading the direcotry was {o.returncode}")
     
     # make it writeable by other users since the umask in the .bashrc isn't working for some reason
-    o2 = subprocess.run(["ssh", "uploadingGuest@"  + serveri, "chmod", "-R", "777", 
+    o2 = subprocess.run(["ssh", "uploadingGuest@"  + serverip, "chmod", "-R", "777", 
                         "/home/uploadingGuest/recentCaptures/" + folderName + "/"], 
                         capture_output=True)
     print(f"the returncode for upating the permissions was {o2.returncode}")
