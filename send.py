@@ -22,7 +22,7 @@ import tzlocal
 import logging
 import logging.handlers
 
-logger = logging.getLogger('home_video_uploader')
+logger = logging.getLogger('home-video-uploader')
 logger.setLevel(logging.INFO)
 handler = logging.handlers.SysLogHandler(address='/dev/log/home_video_uploader.log')
 formatter = logging.Formatter('%(name)s: %(levelname)s: %(message)s')
