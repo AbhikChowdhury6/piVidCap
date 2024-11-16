@@ -2,17 +2,32 @@
 # as root
 # useradd -m uploadingGuest
 # passwd <strong password here>
+# as uploadingGuest
+# mkdir recentCaptures
+# chmod 777 recentCaptures
 
 #process for setting up local
 # ssh-keygen -t rsa
 # ssh-copy-id uploadingGuest@<remote ip>
+# chrontab -e 
+# add the line 0 3 * * * /home/$USER/Documents/videoProcessing/send.sh
+# for logs check /var/log/syslog or /var/log/cron
+
 
 import os
 import subprocess
 import sys
 from datetime import datetime
 import tzlocal
+import logging
+import logging.handlers
 
+logger = logging.getLogger('home_video_uploader')
+logger.setLevel(logging.INFO)
+handler = logging.handlers.SysLogHandler(address='/dev/log/home_video_uploader.log')
+formatter = logging.Formatter('%(name)s: %(levelname)s: %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 serverip = "192.168.1.113"
@@ -22,9 +37,12 @@ pathToCollectedData = "/home/" + os.getlogin() + "/Documents/collectedData/"
 foldersInCollectedData = os.listdir(pathToCollectedData)
 if len(foldersInCollectedData) == 0:
     print("no files found")
+    logger.info("no files found")
     sys.exit()
+
 deviceName = foldersInCollectedData[0].split("-")[0]
 nameOfTodaysFolder = deviceName + "-" + datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d%z")
+
 startTime = datetime.now()
 for folderName in foldersInCollectedData:
     if folderName == nameOfTodaysFolder:
@@ -33,25 +51,33 @@ for folderName in foldersInCollectedData:
     
     # send the folder over
     print("starting send")
+    logger.info("starting send")
     o = subprocess.run(["scp", "-r", source, "uploadingGuest@" + serverip +
                          ":/home/uploadingGuest/recentCaptures/"],
                          capture_output=True)
     print(f"the returncode for uploading the direcotry was {o.returncode}")
+    logger.info(f"the returncode for uploading the direcotry was {o.returncode}")
     
     # make it writeable by other users since the umask in the .bashrc isn't working for some reason
     o2 = subprocess.run(["ssh", "uploadingGuest@"  + serverip, "chmod", "-R", "777", 
                         "/home/uploadingGuest/recentCaptures/" + folderName + "/"], 
                         capture_output=True)
     print(f"the returncode for upating the permissions was {o2.returncode}")
+    logger.info(f"successfuly sent now deleting {source}")
 
     #delete the folder locally if the send was successful
     if o.returncode == 0:
         print(f"successfuly sent now deleting {source}")
+        logger.info(f"successfuly sent now deleting {source}")
         o = subprocess.run(["rm", "-r", source], capture_output=True)
         print("deleted") if o.returncode == 0 else print(o)
+        logger.info("deleted") if o.returncode == 0 else logger.info(o)
     else:
         print(f"there was a problem sending {source} not deleting")
+        logger.info(f"there was a problem sending {source} not deleting")
         print(o)
+        logger.info(o)
 
 print(f"done sending in {datetime.now() - startTime}!")
+logger.info(f"done sending in {datetime.now() - startTime}!")
 print(f"the time is {datetime.now()}")
