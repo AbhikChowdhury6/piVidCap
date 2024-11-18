@@ -42,8 +42,8 @@ if len(foldersInCollectedData) == 0:
     logger.info("no files found, exiting")
     sys.exit()
 
-deviceName = foldersInCollectedData[0].split("-")[0]
-nameOfTodaysFolder = deviceName + "-" + datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d%z")
+deviceName = foldersInCollectedData[0].split("_")[0]
+nameOfTodaysFolder = deviceName + "_" + datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d%z")
 
 startTime = datetime.now()
 for folderName in foldersInCollectedData:

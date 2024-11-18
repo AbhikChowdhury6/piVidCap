@@ -112,6 +112,7 @@ def writer_worker(input_queue, output_queue):
 
             # also save timestamps
             tsdf = pd.DataFrame(data=timestamps[:endIndex], columns=['sampleDT'])
+            tsdf = tsdf.set_index('sampleDT')
             tsdf.to_parquet(pathToFile + fileName + ".parquet")
             leftoverTimestamps = timestamps[endIndex:]
             del timestamps
