@@ -25,10 +25,12 @@ import logging.handlers
 logger = logging.getLogger('home-video-uploader')
 logger.setLevel(logging.INFO)
 handler = logging.FileHandler(filename="/home/" + os.getlogin() + '/home-video-uploader.log')
-formatter = logging.Formatter('%(name)s: %(levelname)s: %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(name)s: %(levelname)s: %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+print(f"the time started is {datetime.now()}")
+# logger.info(f"the time started is {datetime.now()}")
 
 serverip = "192.168.1.113"
 
@@ -50,8 +52,8 @@ for folderName in foldersInCollectedData:
     source = pathToCollectedData + folderName
     
     # send the folder over
-    print("starting send")
-    logger.info("starting send")
+    print(f"starting send of {folderName}")
+    logger.info(f"starting send of {folderName}")
     o = subprocess.run(["scp", "-r", source, "uploadingGuest@" + serverip +
                          ":/home/uploadingGuest/recentCaptures/"],
                          capture_output=True)
@@ -80,4 +82,5 @@ for folderName in foldersInCollectedData:
 
 print(f"done sending in {datetime.now() - startTime}!")
 logger.info(f"done sending in {datetime.now() - startTime}!")
-print(f"the time is {datetime.now()}")
+print(f"the time completed is {datetime.now()}")
+# logger.info(f"the time completed is {datetime.now()}")
