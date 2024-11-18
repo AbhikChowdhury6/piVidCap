@@ -10,7 +10,7 @@ videoFiles
 |   |___frontDoor
 |___otherVideos (egocentric, dashcam, office, etc.)
 
-workingVideoData
+workingData
 |___homeVideo
     |___bathroomCam
     |___bedroomCam

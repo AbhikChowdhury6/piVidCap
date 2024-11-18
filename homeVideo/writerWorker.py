@@ -79,11 +79,11 @@ def writer_worker(input_queue, output_queue):
 
             
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
-                        deviceName + "-" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
+                        deviceName + "_" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
             os.makedirs(pathToFile, exist_ok=True)
 
-            fileName = deviceName + "-" + \
-                        timestamps[0].strftime('%Y-%m-%dT%H%M%S-%f%z') + "-" + \
+            fileName = deviceName + "_" + \
+                        timestamps[0].strftime('%Y-%m-%dT%H%M%S-%f%z') + "_" + \
                         timestamps[endIndex-1].strftime('%Y-%m-%dT%H%M%S-%f%z')
 
             print(f"writing {endIndex} frames to the name " + fileName)
