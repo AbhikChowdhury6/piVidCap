@@ -24,7 +24,7 @@ import logging.handlers
 
 logger = logging.getLogger('home-video-uploader')
 logger.setLevel(logging.INFO)
-handler = logging.handlers.SysLogHandler(address="/home/" + os.getlogin() + '/home-video-uploader.log')
+handler = logging.FileHandler(filename="/home/" + os.getlogin() + '/home-video-uploader.log')
 formatter = logging.Formatter('%(name)s: %(levelname)s: %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
@@ -36,8 +36,8 @@ pathToCollectedData = "/home/" + os.getlogin() + "/Documents/collectedData/"
 
 foldersInCollectedData = os.listdir(pathToCollectedData)
 if len(foldersInCollectedData) == 0:
-    print("no files found")
-    logger.info("no files found")
+    print("no files found, exiting")
+    logger.info("no files found, exiting")
     sys.exit()
 
 deviceName = foldersInCollectedData[0].split("-")[0]
@@ -63,7 +63,7 @@ for folderName in foldersInCollectedData:
                         "/home/uploadingGuest/recentCaptures/" + folderName + "/"], 
                         capture_output=True)
     print(f"the returncode for upating the permissions was {o2.returncode}")
-    logger.info(f"successfuly sent now deleting {source}")
+    logger.info(f"the returncode for upating the permissions was {o2.returncode}")
 
     #delete the folder locally if the send was successful
     if o.returncode == 0:
@@ -74,9 +74,9 @@ for folderName in foldersInCollectedData:
         logger.info("deleted") if o.returncode == 0 else logger.info(o)
     else:
         print(f"there was a problem sending {source} not deleting")
-        logger.info(f"there was a problem sending {source} not deleting")
+        logger.error(f"there was a problem sending {source} not deleting")
         print(o)
-        logger.info(o)
+        logger.error(o)
 
 print(f"done sending in {datetime.now() - startTime}!")
 logger.info(f"done sending in {datetime.now() - startTime}!")
