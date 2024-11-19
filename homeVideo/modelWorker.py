@@ -41,7 +41,7 @@ def model_worker(input_queue, output_queue):
                 maxPersonConf = max([r[0].boxes.conf[i] for i in indexesOfPeople])
                 print(f"the most confident recognition was {maxPersonConf}")
                 sys.stdout.flush()
-                if maxPersonConf > .7:
+                if maxPersonConf > .25:
                     ret = True
             else:
                 print("didn't see anyone")
