@@ -3,28 +3,12 @@ import sys
 import os
 # import cv2
 
-# model = YOLO("yolo11n-pose.pt")
 
-# Export the model to NCNN format
-# model.export(format="ncnn")  # creates 'yolo11n_ncnn_model'
-
-# print("just before ncnn def")
-# sys.stdout.flush()
-# ncnn_model = YOLO("yolo11n-pose.torchscript")
-
-# result = ncnn_model("test.jpg")
 
 def model_worker(input_queue, output_queue):
     print("in model worker")
     sys.stdout.flush()
-
-    if not os.path.isfile("yolo11n-pose.torchscript"):
-        print("no file found making the torchscript")
-        model = YOLO("yolo11n-pose.pt")
-        model.export(format="ncnn") 
-
-    ncnn_model = YOLO("yolo11n-pose.torchscript")
-    # result = ncnn_model("test.jpg", device='cpu')
+    model = YOLO("yolo11n.pt")
 
     while True:
         # print("waiting for frame!")
@@ -42,17 +26,31 @@ def model_worker(input_queue, output_queue):
             # cv2.waitKey(0)
             # cv2.destroyAllWindows()
 
-            result = ncnn_model(frame)
+            r = model(frame)
             # sys.stdout.flush()
             # print("got results!")
             # sys.stdout.flush()
             # sys.stdout.flush()
             # print(result[0].boxes.data)
             # sys.stdout.flush()
-            print(f"the number of items in the data field of boxes is {len(result[0].boxes.data)}")
+            indexesOfPeople = [i for i, x in enumerate(r[0].boxes.cls) if x == 0]
+            ret = False
+            if len(indexesOfPeople) > 0:
+                print(f"saw {len(indexesOfPeople)} people")
+                sys.stdout.flush()
+                maxPersonConf = max([r[0].boxes.conf[i] for i in indexesOfPeople])
+                print(f"the most confident recognition was {maxPersonConf}")
+                sys.stdout.flush()
+                if maxPersonConf > .7:
+                    ret = True
+            else:
+                print("didn't see anyone")
+                sys.stdout.flush()
+            
+            print(f"sending {ret}")
             sys.stdout.flush()
-            output_queue.put(len(result[0].boxes.data) > 0)
-            del result
+            output_queue.put(ret)
+            del r
             del frame
         except Exception as e:
             print(f"Error processing frame: {e}")

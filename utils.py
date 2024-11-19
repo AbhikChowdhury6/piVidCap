@@ -28,7 +28,7 @@ def getWorkingDf(location, interval = (offsetMinTime.tz_localize("UTC"), offsetM
     relevantFiles = []
     for wdf in workingDataFiles:
         fileStartTime = pd.to_datetime(wdf.split("_")[0])
-        fileEndTime = pd.to_datetime(wdf.split("_")[1])
+        fileEndTime = pd.to_datetime(wdf.split("_")[1].split(".")[0])
         if fileEndTime > startTime and fileStartTime < endTime:
             relevantFiles.append(wdf)
     
