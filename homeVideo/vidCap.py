@@ -126,7 +126,7 @@ if __name__ == "__main__":
                     lb.extend(mybuffer)
                     # print(lrt)
                     # print(len(lb))
-                    print(f"sending {len(lrt)} frames")
+                    print(f"sending an extended {len(lrt)} frames")
                     writer_input_queue.put((lrt, lb)) 
                 else:
                     print(f"sending {len(readTimes)} frames")
@@ -140,7 +140,7 @@ if __name__ == "__main__":
             print(f"done with timeperiod starting at {readTimes[0]}")
             lrt = []
             lrt.clear()
-            lrt = readTimes
+            lrt = readTimes.copy()
             readTimes.clear()
             readTimes = [datetime.now(tzlocal.get_localzone())]
             del frame
@@ -148,7 +148,7 @@ if __name__ == "__main__":
             ret, frame = cap.read()
             lb = []
             lb.clear()
-            lb = mybuffer
+            lb = mybuffer.copy()
             mybuffer.clear()
             mybuffer = [frame]
             model_input_queue.put(frame)
