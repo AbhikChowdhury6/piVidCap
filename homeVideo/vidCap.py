@@ -140,7 +140,7 @@ if __name__ == "__main__":
             print(f"done with timeperiod starting at {readTimes[0]}")
             lrt = []
             lrt.clear()
-            lrt = readTimes.copy()
+            lrt = readTimes[1:].copy()
             readTimes.clear()
             readTimes = [datetime.now(tzlocal.get_localzone())]
             del frame
@@ -148,7 +148,7 @@ if __name__ == "__main__":
             ret, frame = cap.read()
             lb = []
             lb.clear()
-            lb = mybuffer.copy()
+            lb = mybuffer[1:].copy()
             mybuffer.clear()
             mybuffer = [frame]
             model_input_queue.put(frame)
