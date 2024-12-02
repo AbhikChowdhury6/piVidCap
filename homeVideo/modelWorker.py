@@ -8,7 +8,7 @@ import os
 def model_worker(input_queue, output_queue):
     print("in model worker")
     sys.stdout.flush()
-    model = YOLO("yolo11n.pt")
+    model = YOLO("yolo11x.pt")
 
     while True:
         # print("waiting for frame!")
