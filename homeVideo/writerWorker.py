@@ -39,6 +39,7 @@ def writer_worker(input_queue, output_queue):
         newTimestmaps, newFrames = input_queue.get()  # Get frame from the input queue
         # print(newTimestmaps)
         print(f"recived {len(newFrames)} new frames!")
+        print(f"recived {len(newTimestmaps)} new timestamps!")
         sys.stdout.flush()
 
 
@@ -59,6 +60,7 @@ def writer_worker(input_queue, output_queue):
         del newFrames
         del newTimestmaps
         print(f"have {len(frames)} total frames!")
+        print(f"have {len(timestamps)} total timestamps!")
         sys.stdout.flush()
 
         if timestamps[0].day < timestamps[-1].day:
@@ -76,6 +78,9 @@ def writer_worker(input_queue, output_queue):
                     endIndex -= 1
             else:
                 endIndex = 1800
+            
+            print(f"attempting to write {endIndex} frames")
+            sys.stdout.flush()
 
             
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
