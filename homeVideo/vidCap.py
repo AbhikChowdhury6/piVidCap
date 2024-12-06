@@ -126,10 +126,12 @@ if __name__ == "__main__":
                     lb.extend(mybuffer)
                     # print(lrt)
                     # print(len(lb))
-                    print(f"sending an extended {len(lrt)} frames")
+                    print(f"sending an extended {len(lb)} frames")
+                    print(f"sending an extended {len(lrt)} timestamps")
                     writer_input_queue.put((lrt, lb)) 
                 else:
-                    print(f"sending {len(readTimes)} frames")
+                    print(f"sending {len(mybuffer)} frames")
+                    print(f"sending {len(readTimes)} timestamps")
                     writer_input_queue.put((readTimes, mybuffer))
             else:
                 # else just save the one frame analyzed for a timelapse
