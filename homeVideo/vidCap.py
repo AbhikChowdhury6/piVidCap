@@ -117,6 +117,7 @@ if __name__ == "__main__":
         mybuffer.append(frame)
 
         if (datetime.now().second + 1) % 15 == 0 and datetime.now().microsecond > 900_000:
+            print(f"had {len(mybuffer)} number of frames this segment")
             # if there was people then save the last 15 seconds
             mr = modelResult()
             if mr:

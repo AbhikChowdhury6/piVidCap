@@ -69,7 +69,7 @@ echo "source /home/$LOCAL_USERNAME/vision/bin/activate" >> /home/$LOCAL_USERNAME
 
 
 
-echo "/usr/lib/python3/dist-packages" >> /home/pi/miniforge3/envs/v2/lib/python3.11/site-packages/conda.pth
+echo "/usr/lib/python3/dist-packages" >> /home/pi/miniforge3/envs/vision/lib/python3.12/site-packages/conda.pth
 
 
 
