@@ -140,8 +140,7 @@ if __name__ == "__main__":
             readTimes.clear()
             readTimes = [datetime.now(tzlocal.get_localzone())]
             del frame
-            del ret
-            ret, frame = picam2.capture_array()[:,:,:3]
+            frame = picam2.capture_array()[:,:,:3]
             lb = []
             lb.clear()
             lb = mybuffer[1:].copy()
