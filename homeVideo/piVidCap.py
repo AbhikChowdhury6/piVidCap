@@ -110,6 +110,7 @@ if __name__ == "__main__":
         mybuffer.append(frame)
 
         if (datetime.now().second + 1) % 15 == 0 and datetime.now().microsecond > 900_000:
+            print(f"had {len(mybuffer)} number of frames this segment")
             # if there was people then save the last 15 seconds
             mr = modelResult()
             if mr:
@@ -119,10 +120,12 @@ if __name__ == "__main__":
                     lb.extend(mybuffer)
                     # print(lrt)
                     # print(len(lb))
-                    print(f"sending {len(lrt)} frames")
+                    print(f"sending an extended {len(lb)} frames")
+                    print(f"sending an extended {len(lrt)} timestamps")
                     writer_input_queue.put((lrt, lb)) 
                 else:
-                    print(f"sending {len(readTimes)} frames")
+                    print(f"sending {len(mybuffer)} frames")
+                    print(f"sending {len(readTimes)} timestamps")
                     writer_input_queue.put((readTimes, mybuffer))
             else:
                 # else just save the one frame analyzed for a timelapse
@@ -133,14 +136,15 @@ if __name__ == "__main__":
             print(f"done with timeperiod starting at {readTimes[0]}")
             lrt = []
             lrt.clear()
-            lrt = readTimes
+            lrt = readTimes[1:].copy()
             readTimes.clear()
             readTimes = [datetime.now(tzlocal.get_localzone())]
             del frame
-            frame = picam2.capture_array()[:,:,:3]
+            del ret
+            ret, frame = picam2.capture_array()[:,:,:3]
             lb = []
             lb.clear()
-            lb = mybuffer
+            lb = mybuffer[1:].copy()
             mybuffer.clear()
             mybuffer = [frame]
             model_input_queue.put(frame)

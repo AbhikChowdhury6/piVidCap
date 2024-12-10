@@ -17,3 +17,5 @@ python Documents/videoProcessing/homeVideo/vidCap.py 0
  
 
 export DEVICE_NAME=""
+
+#chrontab -e 0 3 * * * /home/stg/anaconda3/envs/vision/bin/python3.12 /home/stg/Documents/videoProcessing/send.py
