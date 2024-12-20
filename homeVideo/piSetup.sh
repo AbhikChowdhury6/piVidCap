@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ssh-keygen -t rsa
+# 
 # copy key with ssh-copy-id uploadingGuest@192.168.1.113
 # ssh in
 
@@ -15,13 +15,15 @@
 
 #in this script
 
-#echo "enter the device name"
-#read DEVICE_NAME
+echo "enter the device name"
+read DEVICE_NAME
 #export DEVICE_NAME=cam1Test
 #echo "enter the local username"
 #read LOCAL_USERNAME
 #echo "enter the remote username"
 
+sudo rm -r /var/lib/apt/lists/*
+sudo apt update && sudo apt upgrade -y
 sudo apt install -y  rpicam-apps
 
 
@@ -31,25 +33,26 @@ bash Miniforge3-Linux-aarch64.sh
 rm Miniforge3-Linux-aarch64.sh
 source ~/.bashrc
 
-
+source ~/miniforge3/etc/profile.d/conda.sh
 conda create --name vision
-conda activate vision
+source activate vision
 conda install -y ultralytics pytorch torchvision pyarrow fastparquet tzlocal
 
-sudo apt update && sudo apt upgrade
-sudo apt install libcap-dev libatlas-base-dev ffmpeg libopenjp2-7
-sudo apt install libcamera-dev
-sudo apt install libkms++-dev libfmt-dev libdrm-dev
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y libcap-dev libatlas-base-dev ffmpeg libopenjp2-7
+sudo apt install -y libcamera-dev
+sudo apt install -y libkms++-dev libfmt-dev libdrm-dev
 
 pip install --upgrade pip
 pip install wheel
 pip install rpi-libcamera rpi-kms picamera2 av
 
 mkdir -p ~/Documents/collectedData
+ssh-keygen -t rsa
 ssh-copy-id uploadingGuest@192.168.1.113
 
 # add exporting the envrionment variables to the .bashrc
-echo "export DEVICE_NAME=piCam" >> /home/pi/.bashrc
+echo "export DEVICE_NAME=$DEVICE_NAME" >> /home/pi/.bashrc
 
 # add activating the vision environment to the .bashrc
 echo "source /home/pi/miniforge3/bin/activate vision" >> /home/pi/.bashrc
@@ -61,7 +64,7 @@ echo "source /home/pi/miniforge3/bin/activate vision" >> /home/pi/.bashrc
 # mpv --fps=40 --no-correct-pts tcp://192.168.1.17:8888/
 
 # add the chron job to send the files
-chrontab -e
+crontab -e
 #0 3 * * * /home/pi/miniforge3/envs/vision/bin/python3.12 /home/pi/Documents/videoProcessing/send.py
 
 

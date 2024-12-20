@@ -37,7 +37,8 @@ if __name__ == "__main__":
     del timeBeforeCapDefined
 
     initalFrameReadStart = datetime.now()
-    frame = picam2.capture_array()[:,:,:3]
+    frame = picam2.capture_array()[:, :, [2, 1, 0]]
+
     initalFrameReadEnd = datetime.now()
     print(f"The first Frame took {initalFrameReadEnd - initalFrameReadStart} to capture")
     del initalFrameReadEnd
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     time.sleep((14 - (currTime.second % 15)) + (1 - currTime.microsecond/1_000_000))
 
     readTimes = [datetime.now(tzlocal.get_localzone())]
-    frame = picam2.capture_array()[:,:,:3]
+    frame = picam2.capture_array()[:, :, [2, 1, 0]]
     mybuffer = [frame]
     model_input_queue.put(frame)
 
@@ -106,7 +107,7 @@ if __name__ == "__main__":
         #logging and frame cap
         readTimes.append(datetime.now(tzlocal.get_localzone()))
         del frame
-        frame = picam2.capture_array()[:,:,:3]
+        frame = picam2.capture_array()[:, :, [2, 1, 0]]
         mybuffer.append(frame)
 
         if (datetime.now().second + 1) % 15 == 0 and datetime.now().microsecond > 900_000:
@@ -140,7 +141,7 @@ if __name__ == "__main__":
             readTimes.clear()
             readTimes = [datetime.now(tzlocal.get_localzone())]
             del frame
-            frame = picam2.capture_array()[:,:,:3]
+            frame = picam2.capture_array()[:, :, [2, 1, 0]]
             lb = []
             lb.clear()
             lb = mybuffer[1:].copy()
