@@ -24,7 +24,7 @@ read DEVICE_NAME
 
 sudo rm -r /var/lib/apt/lists/*
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y  rpicam-apps
+sudo apt install -y  rpicam-apps tmux
 
 
 #install miniconda
@@ -68,8 +68,8 @@ crontab -e
 #0 3 * * * /home/pi/miniforge3/envs/vision/bin/python3.12 /home/pi/Documents/videoProcessing/send.py
 
 
-# TODO - install tmux so i can run the vidcap software in a persistent terminal
-
+#code to run capture
+# python /home/pi/Documents/videoProcessing/homeVideo/piVidCap.py -1
 
 
 
