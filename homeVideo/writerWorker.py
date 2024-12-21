@@ -49,6 +49,9 @@ def writer_worker(input_queue, output_queue):
             output.release()
             break
         
+        if len(newFrames) != len(newTimestmaps):
+            continue
+
         if first:
             first = False
             frameWidth = int(newFrames[0].shape[1])
