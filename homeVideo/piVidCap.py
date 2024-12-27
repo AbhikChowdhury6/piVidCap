@@ -25,9 +25,9 @@ if __name__ == "__main__":
     
     timeBeforeCapDefined = datetime.now() 
     picam2 = Picamera2()
-    picam2.preview_configuration.size = (1920, 1080)
-    picam2.preview_configuration.queue = False
-    picam2.start("preview")
+    video_config = camera.create_video_configuration(main={"size": (1920, 1080), "format": "RGB888"})
+    picam2.configure(video_config)
+    picam2.start()
     timeAfterCapDefined = datetime.now() 
     print(f"The cap took {timeAfterCapDefined - timeBeforeCapDefined} to initialize")
     del timeAfterCapDefined
