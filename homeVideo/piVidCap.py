@@ -25,7 +25,7 @@ if __name__ == "__main__":
     
     timeBeforeCapDefined = datetime.now() 
     picam2 = Picamera2()
-    video_config = camera.create_video_configuration(main={"size": (1920, 1080), "format": "RGB888"})
+    video_config = picam2.create_video_configuration(main={"size": (1920, 1080), "format": "RGB888"})
     picam2.configure(video_config)
     picam2.start()
     timeAfterCapDefined = datetime.now() 
