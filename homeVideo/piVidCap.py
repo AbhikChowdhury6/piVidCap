@@ -25,7 +25,7 @@ if __name__ == "__main__":
     
     timeBeforeCapDefined = datetime.now() 
     picam2 = Picamera2()
-    picam2.preview_configuration.size = (640, 480)
+    picam2.preview_configuration.size = (1920, 1080)
     picam2.preview_configuration.queue = False
     picam2.start("preview")
     timeAfterCapDefined = datetime.now() 
@@ -37,9 +37,9 @@ if __name__ == "__main__":
     def getFrame():
         # -1 for no rotation +1 per 90 degrees clockwize turn
         if int(sys.argv[1]) == -1:
-            return picam2.capture_array()[:, :, [2, 1, 0]]
+            return picam2.capture_array()[:, :, [2, 1, 0]][::2, ::2]
         else:
-            return cv2.rotate(picam2.capture_array()[:, :, [2, 1, 0]], int(sys.argv[1]))
+            return cv2.rotate(picam2.capture_array()[:, :, [2, 1, 0][::2, ::2]], int(sys.argv[1]))
 
 
 

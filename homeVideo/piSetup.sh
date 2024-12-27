@@ -57,11 +57,19 @@ echo "export DEVICE_NAME=$DEVICE_NAME" >> /home/pi/.bashrc
 # add activating the vision environment to the .bashrc
 echo "source /home/pi/miniforge3/bin/activate vision" >> /home/pi/.bashrc
 
+# there's been a bug where the model inferece stops working ## <- written on 12/26/24
+# with no detections or a bunch of random detections
+# here are the comands to downgrade torch for cpu inference that may fix it
+# pip uninstall torch torchvision torchaudio -y
+# pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+
+
 # for framing
 # on pi
 # libcamera-vid --width 640 --height 480 --rotation 180 -t 0 --inline --listen -o tcp://0.0.0.0:8888
 # on installing machine
-# mpv --fps=40 --no-correct-pts tcp://192.168.1.17:8888/
+# mpv --fps=40 --demuxer-lavf-probesize=32 tcp://192.168.1.25:8888/
+
 
 # add the chron job to send the files
 crontab -e
