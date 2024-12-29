@@ -66,7 +66,7 @@ echo "source /home/pi/miniforge3/bin/activate vision" >> /home/pi/.bashrc
 
 # for framing
 # on pi
-# libcamera-vid --width 640 --height 480 --rotation 180 -t 0 --inline --listen -o tcp://0.0.0.0:8888
+# libcamera-vid --width 1920 --height 1080 -t 0 --inline --listen -o tcp://0.0.0.0:8888
 # on installing machine
 # mpv --fps=40 --demuxer-lavf-probesize=32 tcp://192.168.1.25:8888/
 
