@@ -37,9 +37,9 @@ if __name__ == "__main__":
     def getFrame():
         # -1 for no rotation +1 per 90 degrees clockwize turn
         if int(sys.argv[1]) == -1:
-            return picam2.capture_array()[::3, ::3, :]
+            return picam2.capture_array()#[::3, ::3, :]
         else:
-            return cv2.rotate(picam2.capture_array()[::3, ::3, :], int(sys.argv[1]))
+            return cv2.rotate(picam2.capture_array(), int(sys.argv[1]))
 
 
 

@@ -9,6 +9,32 @@ mv /home/uploadingGuest/recentCaptures/* /home/chowder/Documents/recentCaptures/
 
 so for this file structure:
 
+
+Dev computer security
+- full disk encryption
+- lock regualry
+- add "0 */3 * * * /usr/bin/xdg-screensaver lock" to crontab to auto lock every 3 hours
+
+
+ok programs
+- firefox with minimal extenstions
+- base vs code with checked extensions
+- database programs
+
+- python security profile
+    - use really popular packages
+    - 
+
+
+- clean dev dataset
+- all clean dataset
+- all raw dataset
+
+
+
+
+
+
 videoProcessing
 
 videoFiles
