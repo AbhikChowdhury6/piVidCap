@@ -91,8 +91,8 @@ def writer_worker(input_queue, output_queue):
             os.makedirs(pathToFile, exist_ok=True)
 
             fileName = deviceName + "_" + \
-                        timestamps[0].strftime('%Y-%m-%dT%H%M%S-%f%z') + "_" + \
-                        timestamps[endIndex-1].strftime('%Y-%m-%dT%H%M%S-%f%z')
+                        timestamps[0].strftime('%Y-%m-%dT%H%M%S,%f%z') + "_" + \
+                        timestamps[endIndex-1].strftime('%Y-%m-%dT%H%M%S,%f%z')
 
             print(f"writing {endIndex} frames to the name " + fileName)
             sys.stdout.flush()

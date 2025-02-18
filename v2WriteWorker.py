@@ -4,10 +4,22 @@ import pandas as pd
 import os
 from datetime import datetime
 
+def getRepoPath():
+    cwd = os.getcwd()
+    delimiter = "\\" if "\\" in cwd else "/"
+    repoPath = delimiter.join(cwd.split(delimiter)[:cwd.split(delimiter).index("piVidCap")]) + delimiter
+    return repoPath
+repoPath = getRepoPath()
+sys.path.append(repoPath + "/piVidCap/")
+from deviceInfo import deviceInfo
+
+def dt_to_fnString(dt):
+    return dt.tz_convert('UTC').strftime('%Y-%m-%dT%H%M%S,%f%z')
+
 #set these in /etc/enviroment by adding the line DEVICE_NAME="testCam" for example
-deviceName = os.getenv("DEVICE_NAME", "notSet")
-if deviceName == "notSet":
-    print("no device name set")
+deviceName = "_".join(deviceInfo.keys())
+if deviceInfo["instanceName"] == "notSet":
+    print("no instance name set")
     sys.stdout.flush()
 
 user = os.getenv("USER", "pi")
@@ -20,7 +32,7 @@ sys.stdout.flush()
 # the chron job can come in and send off that folder to 
 # /home/{remoteUsername}/Documents/videoData/{year-month}/ in the storage and processing server
 # open chrontab for editing with chrontab -e
-# run the script at 3 am ngl I'm pretty sure everyone in the house will be pretty asleep
+# run the script at 3 am ngl I'm pretty sure everyone in the house will be pretty asleep and they wont mind the bandwith usage
 # add the line
 # 0 3 * * * /home/pi/Documents/videoProcessing/send.sh
 
@@ -31,26 +43,14 @@ def writer_worker(input_queue, output_queue):
     sys.stdout.flush()
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
     timestamps = []
-    frames = []
     frameWidth = 0
     frameHeight = 0
     first = True
     startNewVideo = True
     numAddedFrames = 0
     while True:
-        if startNewVideo:
-            output = cv2.VideoWriter(pathToFile + "new.mp4", 
-                        fourcc, 
-                        30.0, 
-                        (frameWidth, frameHeight))
-            pathToFile = "/home/" + user + "/Documents/collectedData/" + \
-                deviceName + "_" + timestamps[0].strftime('%Y-%m-%d') + "/"
-            os.makedirs(pathToFile, exist_ok=True)
-            
-            startNewVideo = False
-
         newTimestmaps, newFrames = input_queue.get()  # Get frame from the input 
-        timestamps.extend(newTimestmaps)
+        timestamps.extend([x.tz_convert('UTC') for x in newTimestmaps])
         # print(newTimestmaps)
         print(f"recived {len(newFrames)} new frames!")
         print(f"recived {len(newTimestmaps)} new timestamps!")
@@ -63,20 +63,90 @@ def writer_worker(input_queue, output_queue):
             output.release()
             break
         
+        # if somethig went wrong don't save unaligned data
         if len(newFrames) != len(newTimestmaps):
             continue
 
+        # initialize cap properties
         if first:
             first = False
             frameWidth = int(newFrames[0].shape[1])
             frameHeight = int(newFrames[0].shape[0])
-        
-        if timestamps[0].tz_convert("UTC").day < timestamps[-1].tz_convert("UTC").day:
+
+        # initialize output
+        if startNewVideo:
+            startNewVideo = False
+            pathToFile = "/home/" + user + "/Documents/collectedData/" + \
+                deviceName + "_" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
+            os.makedirs(pathToFile, exist_ok=True)
+            output = cv2.VideoWriter(pathToFile + "new.mp4", 
+                        fourcc, 
+                        30.0, 
+                        (frameWidth, frameHeight))
+
+        if timestamps[0].day < timestamps[-1].day:
             crossesMidnight = True
             print(f"crossed midnight!")
             sys.stdout.flush()
         else:
             crossesMidnight = False
+
+        if not(crossesMidnight or numAddedFrames + len(newFrames) >= 1800):
+            for frame in newFrames:
+                output.write(frame)
+            timestamps.extend(newTimestmaps)
+            del newFrames
+            del newTimestmaps
+            continue
+
+        cutoffFrameIndex = 1800
+        while crossesMidnight and timestamps[0].day < timestamps[cutoffFrameIndex-1].day:
+            cutoffFrameIndex -= 1
+        
+        nextFrames = newFrames[cutoffFrameIndex:]
+        nextTimestamps = newTimestmaps[cutoffFrameIndex:]
+
+        for frame in newFrames[:cutoffFrameIndex]:
+                output.write(frame)
+        timestamps.extend(newTimestmaps[:cutoffFrameIndex])
+        
+        # close the output
+        output.release()
+        # calc the base file name
+        base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
+
+        # rename the mp4
+        os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
+        # write the parquet
+        
+
+        
+        
+        # if it does cross midnight or is
+        # find the last frame before midnight or the cutoff
+        # save all of those frames to the curent file
+        # release the output
+        # name the file it's final name
+
+        # create a new folder for the new day and a new file
+        # write the rest of the frames to a new file
+
+        #if it doesn't cross midnight then or is above the target length continue
+
+        # nahhhhh first check if there is a midnight split needed
+
+        # add the new frames
+        for frame in newFrames:
+            output.write(frame)
+        numAddedFrames += len(newFrames)
+        print(f"have {len(numAddedFrames)} total frames in this file!")
+        del newFrames
+        # add the new timestamps
+
+
+
+
+        
 
         # here add the relevant number of new frames to the output
         # and to do that we have to check if midnight has passed and how many frames we've already written
@@ -85,7 +155,7 @@ def writer_worker(input_queue, output_queue):
         timestamps.extend(newTimestmaps)
         del newFrames
         del newTimestmaps
-        print(f"have {len(numAddedFrames)} total frames!")
+        
         print(f"have {len(timestamps)} total timestamps!")
         sys.stdout.flush()
 
@@ -105,8 +175,8 @@ def writer_worker(input_queue, output_queue):
 
             
             fileName = deviceName + "_" + \
-                        timestamps[0].strftime('%Y-%m-%dT%H%M%S-%f%z') + "_" + \
-                        timestamps[endIndex-1].strftime('%Y-%m-%dT%H%M%S-%f%z')
+                        timestamps[0].strftime('%Y-%m-%dT%H%M%S,%f%z') + "_" + \
+                        timestamps[endIndex-1].strftime('%Y-%m-%dT%H%M%S,%f%z')
 
             print(f"wrote {endIndex} frames to the name " + fileName)
             sys.stdout.flush()
