@@ -47,6 +47,8 @@ def writer_worker(input_queue, output_queue):
     frameHeight = 0
     first = True
     startNewVideo = True
+    leftoverFrames = []
+    leftoverTimestamps = []
     numAddedFrames = 0
     while True:
         newTimestmaps, newFrames = input_queue.get()  # Get frame from the input 
@@ -55,7 +57,6 @@ def writer_worker(input_queue, output_queue):
         print(f"recived {len(newFrames)} new frames!")
         print(f"recived {len(newTimestmaps)} new timestamps!")
         sys.stdout.flush()
-
 
         if newFrames is None:  # None is the signal to exit
             print("exiting writer worker")
@@ -91,6 +92,16 @@ def writer_worker(input_queue, output_queue):
         else:
             crossesMidnight = False
 
+        # add any frames and timestamps leftover from the last video cut
+        if len(leftoverFrames) != 0:
+            newFrames[:0] = leftoverFrames
+            newTimestmaps[:0] = leftoverTimestamps
+            del leftoverFrames
+            del leftoverTimestamps
+            leftoverFrames = []
+            leftoverTimestamps = []
+
+        # if you're just adding to the existing file
         if not(crossesMidnight or numAddedFrames + len(newFrames) >= 1800):
             for frame in newFrames:
                 output.write(frame)
@@ -99,12 +110,13 @@ def writer_worker(input_queue, output_queue):
             del newTimestmaps
             continue
 
+        # if you are finishing a file
         cutoffFrameIndex = 1800
         while crossesMidnight and timestamps[0].day < timestamps[cutoffFrameIndex-1].day:
             cutoffFrameIndex -= 1
         
-        nextFrames = newFrames[cutoffFrameIndex:]
-        nextTimestamps = newTimestmaps[cutoffFrameIndex:]
+        leftoverFrames = newFrames[cutoffFrameIndex:].copy()
+        leftoverTimestamps = newTimestmaps[cutoffFrameIndex:].copy()
 
         for frame in newFrames[:cutoffFrameIndex]:
                 output.write(frame)
@@ -112,101 +124,19 @@ def writer_worker(input_queue, output_queue):
         
         # close the output
         output.release()
+        startNewVideo = True
         # calc the base file name
         base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
-
         # rename the mp4
         os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
         # write the parquet
-        
+        tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
+        tsdf = tsdf.set_index('sampleDT')
+        tsdf.to_parquet(pathToFile + base_file_name + ".parquet")
 
-        
-        
-        # if it does cross midnight or is
-        # find the last frame before midnight or the cutoff
-        # save all of those frames to the curent file
-        # release the output
-        # name the file it's final name
-
-        # create a new folder for the new day and a new file
-        # write the rest of the frames to a new file
-
-        #if it doesn't cross midnight then or is above the target length continue
-
-        # nahhhhh first check if there is a midnight split needed
-
-        # add the new frames
-        for frame in newFrames:
-            output.write(frame)
-        numAddedFrames += len(newFrames)
-        print(f"have {len(numAddedFrames)} total frames in this file!")
-        del newFrames
-        # add the new timestamps
-
-
-
-
-        
-
-        # here add the relevant number of new frames to the output
-        # and to do that we have to check if midnight has passed and how many frames we've already written
-        if crossesMidnight
-
-        timestamps.extend(newTimestmaps)
         del newFrames
         del newTimestmaps
-        
-        print(f"have {len(timestamps)} total timestamps!")
-        sys.stdout.flush()
-
-        
-
-        if frame >= 1800 or crossesMidnight:
-
-            if crossesMidnight:
-                endIndex = len(timestamps)-1
-                while timestamps[0].tz_convert("UTC").day < timestamps[endIndex-1].tz_convert("UTC").day:
-                    endIndex -= 1
-            else:
-                endIndex = 1800
-            
-            print(f"attempting to write {endIndex} frames")
-            sys.stdout.flush()
-
-            
-            fileName = deviceName + "_" + \
-                        timestamps[0].strftime('%Y-%m-%dT%H%M%S,%f%z') + "_" + \
-                        timestamps[endIndex-1].strftime('%Y-%m-%dT%H%M%S,%f%z')
-
-            print(f"wrote {endIndex} frames to the name " + fileName)
-            sys.stdout.flush()
+        del tsdf
 
 
-            #save frames to a video
-            writeStartTime = datetime.now()
-            for frame in frames[:endIndex]:
-                output.write(frame)
-            output.release()
-            print(f"writing took {datetime.now() - writeStartTime}")
-            sys.stdout.flush()
-            del writeStartTime
 
-            leftoverFrames = frames[endIndex:]
-            del frames
-            frames = leftoverFrames
-            del leftoverFrames
-            print(f"{len(frames)} is the number of frames left")
-            sys.stdout.flush()
-
-            # also save timestamps
-            tsdf = pd.DataFrame(data=timestamps[:endIndex], columns=['sampleDT'])
-            tsdf = tsdf.set_index('sampleDT')
-            tsdf.to_parquet(pathToFile + fileName + ".parquet")
-            leftoverTimestamps = timestamps[endIndex:]
-            del timestamps
-            timestamps = leftoverTimestamps
-            del leftoverTimestamps
-            # sys.stdout.flush()
-
-
-        
