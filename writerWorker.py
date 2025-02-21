@@ -109,6 +109,8 @@ def writer_worker(input_queue, output_queue):
             for frame in newFrames:
                 output.write(frame)
             timestamps.extend(newTimestmaps)
+            numAddedFrames += len(newFrames)
+            print(f"have {numAddedFrames} frames in the current video")
             del newFrames
             del newTimestmaps
             continue
@@ -139,6 +141,8 @@ def writer_worker(input_queue, output_queue):
         del newFrames
         del newTimestmaps
         del tsdf
+
+        numAddedFrames = 0
 
 
 
