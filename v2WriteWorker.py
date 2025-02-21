@@ -11,12 +11,18 @@ def getRepoPath():
     return repoPath
 repoPath = getRepoPath()
 sys.path.append(repoPath + "/piVidCap/")
-from deviceInfo import deviceInfo
 
 def dt_to_fnString(dt):
     return dt.tz_convert('UTC').strftime('%Y-%m-%dT%H%M%S,%f%z')
 
-#set these in /etc/enviroment by adding the line DEVICE_NAME="testCam" for example
+if os.path.exists(repoPath + "/piVidCap/deviceInfo.py"):
+    from deviceInfo import deviceInfo
+else:
+    from collections import OrderedDict
+    keys = ["responsiblePartyName", "instanceName", "developingPartyName", "deviceName", "dataType", "dataSource"]
+    values = ["abhik", "notSet", "abhik", "unknown", "mp4", "piVidCap"]
+    deviceInfo = OrderedDict(zip(keys, values))
+
 deviceName = "_".join(deviceInfo.keys())
 if deviceInfo["instanceName"] == "notSet":
     print("no instance name set")
@@ -122,17 +128,16 @@ def writer_worker(input_queue, output_queue):
                 output.write(frame)
         timestamps.extend(newTimestmaps[:cutoffFrameIndex])
         
-        # close the output
+        base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
+        
+        # close the output and name video
         output.release()
         startNewVideo = True
-        # calc the base file name
-        base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
-        # rename the mp4
         os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
         # write the parquet
         tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
         tsdf = tsdf.set_index('sampleDT')
-        tsdf.to_parquet(pathToFile + base_file_name + ".parquet")
+        tsdf.to_parquet(pathToFile + base_file_name + ".parquet.gzip", compression='gzip')
 
         del newFrames
         del newTimestmaps
