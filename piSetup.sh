@@ -10,7 +10,7 @@
 
 # first manually clone repo
 # sudo apt install git
-# git clone https://github.com/AbhikChowdhury6/videoProcessing.git ~/Documents/videoProcessing
+# git clone https://github.com/AbhikChowdhury6/piVidCap.git ~/Documents/piVidCap
 # run 
 
 #in this script
@@ -18,8 +18,8 @@
 #edit the exdeviceInfo.py
 #rename it to deviceInfo.py
 
-sudo rm -r /var/lib/apt/lists/*
-sudo apt update && sudo apt upgrade -y
+#sudo rm -r /var/lib/apt/lists/*
+#sudo apt update && sudo apt upgrade -y
 sudo apt install -y  rpicam-apps tmux
 
 
@@ -47,8 +47,6 @@ mkdir -p ~/Documents/collectedData
 ssh-keygen -t rsa
 ssh-copy-id uploadingGuest@192.168.1.113
 
-# add exporting the envrionment variables to the .bashrc
-echo "export DEVICE_NAME=$DEVICE_NAME" >> /home/pi/.bashrc
 
 # add activating the vision environment to the .bashrc
 echo "source /home/pi/miniforge3/bin/activate vision" >> /home/pi/.bashrc
