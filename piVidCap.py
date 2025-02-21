@@ -7,6 +7,14 @@ import pandas as pd
 import signal
 import sys
 
+def getRepoPath():
+    cwd = os.getcwd()
+    delimiter = "\\" if "\\" in cwd else "/"
+    repoPath = delimiter.join(cwd.split(delimiter)[:cwd.split(delimiter).index("piVidCap")]) + delimiter
+    return repoPath
+repoPath = getRepoPath()
+sys.path.append(repoPath + "/piVidCap/")
+
 import torch.multiprocessing as mp
 from modelWorker import model_worker
 from writerWorker import writer_worker

@@ -17,7 +17,7 @@
 import os
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 import tzlocal
 import logging
 import logging.handlers
@@ -64,7 +64,7 @@ if deviceInfo["instanceName"] == "notSet":
     sys.stdout.flush()
 
 
-nameOfTodaysFolder = deviceName + "_" + datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d%z")
+nameOfTodaysFolder = deviceName + "_" + datetime.now(timezone.utc).strftime("%Y-%m-%d%z")
 
 startTime = datetime.now()
 for folderName in foldersInCollectedData:

@@ -42,6 +42,9 @@ sudo apt install -y libkms++-dev libfmt-dev libdrm-dev
 pip install --upgrade pip
 pip install wheel
 pip install rpi-libcamera rpi-kms picamera2 av
+# libcamera was a bit ahead of rpi-libcamera so i got this form pypi
+# pip install rpi-libcamera -C setup-args="-Dversion=unknown"
+
 
 mkdir -p ~/Documents/collectedData
 ssh-keygen -t rsa
@@ -67,11 +70,11 @@ echo "source /home/pi/miniforge3/bin/activate vision" >> /home/pi/.bashrc
 
 # add the chron job to send the files
 crontab -e
-#0 3 * * * /home/pi/miniforge3/envs/vision/bin/python3.12 /home/pi/Documents/videoProcessing/send.py
+#0 8 * * * /home/pi/miniforge3/envs/vision/bin/python3.12 /home/pi/Documents/piVidCap/send.py
 
 
 #code to run capture
-# python /home/pi/Documents/videoProcessing/homeVideo/piVidCap.py -1
+# python /home/pi/Documents/piVidCap/piVidCap.py -1
 
 
 
