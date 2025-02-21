@@ -3,6 +3,7 @@ import cv2
 import pandas as pd
 import os
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
 repoPath = "/home/pi/Documents/"
@@ -54,7 +55,7 @@ def writer_worker(input_queue, output_queue):
     numAddedFrames = 0
     while True:
         newTimestmaps, newFrames = input_queue.get()  # Get frame from the input 
-        timestamps.extend([x.tz_convert('UTC') for x in newTimestmaps])
+        timestamps.extend([x.astimezone(ZoneInfo("UTC")) for x in newTimestmaps])
         # print(newTimestmaps)
         print(f"recived {len(newFrames)} new frames!")
         print(f"recived {len(newTimestmaps)} new timestamps!")
