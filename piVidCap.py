@@ -8,13 +8,8 @@ import signal
 import sys
 import os
 
-def getRepoPath():
-    cwd = os.getcwd()
-    delimiter = "\\" if "\\" in cwd else "/"
-    repoPath = delimiter.join(cwd.split(delimiter)[:cwd.split(delimiter).index("piVidCap")]) + delimiter
-    return repoPath
-repoPath = getRepoPath()
-sys.path.append(repoPath + "/piVidCap/")
+repoPath = "/home/pi/Documents/"
+sys.path.append(repoPath + "piVidCap/")
 
 import torch.multiprocessing as mp
 from modelWorker import model_worker

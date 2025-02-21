@@ -4,18 +4,14 @@ import pandas as pd
 import os
 from datetime import datetime
 
-def getRepoPath():
-    cwd = os.getcwd()
-    delimiter = "\\" if "\\" in cwd else "/"
-    repoPath = delimiter.join(cwd.split(delimiter)[:cwd.split(delimiter).index("piVidCap")]) + delimiter
-    return repoPath
-repoPath = getRepoPath()
-sys.path.append(repoPath + "/piVidCap/")
+
+repoPath = "/home/pi/Documents/"
+sys.path.append(repoPath + "piVidCap/")
 
 def dt_to_fnString(dt):
     return dt.tz_convert('UTC').strftime('%Y-%m-%dT%H%M%S,%f%z')
 
-if os.path.exists(repoPath + "/piVidCap/deviceInfo.py"):
+if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import deviceInfo
 else:
     from collections import OrderedDict
