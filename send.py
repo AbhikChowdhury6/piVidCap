@@ -42,12 +42,34 @@ if len(foldersInCollectedData) == 0:
     logger.info("no files found, exiting")
     sys.exit()
 
-deviceName = foldersInCollectedData[0].split("_")[0]
+# get device name
+def getRepoPath():
+    cwd = os.getcwd()
+    delimiter = "\\" if "\\" in cwd else "/"
+    repoPath = delimiter.join(cwd.split(delimiter)[:cwd.split(delimiter).index("piVidCap")]) + delimiter
+    return repoPath
+repoPath = getRepoPath()
+sys.path.append(repoPath + "/piVidCap/")
+if os.path.exists(repoPath + "/piVidCap/deviceInfo.py"):
+    from deviceInfo import deviceInfo
+else:
+    from collections import OrderedDict
+    keys = ["responsiblePartyName", "instanceName", "developingPartyName", "deviceName", "dataType", "dataSource"]
+    values = ["abhik", "notSet", "abhik", "unknown", "mp4", "piVidCap"]
+    deviceInfo = OrderedDict(zip(keys, values))
+
+deviceName = "_".join(deviceInfo.keys())
+if deviceInfo["instanceName"] == "notSet":
+    print("no instance name set")
+    sys.stdout.flush()
+
+
 nameOfTodaysFolder = deviceName + "_" + datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d%z")
 
 startTime = datetime.now()
 for folderName in foldersInCollectedData:
-    if folderName == nameOfTodaysFolder:
+    #if you also want to send todays folder then add any argument when calling send
+    if folderName == nameOfTodaysFolder and len(sys.argv) == 1:
         continue
     source = pathToCollectedData + folderName
     

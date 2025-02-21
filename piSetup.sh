@@ -15,12 +15,8 @@
 
 #in this script
 
-echo "enter the device name"
-read DEVICE_NAME
-#export DEVICE_NAME=cam1Test
-#echo "enter the local username"
-#read LOCAL_USERNAME
-#echo "enter the remote username"
+#edit the exdeviceInfo.py
+#rename it to deviceInfo.py
 
 sudo rm -r /var/lib/apt/lists/*
 sudo apt update && sudo apt upgrade -y
