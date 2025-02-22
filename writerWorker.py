@@ -50,8 +50,6 @@ def writer_worker(input_queue, output_queue):
     frameHeight = 0
     first = True
     startNewVideo = True
-    leftoverFrames = []
-    leftoverTimestamps = []
     numAddedFrames = 0
     while True:
         newTimestmaps, newFrames = input_queue.get()  # Get frame from the input 
@@ -77,7 +75,7 @@ def writer_worker(input_queue, output_queue):
             frameWidth = int(newFrames[0].shape[1])
             frameHeight = int(newFrames[0].shape[0])
 
-        # initialize output
+        # start a new output file
         if startNewVideo:
             startNewVideo = False
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
@@ -88,6 +86,7 @@ def writer_worker(input_queue, output_queue):
                         30.0, 
                         (frameWidth, frameHeight))
 
+        # check if the current file crosses midnight
         if timestamps[0].day < timestamps[-1].day:
             crossesMidnight = True
             print(f"crossed midnight!")
@@ -95,14 +94,6 @@ def writer_worker(input_queue, output_queue):
         else:
             crossesMidnight = False
 
-        # add any frames and timestamps leftover from the last video cut
-        if len(leftoverFrames) != 0:
-            newFrames[:0] = leftoverFrames
-            newTimestmaps[:0] = leftoverTimestamps
-            del leftoverFrames
-            del leftoverTimestamps
-            leftoverFrames = []
-            leftoverTimestamps = []
 
         # if you're just adding to the existing file
         if not(crossesMidnight or numAddedFrames + len(newFrames) >= 1800):
@@ -111,38 +102,69 @@ def writer_worker(input_queue, output_queue):
             timestamps.extend(newTimestmaps)
             numAddedFrames += len(newFrames)
             print(f"have {numAddedFrames} frames in the current video")
-            del newFrames
-            del newTimestmaps
-            continue
 
-        # if you are finishing a file
-        cutoffFrameIndex = 1800
-        while crossesMidnight and timestamps[0].day < timestamps[cutoffFrameIndex-1].day:
-            cutoffFrameIndex -= 1
+        # if the file just got too big
+        elif not crossesMidnight and numAddedFrames + len(newFrames) >= 1800:
+            if numAddedFrames + len(newFrames) >= 1800:
+                for frame in newFrames:
+                    output.write(frame)
+            timestamps.extend(newTimestmaps)
+            
+            base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
+            
+            # close the output and name video
+            output.release()
+            startNewVideo = True
+            os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
+            # write the parquet
+            tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
+            tsdf = tsdf.set_index('sampleDT')
+            tsdf.to_parquet(pathToFile + base_file_name + ".parquet.gzip", compression='gzip')
+            del tsdf
+
+            numAddedFrames = 0
+
+            
+        # if the file crosses midnight
+        else:
+            cutoffFrameIndex = len(newFrames)
+            while crossesMidnight and timestamps[0].day < timestamps[cutoffFrameIndex-1].day:
+                cutoffFrameIndex -= 1
         
-        leftoverFrames = newFrames[cutoffFrameIndex:].copy()
-        leftoverTimestamps = newTimestmaps[cutoffFrameIndex:].copy()
 
-        for frame in newFrames[:cutoffFrameIndex]:
+            for frame in newFrames[:cutoffFrameIndex]:
                 output.write(frame)
-        timestamps.extend(newTimestmaps[:cutoffFrameIndex])
+            timestamps.extend(newTimestmaps[:cutoffFrameIndex])
         
-        base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
-        
-        # close the output and name video
-        output.release()
-        startNewVideo = True
-        os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
-        # write the parquet
-        tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
-        tsdf = tsdf.set_index('sampleDT')
-        tsdf.to_parquet(pathToFile + base_file_name + ".parquet.gzip", compression='gzip')
+            base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
+            
+            # close the output and name video
+            output.release()
+            os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
+            # write the parquet
+            tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
+            tsdf = tsdf.set_index('sampleDT')
+            tsdf.to_parquet(pathToFile + base_file_name + ".parquet.gzip", compression='gzip')
+            del tsdf
 
+            #start a new video and write the cut off part
+            startNewVideo = False
+            pathToFile = "/home/" + user + "/Documents/collectedData/" + \
+                deviceName + "_" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
+            os.makedirs(pathToFile, exist_ok=True)
+            output = cv2.VideoWriter(pathToFile + "new.mp4", 
+                        fourcc, 
+                        30.0, 
+                        (frameWidth, frameHeight))
+
+
+            for frame in newFrames[cutoffFrameIndex:]:
+                output.write(frame)
+            timestamps = newTimestmaps[cutoffFrameIndex:]
+            numAddedFrames = len(timestamps)
+        
         del newFrames
         del newTimestmaps
-        del tsdf
-
-        numAddedFrames = 0
 
 
 

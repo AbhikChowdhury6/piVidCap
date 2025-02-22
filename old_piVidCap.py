@@ -80,11 +80,11 @@ if __name__ == "__main__":
 
     modelStartTime = datetime.now()
     model_input_queue.put(frame)
-    mr = model_output_queue.get()
+    result = model_output_queue.get()
     modelEndTime = datetime.now()
 
     print(f"the model took {modelEndTime - modelStartTime} to run")
-    print("Model output:", mr)
+    print("Model output:", result)
     del modelEndTime
     del modelStartTime
 
@@ -96,6 +96,16 @@ if __name__ == "__main__":
     writer_process.start()
 
     # actual capture code
+
+    # wait till a round 15 seconds
+    currTime = datetime.now()
+    time.sleep((14 - (currTime.second % 15)) + (1 - currTime.microsecond/1_000_000))
+
+    readTimes = [datetime.now(tzlocal.get_localzone())]
+    frame = getFrame()
+    mybuffer = [frame]
+    model_input_queue.put(frame)
+
     def modelResult():
         if model_output_queue.empty(): print("waiting for processing")
         return model_output_queue.get()
@@ -104,50 +114,66 @@ if __name__ == "__main__":
         msToDelay = 100 - ((datetime.now().microsecond / 1000) % 100)
         time.sleep(msToDelay/1000)
 
-    def health_checks():
-        print(f"is model alive?: {model_process.is_alive()}")
-        print(f"is writer alive?: {writer_process.is_alive()}")
-        print()
-        if not (model_process.is_alive() and writer_process.is_alive()):
-            print("one of the processes died exiting everything")
-            model_input_queue.put(None)
-            writer_input_queue.put(None)
-            return False
-
-
-    myFrameBuffer = []
-    myTimesBuffer = []
+    lastModelResult = True
     while True:
-        frame = getFrame()
-        frameTime = datetime.now(tzlocal.get_localzone())
-
-        myFrameBuffer.append(frame)
-        myTimesBuffer.append(frameTime)
-
-        # if not a round 15 seconds
-        if (not ((datetime.now().second + 1) % 15 == 0 
-                and datetime.now().microsecond > 900_000)
-                or len(myTimesBuffer) <= 151):
-            delayTill100ms()
-            continue
-
-        #it's on a 15th seconds or the buffer is too big
-        if not health_checks():
-            break
-
-        print(f"got {len(myTimesBuffer)} frames the past 15 seconds")
-        print(f"it is {datetime.now()}")
-        last_mr = mr
-        mr = modelResult()
-        if mr: print("saw someone!!!")
-        if mr or last_mr:
-            print("sending whole buffer")
-            writer_input_queue.put((myTimesBuffer, myFrameBuffer))
-        else:
-            print("only sending most recent frame")
-            writer_input_queue.put((myTimesBuffer[-1], myFrameBuffer[-1]))
-
-        myFrameBuffer = []
-        myTimesBuffer = []
 
         delayTill100ms()
+        
+        #logging and frame cap
+        readTimes.append(datetime.now(tzlocal.get_localzone()))
+        del frame
+        frame = getFrame()
+        mybuffer.append(frame)
+
+        if (datetime.now().second + 1) % 15 == 0 and datetime.now().microsecond > 900_000:
+            print(f"had {len(mybuffer)} number of frames this segment")
+            # if there was people then save the last 15 seconds
+            mr = modelResult()
+            if mr:
+                print("saw someone!")
+                if not lastModelResult:
+                    lrt.extend(readTimes)
+                    lb.extend(mybuffer)
+                    # print(lrt)
+                    # print(len(lb))
+                    print(f"sending an extended {len(lb)} frames")
+                    print(f"sending an extended {len(lrt)} timestamps")
+                    writer_input_queue.put((lrt, lb)) 
+                else:
+                    print(f"sending {len(mybuffer)} frames")
+                    print(f"sending {len(readTimes)} timestamps")
+                    writer_input_queue.put((readTimes, mybuffer))
+            else:
+                # else just save the one frame analyzed for a timelapse
+                print("sending 1 frame")
+                writer_input_queue.put(([readTimes[0]],[mybuffer[0]]))
+            
+            delayTill100ms()
+            print(f"done with timeperiod starting at {readTimes[0]}")
+            lrt = []
+            lrt.clear()
+            lrt = readTimes[1:].copy()
+            readTimes.clear()
+            readTimes = [datetime.now(tzlocal.get_localzone())]
+            del frame
+            frame = getFrame()
+            lb = []
+            lb.clear()
+            lb = mybuffer[1:].copy()
+            mybuffer.clear()
+            mybuffer = [frame]
+            model_input_queue.put(frame)
+            lastModelResult = mr
+            print(f"is model alive?: {model_process.is_alive()}")
+            print(f"is writer alive?: {writer_process.is_alive()}")
+            print()
+            if not (model_process.is_alive() and writer_process.is_alive()):
+                print("one of the processes died exiting everything")
+                model_input_queue.put(None)
+                writer_input_queue.put(None)
+                break
+
+
+# picamera configure notes
+# buffersize = 1 queue false?
+# disable timeout

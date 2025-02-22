@@ -95,7 +95,7 @@ crontab -e
 # add     "camera_timeout_value_ms":    10000000,
 
 #sudo nano /etc/dphys-swapfile
-# update swap to 3000
+# update swap to 5000
 
 
 # then add running the vidCap.py script to /etc/rc.local once ready
