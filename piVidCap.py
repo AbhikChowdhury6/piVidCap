@@ -71,11 +71,11 @@ if __name__ == "__main__":
     print(f"is the model process alive?: {model_process.is_alive()}")
     modelStartTime = datetime.now()
     model_input_queue.put(frame)
-    result = model_output_queue.get()
+    mr = model_output_queue.get()
     modelEndTime = datetime.now()
 
     print(f"the model took {modelEndTime - modelStartTime} to setup and run")
-    print("Model output:", result)
+    print("Model output:", mr)
 
 
     writer_input_queue = mp.Queue()
