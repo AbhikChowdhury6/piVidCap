@@ -81,8 +81,8 @@ def writer_worker(input_queue, output_queue):
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
                 deviceName + "_" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
             os.makedirs(pathToFile, exist_ok=True)
-            if os.path.exists(pathToFile + + "new.mp4"):
-                os.remove(pathToFile + + "new.mp4")
+            if os.path.exists(pathToFile + "new.mp4"):
+                os.remove(pathToFile + "new.mp4")
             output = cv2.VideoWriter(pathToFile + "new.mp4", 
                         fourcc, 
                         30.0, 
@@ -157,8 +157,8 @@ def writer_worker(input_queue, output_queue):
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
                 deviceName + "_" + timestamps[cutoffFrameIndex].strftime('%Y-%m-%d%z') + "/"
             os.makedirs(pathToFile, exist_ok=True)
-            if os.path.exists(pathToFile + + "new.mp4"):
-                os.remove(pathToFile + + "new.mp4")
+            if os.path.exists(pathToFile + "new.mp4"):
+                os.remove(pathToFile + "new.mp4")
             output = cv2.VideoWriter(pathToFile + "new.mp4", 
                         fourcc, 
                         30.0, 
