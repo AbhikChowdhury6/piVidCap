@@ -81,6 +81,8 @@ def writer_worker(input_queue, output_queue):
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
                 deviceName + "_" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
             os.makedirs(pathToFile, exist_ok=True)
+            if os.path.exists(pathToFile + + "new.mp4"):
+                os.remove(pathToFile + + "new.mp4")
             output = cv2.VideoWriter(pathToFile + "new.mp4", 
                         fourcc, 
                         30.0, 
@@ -116,6 +118,7 @@ def writer_worker(input_queue, output_queue):
             output.release()
             startNewVideo = True
             os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
+            print(f"finished writing the file {base_file_name + '.mp4'}")
             # write the parquet
             tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
             tsdf = tsdf.set_index('sampleDT')
@@ -141,6 +144,8 @@ def writer_worker(input_queue, output_queue):
             # close the output and name video
             output.release()
             os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
+            print(f"finished writing the file {base_file_name + '.mp4'}")
+
             # write the parquet
             tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
             tsdf = tsdf.set_index('sampleDT')
@@ -150,8 +155,10 @@ def writer_worker(input_queue, output_queue):
             #start a new video and write the cut off part
             startNewVideo = False
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
-                deviceName + "_" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
+                deviceName + "_" + timestamps[cutoffFrameIndex].strftime('%Y-%m-%d%z') + "/"
             os.makedirs(pathToFile, exist_ok=True)
+            if os.path.exists(pathToFile + + "new.mp4"):
+                os.remove(pathToFile + + "new.mp4")
             output = cv2.VideoWriter(pathToFile + "new.mp4", 
                         fourcc, 
                         30.0, 

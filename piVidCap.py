@@ -77,16 +77,6 @@ if __name__ == "__main__":
     print(f"the model took {modelEndTime - modelStartTime} to setup and run")
     print("Model output:", result)
 
-    modelStartTime = datetime.now()
-    model_input_queue.put(frame)
-    mr = model_output_queue.get()
-    modelEndTime = datetime.now()
-
-    print(f"the model took {modelEndTime - modelStartTime} to run")
-    print("Model output:", mr)
-    del modelEndTime
-    del modelStartTime
-
 
     writer_input_queue = mp.Queue()
     writer_output_queue = mp.Queue()
@@ -132,11 +122,16 @@ if __name__ == "__main__":
             continue
 
         #it's on a 15th seconds or the buffer is too big
+        st = datetime.now()
         if not health_checks():
             break
+        print(f"it took {datetime.now() - st} for health_checks")
 
+        st = datetime.now()
         model_input_queue.put(myFrameBuffer[-1])
+        print(f"it took {datetime.now() - st} for putting in the model input queue")
 
+        st = datetime.now()
         print(f"got {len(myTimesBuffer)} frames the past 15 seconds")
         print(f"it is {datetime.now()}")
         last_mr = mr
@@ -148,6 +143,7 @@ if __name__ == "__main__":
         else:
             print("only sending most recent frame")
             writer_input_queue.put(([myTimesBuffer[-1]], [myFrameBuffer[-1]]))
+        print(f"it took {datetime.now() - st} for putting in the write input queue")
 
         myFrameBuffer = []
         myTimesBuffer = []
