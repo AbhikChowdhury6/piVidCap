@@ -125,9 +125,9 @@ if __name__ == "__main__":
         myTimesBuffer.append(frameTime)
 
         # if not a round 15 seconds
-        if (not ((datetime.now().second + 1) % 15 == 0 
-                and datetime.now().microsecond > 900_000)
-                or len(myTimesBuffer) <= 151):
+        if ((not ((datetime.now().second + 1) % 15 == 0 
+                and datetime.now().microsecond > 900_000))
+            and len(myTimesBuffer) <= 151):
             delayTill100ms()
             continue
 
@@ -147,7 +147,7 @@ if __name__ == "__main__":
             writer_input_queue.put((myTimesBuffer, myFrameBuffer))
         else:
             print("only sending most recent frame")
-            writer_input_queue.put((myTimesBuffer[-1], myFrameBuffer[-1]))
+            writer_input_queue.put(([myTimesBuffer[-1]], [myFrameBuffer[-1]]))
 
         myFrameBuffer = []
         myTimesBuffer = []
