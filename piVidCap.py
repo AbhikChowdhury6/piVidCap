@@ -131,11 +131,16 @@ if __name__ == "__main__":
         model_input_queue.put(myFrameBuffer[-1])
         print(f"it took {datetime.now() - st} for putting in the model input queue")
 
-        st = datetime.now()
+        
         print(f"got {len(myTimesBuffer)} frames the past 15 seconds")
         print(f"it is {datetime.now()}")
         last_mr = mr
+
+        st = datetime.now()
         mr = modelResult()
+        print(f"it took {datetime.now() - st} to get the model result")
+        
+        st = datetime.now()
         if mr: print("saw someone!!!")
         if mr or last_mr:
             print("sending whole buffer")
