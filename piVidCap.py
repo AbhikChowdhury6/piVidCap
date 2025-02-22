@@ -135,6 +135,8 @@ if __name__ == "__main__":
         if not health_checks():
             break
 
+        model_input_queue.put(myFrameBuffer[-1])
+
         print(f"got {len(myTimesBuffer)} frames the past 15 seconds")
         print(f"it is {datetime.now()}")
         last_mr = mr
