@@ -112,6 +112,7 @@ if __name__ == "__main__":
             model_input_queue.put(None)
             writer_input_queue.put(None)
             return False
+        return True
 
 
     myFrameBuffer = []
