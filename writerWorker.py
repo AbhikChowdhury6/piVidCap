@@ -10,7 +10,7 @@ repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
 
 def dt_to_fnString(dt):
-    return dt.tz_convert('UTC').strftime('%Y-%m-%dT%H%M%S,%f%z')
+    return dt.astimezone(ZoneInfo("UTC")).strftime('%Y-%m-%dT%H%M%S,%f%z')
 
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import deviceInfo

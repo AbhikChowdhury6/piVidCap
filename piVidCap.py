@@ -2,7 +2,6 @@ from picamera2 import Picamera2
 import cv2
 from datetime import datetime
 import time
-import tzlocal
 import pandas as pd
 import signal
 import sys
@@ -119,7 +118,7 @@ if __name__ == "__main__":
     myTimesBuffer = []
     while True:
         frame = getFrame()
-        frameTime = datetime.now(tzlocal.get_localzone())
+        frameTime = datetime.now().astimezone()
 
         myFrameBuffer.append(frame)
         myTimesBuffer.append(frameTime)
