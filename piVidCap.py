@@ -76,7 +76,6 @@ if __name__ == "__main__":
         time.sleep(1)
     modelEndTime = datetime.now()
     print(f"the model took {modelEndTime - modelStartTime} to setup and run")
-    print("Model output:", mr)
 
 
     writer_input_queue = mp.Queue()
