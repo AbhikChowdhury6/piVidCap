@@ -24,6 +24,9 @@ deviceName = "_".join(deviceInfo.values())
 if deviceInfo["instanceName"] == "notSet":
     print("no instance name set")
     sys.stdout.flush()
+print(f"device name is {deviceName}")
+sys.stdout.flush()
+
 
 user = os.getenv("USER", "pi")
 sys.stdout.flush()

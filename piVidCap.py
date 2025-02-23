@@ -67,7 +67,7 @@ if __name__ == "__main__":
     print(f"is the model process alive?: {model_process.is_alive()}")
     modelStartTime = datetime.now()
     model_input_queue.put(frame)
-    print(" going to wait for model")
+    print("going to wait for model")
     start_time = time.time()
     while model_output_queue.empty(): 
         if time.time() - start_time > 20:
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         model_input_queue.put(myFrameBuffer[-1])
         print(f"it took {datetime.now() - st} for putting in the model input queue")
 
-        maxTime = max(b - a for a, b in zip(timestamps, timestamps[1:]))
+        maxTime = max(b - a for a, b in zip(myTimesBuffer, myTimesBuffer[1:]))
         print(f"the max frame interval was {maxTime}")
         print(f"got {len(myTimesBuffer)} frames the past 15 seconds")
         print(f"it is {datetime.now()}")
