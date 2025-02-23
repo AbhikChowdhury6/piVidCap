@@ -15,10 +15,6 @@ from modelWorker import model_worker
 from writerWorker import writer_worker
 
 
-
-#let's rewrite this
-
-
 if __name__ == "__main__":
     #the spawend processes will build up unless exited
     def handle_sigint(signal_received, frame):
@@ -71,9 +67,14 @@ if __name__ == "__main__":
     print(f"is the model process alive?: {model_process.is_alive()}")
     modelStartTime = datetime.now()
     model_input_queue.put(frame)
-    mr = model_output_queue.get()
+    print(" going to wait for model")
+    start_time
+    while model_output_queue.qsize() == 0: 
+        if time.time() - start_time > 20:
+            print("took more than 20 seconds to run exiting")
+            sys.exit()
+        time.sleep(1)
     modelEndTime = datetime.now()
-
     print(f"the model took {modelEndTime - modelStartTime} to setup and run")
     print("Model output:", mr)
 
@@ -104,9 +105,11 @@ if __name__ == "__main__":
             return False
         return True
 
+    
 
     myFrameBuffer = []
     myTimesBuffer = []
+    mr = False
     while True:
         frame = getFrame()
         frameTime = datetime.now().astimezone()
@@ -131,7 +134,8 @@ if __name__ == "__main__":
         model_input_queue.put(myFrameBuffer[-1])
         print(f"it took {datetime.now() - st} for putting in the model input queue")
 
-        
+        maxTime = max(b - a for a, b in zip(timestamps, timestamps[1:]))
+        print(f"the max frame interval was {maxTime}")
         print(f"got {len(myTimesBuffer)} frames the past 15 seconds")
         print(f"it is {datetime.now()}")
         last_mr = mr

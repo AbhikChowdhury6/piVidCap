@@ -58,7 +58,7 @@ else:
     values = ["abhik", "notSet", "abhik", "unknown", "mp4", "piVidCap"]
     deviceInfo = OrderedDict(zip(keys, values))
 
-deviceName = "_".join(deviceInfo.keys())
+deviceName = "_".join(deviceInfo.values())
 if deviceInfo["instanceName"] == "notSet":
     print("no instance name set")
     sys.stdout.flush()
