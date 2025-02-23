@@ -44,7 +44,6 @@ if len(foldersInCollectedData) == 0:
 
 # get device name
 repoPath = "/home/pi/Documents/"
-repoPath = getRepoPath()
 sys.path.append(repoPath + "piVidCap/")
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import deviceInfo
