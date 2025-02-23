@@ -68,7 +68,7 @@ if __name__ == "__main__":
     modelStartTime = datetime.now()
     model_input_queue.put(frame)
     print(" going to wait for model")
-    start_time
+    start_time = time.time()
     while model_output_queue.qsize() == 0: 
         if time.time() - start_time > 20:
             print("took more than 20 seconds to run exiting")
