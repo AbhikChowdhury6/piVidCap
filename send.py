@@ -43,14 +43,10 @@ if len(foldersInCollectedData) == 0:
     sys.exit()
 
 # get device name
-def getRepoPath():
-    cwd = os.getcwd()
-    delimiter = "\\" if "\\" in cwd else "/"
-    repoPath = delimiter.join(cwd.split(delimiter)[:cwd.split(delimiter).index("piVidCap")]) + delimiter
-    return repoPath
+repoPath = "/home/pi/Documents/"
 repoPath = getRepoPath()
-sys.path.append(repoPath + "/piVidCap/")
-if os.path.exists(repoPath + "/piVidCap/deviceInfo.py"):
+sys.path.append(repoPath + "piVidCap/")
+if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import deviceInfo
 else:
     from collections import OrderedDict
