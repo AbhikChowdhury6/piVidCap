@@ -2,6 +2,7 @@ from picamera2 import Picamera2
 import cv2
 from datetime import datetime
 import time
+import keyboard
 import pandas as pd
 import signal
 import sys
