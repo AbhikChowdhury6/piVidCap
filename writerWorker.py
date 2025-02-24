@@ -55,14 +55,8 @@ def writer_worker(input_queue, output_queue):
     startNewVideo = True
     numAddedFrames = 0
     while True:
-        newTimestmaps, newFrames = input_queue.get()  # Get frame from the input 
-        timestamps.extend([x.astimezone(ZoneInfo("UTC")) for x in newTimestmaps])
-        # print(newTimestmaps)
-        print(f"recived {len(newFrames)} new frames!")
-        print(f"recived {len(newTimestmaps)} new timestamps!")
-        sys.stdout.flush()
-
-        if newFrames is None:  # None is the signal to exit
+        fromQueue = input_queue.get()  # Get frame from the input
+        if fromQueue is None:  # None is the signal to exit
             print("exiting writer worker")
             sys.stdout.flush()
             if len(timestamps) == 0:
@@ -81,6 +75,13 @@ def writer_worker(input_queue, output_queue):
             del tsdf
             output.release()
             break
+
+        newTimestmaps, newFrames =  fromQueue
+        timestamps.extend([x.astimezone(ZoneInfo("UTC")) for x in newTimestmaps])
+        # print(newTimestmaps)
+        print(f"recived {len(newFrames)} new frames!")
+        print(f"recived {len(newTimestmaps)} new timestamps!")
+        sys.stdout.flush()
         
         # if somethig went wrong don't save unaligned data
         if len(newFrames) != len(newTimestmaps):
