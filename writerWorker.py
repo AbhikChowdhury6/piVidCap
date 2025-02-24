@@ -189,6 +189,9 @@ def writer_worker(input_queue, output_queue):
         
         del newFrames
         del newTimestmaps
+    
+    print("write worker exiting")
+    sys.stdout.flush()
 
 
 

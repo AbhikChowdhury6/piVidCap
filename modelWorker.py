@@ -2,13 +2,15 @@ from ultralytics import YOLO
 import sys
 import os
 # import cv2
-
+repoPath = "/home/pi/Documents/"
+sys.path.append(repoPath + "piVidCap/")
+from deviceInfo import modelName
 
 
 def model_worker(input_queue, output_queue):
     print("in model worker")
     sys.stdout.flush()
-    model = YOLO("yolo11x.pt")
+    model = YOLO(modelName)
 
     while True:
         # print("waiting for frame!")
@@ -55,3 +57,6 @@ def model_worker(input_queue, output_queue):
         except Exception as e:
             print(f"Error processing frame: {e}")
             sys.stdout.flush()
+    
+    print("model worker exiting")
+    sys.stdout.flush()

@@ -13,7 +13,7 @@ sys.path.append(repoPath + "piVidCap/")
 import torch.multiprocessing as mp
 from modelWorker import model_worker
 from writerWorker import writer_worker
-
+from deviceInfo import subSample
 
 if __name__ == "__main__":
     #the spawend processes will build up unless exited
@@ -39,9 +39,13 @@ if __name__ == "__main__":
     def getFrame():
         # -1 for no rotation +1 per 90 degrees clockwize turn
         if int(sys.argv[1]) == -1:
-            return picam2.capture_array()
+            frame = picam2.capture_array()
         else:
-            return cv2.rotate(picam2.capture_array(), int(sys.argv[1]))
+            frame =  cv2.rotate(picam2.capture_array(), int(sys.argv[1]))
+        
+        if subSample == 1:
+            return frame
+        return frame[::subSample, ::subSample, :]
 
 
 
@@ -156,6 +160,15 @@ if __name__ == "__main__":
             print("only sending most recent frame")
             writer_input_queue.put(([myTimesBuffer[-1]], [myFrameBuffer[-1]]))
         print(f"it took {datetime.now() - st} for putting in the write input queue")
+
+        if keyboard.is_pressed('q'):
+            print("going to start exiting")
+            model_input_queue.put(None)
+            writer_input_queue.put(None)
+            print("sent Nones, now going to wait 15 seconds for the other workers to exit")
+            time.sleep(15)
+            print("exiting now")
+            sys.exit()
 
         myFrameBuffer = []
         myTimesBuffer = []
