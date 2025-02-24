@@ -65,6 +65,20 @@ def writer_worker(input_queue, output_queue):
         if newFrames is None:  # None is the signal to exit
             print("exiting writer worker")
             sys.stdout.flush()
+            if len(timestamps) == 0:
+                break
+            base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
+            
+            # close the output and name video
+            output.release()
+            os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
+            print(f"finished writing the file {base_file_name + '.mp4'}")
+
+            # write the parquet
+            tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
+            tsdf = tsdf.set_index('sampleDT')
+            tsdf.to_parquet(pathToFile + base_file_name + ".parquet.gzip", compression='gzip')
+            del tsdf
             output.release()
             break
         

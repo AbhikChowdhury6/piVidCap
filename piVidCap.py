@@ -113,6 +113,10 @@ if __name__ == "__main__":
         frame = getFrame()
         frameTime = datetime.now().astimezone()
 
+        frameTS = timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S%z")
+        cv2.putText(frame, frameTS, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 
+                1, (0, 255, 0), 2, cv2.LINE_AA)
+
         myFrameBuffer.append(frame)
         myTimesBuffer.append(frameTime)
 
