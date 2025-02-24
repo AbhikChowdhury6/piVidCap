@@ -2,7 +2,7 @@ from picamera2 import Picamera2
 import cv2
 from datetime import datetime
 import time
-import keyboard
+import select
 import pandas as pd
 import signal
 import sys
@@ -162,8 +162,8 @@ if __name__ == "__main__":
             writer_input_queue.put(([myTimesBuffer[-1]], [myFrameBuffer[-1]]))
         print(f"it took {datetime.now() - st} for putting in the write input queue")
 
-        if keyboard.is_pressed('q'):
-            print("going to start exiting")
+        if select.select([sys.stdin], [], [], 0)[0] and sys.stdin.read(1) == 'q':
+            print("got q going to start exiting")
             model_input_queue.put(None)
             writer_input_queue.put(None)
             print("sent Nones, now going to wait 15 seconds for the other workers to exit")
