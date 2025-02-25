@@ -173,7 +173,7 @@ def writer_worker(input_queue, output_queue):
             #start a new video and write the cut off part
             startNewVideo = False
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
-                deviceName + "_" + timestamps[cutoffFrameIndex].strftime('%Y-%m-%d%z') + "/"
+                deviceName + "_" + timestamps[cutoffFrameIndex].astimezone(ZoneInfo("UTC")).strftime('%Y-%m-%d%z') + "/"
             os.makedirs(pathToFile, exist_ok=True)
             if os.path.exists(pathToFile + "new.mp4"):
                 os.remove(pathToFile + "new.mp4")

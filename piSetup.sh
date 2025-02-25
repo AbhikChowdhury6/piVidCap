@@ -76,6 +76,9 @@ crontab -e
 #code to run capture
 # python /home/pi/Documents/piVidCap/piVidCap.py -1
 
+# try adding to rc.local
+# sudo nano /etc/rc.local
+# su - pi -c "tmux new-session -d -s 0 '/home/pi/miniforge3/envs/vision/bin/python3.12 /home/pi/Documents/piVidCap/piVidCap.py -1'"
 
 
 # we don't do this anymore
