@@ -151,7 +151,7 @@ def writer_worker(input_queue, output_queue):
             cutoffFrameIndex = len(newFrames)
             while crossesMidnight and timestamps[0].day < timestamps[cutoffFrameIndex-1].day:
                 cutoffFrameIndex -= 1
-        
+            cutoffFrameIndex -= 1
 
             for frame in newFrames[:cutoffFrameIndex]:
                 output.write(frame)
