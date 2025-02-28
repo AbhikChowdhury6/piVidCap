@@ -132,6 +132,7 @@ def writer_worker(input_queue, output_queue):
             output.release()
             os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
             print(f"finished writing the file {base_file_name + '.mp4'}")
+            sys.stdout.flush()
 
             # write the parquet
             tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
@@ -172,6 +173,8 @@ def writer_worker(input_queue, output_queue):
         timestamps.extend(newTimestmaps)
         numAddedFrames += len(newFrames)
         print(f"have {numAddedFrames} frames in the current video")
+        print(f"it took {datetime.now() - st} to write the frames")
+        sys.stdout.flush()
 
         # if the file got too big write it
         if numAddedFrames + len(newFrames) >= 1800:
@@ -182,6 +185,7 @@ def writer_worker(input_queue, output_queue):
             startNewVideo = True
             os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
             print(f"finished writing the file {base_file_name + '.mp4'}")
+            sys.stdout.flush()
             # write the parquet
             tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
             tsdf = tsdf.set_index('sampleDT')

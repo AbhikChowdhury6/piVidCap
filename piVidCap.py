@@ -100,10 +100,10 @@ if __name__ == "__main__":
         time.sleep(msToDelay/1000)
 
     def health_checks():
-        print(f"is model alive?: {model_process.is_alive()}")
-        print(f"is writer alive?: {writer_process.is_alive()}")
-        print()
+
         if not (model_process.is_alive() and writer_process.is_alive()):
+            print(f"is model alive?: {model_process.is_alive()}")
+            print(f"is writer alive?: {writer_process.is_alive()}")
             print("one of the processes died exiting everything")
             model_input_queue.put(None)
             writer_input_queue.put(None)
@@ -146,6 +146,7 @@ if __name__ == "__main__":
         maxTime = max(b - a for a, b in zip(myTimesBuffer, myTimesBuffer[1:]))
         #print(f"the max frame interval was {maxTime}")
         #print(f"got {len(myTimesBuffer)} frames the past 15 seconds")
+        print()
         print(f"it is {datetime.now()}")
         last_mr = mr
 
