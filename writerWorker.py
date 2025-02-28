@@ -88,6 +88,11 @@ def writer_worker(input_queue, output_queue):
             print("length of new frames and timestamps don't match ... skipping")
             continue
 
+        if len(timestamps) == 0:
+            firstTimestamp = newTimestmaps[0]
+        else:
+            firstTimestamp = timestamps[0]
+
         # initialize cap properties
         if first:
             first = False
@@ -98,7 +103,7 @@ def writer_worker(input_queue, output_queue):
         if startNewVideo:
             startNewVideo = False
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
-                deviceName + "_" + newTimestmaps[0].strftime('%Y-%m-%d%z') + "/"
+                deviceName + "_" +firstTimestamp.strftime('%Y-%m-%d%z') + "/"
             os.makedirs(pathToFile, exist_ok=True)
             if os.path.exists(pathToFile + "new.mp4"):
                 os.remove(pathToFile + "new.mp4")
@@ -108,7 +113,7 @@ def writer_worker(input_queue, output_queue):
                         (frameWidth, frameHeight))
 
         # check if the current file crosses midnight
-        if timestamps[0].day < timestamps[-1].day:
+        if firstTimestamp.day < newTimestmaps[-1].day:
             crossesMidnight = True
             print(f"crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             sys.stdout.flush()
@@ -139,6 +144,7 @@ def writer_worker(input_queue, output_queue):
             tsdf = tsdf.set_index('sampleDT')
             tsdf.to_parquet(pathToFile + base_file_name + ".parquet.gzip", compression='gzip')
             del tsdf
+            timestamps = []
 
             numAddedFrames = 0
 
@@ -166,6 +172,7 @@ def writer_worker(input_queue, output_queue):
             tsdf = tsdf.set_index('sampleDT')
             tsdf.to_parquet(pathToFile + base_file_name + ".parquet.gzip", compression='gzip')
             del tsdf
+            timestamps = []
 
             #start a new video and write the cut off part
             startNewVideo = False
