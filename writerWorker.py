@@ -77,14 +77,15 @@ def writer_worker(input_queue, output_queue):
             break
 
         newTimestmaps, newFrames =  fromQueue
-        timestamps.extend([x.astimezone(ZoneInfo("UTC")) for x in newTimestmaps])
+        newTimestmaps = [x.astimezone(ZoneInfo("UTC")) for x in newTimestmaps]
         # print(newTimestmaps)
-        print(f"recived {len(newFrames)} new frames!")
-        print(f"recived {len(newTimestmaps)} new timestamps!")
+        #print(f"recived {len(newFrames)} new frames!")
+        #print(f"recived {len(newTimestmaps)} new timestamps!")
         sys.stdout.flush()
         
         # if somethig went wrong don't save unaligned data
         if len(newFrames) != len(newTimestmaps):
+            print("length of new frames and timestamps don't match ... skipping")
             continue
 
         # initialize cap properties
@@ -109,27 +110,23 @@ def writer_worker(input_queue, output_queue):
         # check if the current file crosses midnight
         if timestamps[0].day < timestamps[-1].day:
             crossesMidnight = True
-            print(f"crossed midnight!")
+            print(f"crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             sys.stdout.flush()
         else:
             crossesMidnight = False
 
 
         # if you're just adding to the existing file
-        if not(crossesMidnight or numAddedFrames + len(newFrames) >= 1800):
+        if not crossesMidnight:
+            st = datetime.now()
             for frame in newFrames:
                 output.write(frame)
             timestamps.extend(newTimestmaps)
             numAddedFrames += len(newFrames)
             print(f"have {numAddedFrames} frames in the current video")
 
-        # if the file just got too big
-        elif not crossesMidnight and numAddedFrames + len(newFrames) >= 1800:
-            if numAddedFrames + len(newFrames) >= 1800:
-                for frame in newFrames:
-                    output.write(frame)
-            timestamps.extend(newTimestmaps)
-            
+        # if the file got too big write it
+        if not crossesMidnight and numAddedFrames + len(newFrames) >= 1800:
             base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
             
             # close the output and name video
@@ -173,7 +170,7 @@ def writer_worker(input_queue, output_queue):
             #start a new video and write the cut off part
             startNewVideo = False
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
-                deviceName + "_" + timestamps[cutoffFrameIndex].astimezone(ZoneInfo("UTC")).strftime('%Y-%m-%d%z') + "/"
+                deviceName + "_" + timestamps[cutoffFrameIndex].strftime('%Y-%m-%d%z') + "/"
             os.makedirs(pathToFile, exist_ok=True)
             if os.path.exists(pathToFile + "new.mp4"):
                 os.remove(pathToFile + "new.mp4")

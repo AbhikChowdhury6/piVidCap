@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 import sys
 import os
+from datetime import datetime
 # import cv2
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
@@ -13,43 +14,32 @@ def model_worker(input_queue, output_queue):
     model = YOLO(modelName)
 
     while True:
-        # print("waiting for frame!")
-        # sys.stdout.flush()
         frame = input_queue.get()  # Get frame from the input queue
         if frame is None:  # None is the signal to exit
             print("exiting model worker")
             sys.stdout.flush()
             break
-        
-        # print("got frame!")
-        # sys.stdout.flush()
-        try:
-            # cv2.imshow("frame",frame)
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
 
-            r = model(frame)
-            # sys.stdout.flush()
-            # print("got results!")
-            # sys.stdout.flush()
-            # sys.stdout.flush()
-            # print(result[0].boxes.data)
-            # sys.stdout.flush()
+        try:
+            st = datetime.now()
+            r = model(frame, verbose=False)
+            print(f"it took {datetime.now() - st} for the model to run")
+
             indexesOfPeople = [i for i, x in enumerate(r[0].boxes.cls) if x == 0]
             ret = False
             if len(indexesOfPeople) > 0:
-                print(f"saw {len(indexesOfPeople)} people")
+                #print(f"saw {len(indexesOfPeople)} people")
                 sys.stdout.flush()
                 maxPersonConf = max([r[0].boxes.conf[i] for i in indexesOfPeople])
-                print(f"the most confident recognition was {maxPersonConf}")
+                #print(f"the most confident recognition was {maxPersonConf}")
                 sys.stdout.flush()
                 if maxPersonConf > .25:
                     ret = True
             else:
-                print("didn't see anyone")
+                #print("didn't see anyone")
                 sys.stdout.flush()
             
-            print(f"sending {ret}")
+            #print(f"sending {ret}")
             sys.stdout.flush()
             output_queue.put(ret)
             del r
