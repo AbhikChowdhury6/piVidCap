@@ -98,7 +98,7 @@ def writer_worker(input_queue, output_queue):
         if startNewVideo:
             startNewVideo = False
             pathToFile = "/home/" + user + "/Documents/collectedData/" + \
-                deviceName + "_" + timestamps[0].strftime('%Y-%m-%d%z') + "/"
+                deviceName + "_" + newTimestmaps[0].strftime('%Y-%m-%d%z') + "/"
             os.makedirs(pathToFile, exist_ok=True)
             if os.path.exists(pathToFile + "new.mp4"):
                 os.remove(pathToFile + "new.mp4")
