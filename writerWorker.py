@@ -114,45 +114,11 @@ def writer_worker(input_queue, output_queue):
 
         # check if the current file crosses midnight
         if firstTimestamp.day < newTimestmaps[-1].day:
-            crossesMidnight = True
             print(f"crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             sys.stdout.flush()
-        else:
-            crossesMidnight = False
-
-
-        # if you're just adding to the existing file
-        if not crossesMidnight:
-            st = datetime.now()
-            for frame in newFrames:
-                output.write(frame)
-            timestamps.extend(newTimestmaps)
-            numAddedFrames += len(newFrames)
-            print(f"have {numAddedFrames} frames in the current video")
-
-        # if the file got too big write it
-        if not crossesMidnight and numAddedFrames + len(newFrames) >= 1800:
-            base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
             
-            # close the output and name video
-            output.release()
-            startNewVideo = True
-            os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
-            print(f"finished writing the file {base_file_name + '.mp4'}")
-            # write the parquet
-            tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
-            tsdf = tsdf.set_index('sampleDT')
-            tsdf.to_parquet(pathToFile + base_file_name + ".parquet.gzip", compression='gzip')
-            del tsdf
-            timestamps = []
-
-            numAddedFrames = 0
-
-            
-        # if the file crosses midnight
-        else:
             cutoffFrameIndex = len(newFrames)
-            while crossesMidnight and timestamps[0].day < timestamps[cutoffFrameIndex-1].day:
+            while crossesMidnight and firstTimestamp.day < newTimestmaps[cutoffFrameIndex-1].day:
                 cutoffFrameIndex -= 1
             cutoffFrameIndex -= 1
 
@@ -191,9 +157,40 @@ def writer_worker(input_queue, output_queue):
                 output.write(frame)
             timestamps = newTimestmaps[cutoffFrameIndex:]
             numAddedFrames = len(timestamps)
-        
-        del newFrames
-        del newTimestmaps
+            
+            del newFrames
+            del newTimestmaps
+            continue
+
+
+
+
+        # if you're just adding to the existing file
+        st = datetime.now()
+        for frame in newFrames:
+            output.write(frame)
+        timestamps.extend(newTimestmaps)
+        numAddedFrames += len(newFrames)
+        print(f"have {numAddedFrames} frames in the current video")
+
+        # if the file got too big write it
+        if numAddedFrames + len(newFrames) >= 1800:
+            base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
+            
+            # close the output and name video
+            output.release()
+            startNewVideo = True
+            os.rename(pathToFile + "new.mp4", pathToFile + base_file_name + ".mp4")
+            print(f"finished writing the file {base_file_name + '.mp4'}")
+            # write the parquet
+            tsdf = pd.DataFrame(data=timestamps, columns=['sampleDT'])
+            tsdf = tsdf.set_index('sampleDT')
+            tsdf.to_parquet(pathToFile + base_file_name + ".parquet.gzip", compression='gzip')
+            del tsdf
+            timestamps = []
+            numAddedFrames = 0
+
+
     
     print("write worker exiting")
     sys.stdout.flush()
