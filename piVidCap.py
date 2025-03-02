@@ -100,7 +100,6 @@ if __name__ == "__main__":
         time.sleep(msToDelay/1000)
 
     def health_checks():
-
         if not (model_process.is_alive() and writer_process.is_alive()):
             print(f"is model alive?: {model_process.is_alive()}")
             print(f"is writer alive?: {writer_process.is_alive()}")
@@ -110,10 +109,18 @@ if __name__ == "__main__":
             return False
         return True
 
+    def printTimeStats(myTimesBuffer):
+        maxTime = max(b - a for a, b in zip(myTimesBuffer, myTimesBuffer[1:]))
+        #print(f"the max frame interval was {maxTime}")
+        #print(f"got {len(myTimesBuffer)} frames the past 15 seconds")
+
     
 
     myFrameBuffer = []
     myTimesBuffer = []
+    minus30Frames = []
+    minus30Times = []
+    most_recent_write_time = pd.Timestamp.min.tz_localize("UTC")
     mr = False
     while True:
         frame = getFrame()
@@ -143,9 +150,6 @@ if __name__ == "__main__":
         model_input_queue.put(myFrameBuffer[-1])
         #print(f"it took {datetime.now() - st} for putting in the model input queue")
 
-        maxTime = max(b - a for a, b in zip(myTimesBuffer, myTimesBuffer[1:]))
-        #print(f"the max frame interval was {maxTime}")
-        #print(f"got {len(myTimesBuffer)} frames the past 15 seconds")
         print()
         print(f"it is {datetime.now()}")
         last_mr = mr
@@ -156,12 +160,20 @@ if __name__ == "__main__":
         
         st = datetime.now()
         if mr: print("saw someone!!!")
-        if mr or last_mr:
-            #print("sending whole buffer")
+        if mr and not last_mr:
+            print("sending last 30 secs")
+            writer_input_queue.put((minus30Times.extend(myTimesBuffer),
+                                    minus30Frames.extend(myFrameBuffer)))
+            most_recent_write_time = myTimesBuffer[-1]
+        elif mr or last_mr:
+            print("sending last 15 secs")
             writer_input_queue.put((myTimesBuffer, myFrameBuffer))
+            most_recent_write_time = myTimesBuffer[-1]
         else:
-            #print("only sending most recent frame")
-            writer_input_queue.put(([myTimesBuffer[-1]], [myFrameBuffer[-1]]))
+            print("trying to only send 30s old frame")
+            if minus30Times[0] > most_recent_write_time:
+                writer_input_queue.put(([minus30Frames[0]], [minus30Times[0]]))
+                most_recent_write_time = minus30Times[0]
         #print(f"it took {datetime.now() - st} for putting in the write input queue")
 
         if select.select([sys.stdin], [], [], 0)[0]:
@@ -174,6 +186,8 @@ if __name__ == "__main__":
                 print("exiting now")
                 sys.exit()
 
+        minus30Frames = myFrameBuffer
+        minus30Times = myTimesBuffer
         myFrameBuffer = []
         myTimesBuffer = []
 

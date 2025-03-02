@@ -77,6 +77,10 @@ def writer_worker(input_queue, output_queue):
             break
 
         newTimestmaps, newFrames =  fromQueue
+        if len(newTimestmaps) == 0:
+            print("empty list")
+            continue
+
         newTimestmaps = [x.astimezone(ZoneInfo("UTC")) for x in newTimestmaps]
         # print(newTimestmaps)
         #print(f"recived {len(newFrames)} new frames!")

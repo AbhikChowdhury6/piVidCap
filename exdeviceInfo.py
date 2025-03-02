@@ -15,5 +15,7 @@ deviceInfo = OrderedDict(zip(keys, values))
 subSample = 1
 
 # the biggest one: yolo11x.pt
+# yolo11l.pt should halve the inference time
+# yolo11s.pt is another big jump
 # the smallest one: yolo11n.pt
 modelName = "yolo11x.pt"
