@@ -111,8 +111,8 @@ if __name__ == "__main__":
 
     def printTimeStats(myTimesBuffer):
         maxTime = max(b - a for a, b in zip(myTimesBuffer, myTimesBuffer[1:]))
-        #print(f"the max frame interval was {maxTime}")
-        #print(f"got {len(myTimesBuffer)} frames the past 15 seconds")
+        print(f"the max frame interval was {maxTime}")
+        print(f"got {len(myTimesBuffer)} frames the past 15 seconds")
 
     
 
@@ -144,11 +144,13 @@ if __name__ == "__main__":
         st = datetime.now()
         if not health_checks():
             break
-        #print(f"it took {datetime.now() - st} for health_checks")
+        print(f"it took {datetime.now() - st} for health_checks")
+
+        printTimeStats(myTimesBuffer)
 
         st = datetime.now()
         model_input_queue.put(myFrameBuffer[-1])
-        #print(f"it took {datetime.now() - st} for putting in the model input queue")
+        print(f"it took {datetime.now() - st} for putting in the model input queue")
 
         print()
         print(f"it is {datetime.now()}")
@@ -156,7 +158,7 @@ if __name__ == "__main__":
 
         st = datetime.now()
         mr = modelResult()
-        #print(f"it took {datetime.now() - st} to get the model result")
+        print(f"it took {datetime.now() - st} to get the model result")
         
         st = datetime.now()
         if mr: print("saw someone!!!")
@@ -173,9 +175,10 @@ if __name__ == "__main__":
             print("trying to only send 30s old frame")
             if len(minus30Frames) == 0: continue
             if minus30Times[0] > most_recent_write_time:
+                print(minus30Times[0])
                 writer_input_queue.put(([minus30Frames[0]], [minus30Times[0]]))
                 most_recent_write_time = minus30Times[0]
-        #print(f"it took {datetime.now() - st} for putting in the write input queue")
+        print(f"it took {datetime.now() - st} for putting in the write input queue")
 
         if select.select([sys.stdin], [], [], 0)[0]:
             if sys.stdin.read(1) == 'q':
