@@ -164,8 +164,8 @@ if __name__ == "__main__":
         if mr: print("saw someone!!!")
         if mr and not last_mr:
             print("sending last 30 secs")
-            writer_input_queue.put((minus30Times.extend(myTimesBuffer),
-                                    minus30Frames.extend(myFrameBuffer)))
+            writer_input_queue.put((minus30Times + myTimesBuffer,
+                                    minus30Frames + myFrameBuffer))
             most_recent_write_time = myTimesBuffer[-1]
         elif mr or last_mr:
             print("sending last 15 secs")
