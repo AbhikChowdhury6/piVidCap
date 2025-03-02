@@ -1,7 +1,7 @@
 from picamera2 import Picamera2
 import cv2
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import select
 import pandas as pd
@@ -171,6 +171,7 @@ if __name__ == "__main__":
             most_recent_write_time = myTimesBuffer[-1]
         else:
             print("trying to only send 30s old frame")
+            if len(minus30Frames) == 0: continue
             if minus30Times[0] > most_recent_write_time:
                 writer_input_queue.put(([minus30Frames[0]], [minus30Times[0]]))
                 most_recent_write_time = minus30Times[0]
