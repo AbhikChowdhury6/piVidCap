@@ -15,8 +15,8 @@ def model_worker(child_conn):
     model = YOLO(modelName)
 
     while True:
-        if not child_conn.poll():
-            break
+        child_conn.poll(None)
+
         frame = pickle.loads(child_conn.recv()) 
         if frame is None:  # None is the signal to exit
             print("exiting model worker")

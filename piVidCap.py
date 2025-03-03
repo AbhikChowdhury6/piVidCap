@@ -105,8 +105,8 @@ if __name__ == "__main__":
             print(f"is model alive?: {model_process.is_alive()}")
             print(f"is writer alive?: {writer_process.is_alive()}")
             print("one of the processes died exiting everything")
-            model_parent_conn.send(None)
-            writer_parent_conn.send(None)
+            model_parent_conn.send(pickle.dumps(None))
+            writer_parent_conn.send(pickle.dumps(None))
             return False
         return True
 
@@ -184,8 +184,8 @@ if __name__ == "__main__":
         if select.select([sys.stdin], [], [], 0)[0]:
             if sys.stdin.read(1) == 'q':
                 print("got q going to start exiting")
-                model_parent_conn.send(None)
-                writer_parent_conn.send(None)
+                model_parent_conn.send(pickle.dumps(None))
+                writer_parent_conn.send(pickle.dumps(None))
                 print("sent Nones, now going to wait 20 seconds for the other workers to exit")
                 time.sleep(20)
                 print("exiting now")

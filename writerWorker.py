@@ -56,8 +56,8 @@ def writer_worker(child_conn):
     startNewVideo = True
     numAddedFrames = 0
     while True:
-        if not child_conn.poll():
-            break
+        child_conn.poll(None)
+        
         from_pipe = pickle.loads(child_conn.recv())  # Get frame from the input
         if from_pipe is None:  # None is the signal to exit
             print("exiting writer worker")
