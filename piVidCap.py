@@ -140,7 +140,7 @@ if __name__ == "__main__":
         #print(f"it took {datetime.now() - st} for health_checks")
 
         st = datetime.now()
-        model_input_queue.put(myFrameBuffer[-1])
+        model_input_queue.put(myFrameBuffer[0])
         #print(f"it took {datetime.now() - st} for putting in the model input queue")
 
         maxTime = max(b - a for a, b in zip(myTimesBuffer, myTimesBuffer[1:]))
