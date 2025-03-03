@@ -63,37 +63,37 @@ if __name__ == "__main__":
     mp.set_start_method('spawn', force=True)
     mp.freeze_support()
 
-    model_input_queue = mp.Queue()
-    model_output_queue = mp.Queue()
+    model_parent_conn, model_child_conn = mp.Pipe()
 
     # Start the worker process
-    model_process = mp.Process(target=model_worker, args=(model_input_queue, model_output_queue))
+    model_process = mp.Process(target=model_worker, args=(child_conn, ))
     model_process.start()
 
     print(f"is the model process alive?: {model_process.is_alive()}")
     modelStartTime = datetime.now()
-    model_input_queue.put(frame)
+    model_parent_conn.send(pickle.dumps(frame))
     print("going to wait for model")
-    start_time = time.time()
-    while model_output_queue.empty(): 
-        if time.time() - start_time > 20:
-            print("took more than 20 seconds to run exiting")
-            sys.exit()
-        time.sleep(1)
+    if not model_parent_conn.poll(20):
+        print("took more than 20 seconds to run, exiting")
+        sys.exit()
     modelEndTime = datetime.now()
     print(f"the model took {modelEndTime - modelStartTime} to setup and run")
 
 
-    writer_input_queue = mp.Queue()
-    writer_output_queue = mp.Queue()
+    writer_parent_conn, writer_child_conn = mp.Pipe()
 
-    writer_process = mp.Process(target=writer_worker, args=(writer_input_queue, writer_output_queue))
+    writer_process = mp.Process(target=writer_worker, args=(writer_parent_conn, ))
     writer_process.start()
 
     # actual capture code
     def modelResult():
-        if model_output_queue.empty(): print("waiting for processing")
-        return model_output_queue.get()
+        if model_parent_conn.poll(0.01): 
+            return pickle.loads(model_parent_conn.recv())
+
+        print("waiting for processing")
+        if child_conn.poll():
+            return pickle.loads(model_parent_conn.recv())
+
 
     def delayTill100ms(): # a bit offset to compensate for read lag
         msToDelay = 100 - ((datetime.now().microsecond / 1000) % 100)
@@ -104,8 +104,8 @@ if __name__ == "__main__":
             print(f"is model alive?: {model_process.is_alive()}")
             print(f"is writer alive?: {writer_process.is_alive()}")
             print("one of the processes died exiting everything")
-            model_input_queue.put(None)
-            writer_input_queue.put(None)
+            model_parent_conn.send(None)
+            writer_parent_conn.send(None)
             return False
         return True
 
@@ -149,7 +149,7 @@ if __name__ == "__main__":
         printTimeStats(myTimesBuffer)
 
         st = datetime.now()
-        model_input_queue.put(myFrameBuffer[-1])
+        model_parent_conn.send(pickle.dumps(myFrameBuffer[0]))
         print(f"it took {datetime.now() - st} for putting in the model input queue")
 
         print()
