@@ -66,7 +66,7 @@ if __name__ == "__main__":
     model_parent_conn, model_child_conn = mp.Pipe()
 
     # Start the worker process
-    model_process = mp.Process(target=model_worker, args=(child_conn, ))
+    model_process = mp.Process(target=model_worker, args=(model_child_conn, ))
     model_process.start()
 
     print(f"is the model process alive?: {model_process.is_alive()}")
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     writer_parent_conn, writer_child_conn = mp.Pipe()
 
-    writer_process = mp.Process(target=writer_worker, args=(writer_parent_conn, ))
+    writer_process = mp.Process(target=writer_worker, args=(writer_child_conn, ))
     writer_process.start()
 
     # actual capture code
