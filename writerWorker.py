@@ -4,6 +4,7 @@ import pandas as pd
 import os
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import pickle
 
 
 repoPath = "/home/pi/Documents/"

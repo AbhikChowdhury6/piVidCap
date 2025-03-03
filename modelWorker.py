@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 import sys
 import os
+import pickle
 from datetime import datetime
 # import cv2
 repoPath = "/home/pi/Documents/"

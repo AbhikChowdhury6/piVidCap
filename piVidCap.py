@@ -8,6 +8,7 @@ import pandas as pd
 import signal
 import sys
 import os
+import pickle
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
