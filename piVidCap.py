@@ -164,26 +164,27 @@ if __name__ == "__main__":
         if mr: print("saw someone!!!")
         if mr and not last_mr:
             print("sending last 30 secs")
-            writer_input_queue.put((minus30Times + myTimesBuffer,
-                                    minus30Frames + myFrameBuffer))
+            to_write = (minus30Times + myTimesBuffer,
+                        minus30Frames + myFrameBuffer)
             most_recent_write_time = myTimesBuffer[-1]
         elif mr or last_mr:
             print("sending last 15 secs")
-            writer_input_queue.put((myTimesBuffer, myFrameBuffer))
+            to_write = (myTimesBuffer, myFrameBuffer)
             most_recent_write_time = myTimesBuffer[-1]
         else:
             print("trying to only send 30s old frame")
             if len(minus30Frames) > 0 and minus30Times[0] > most_recent_write_time:
                 print(minus30Times[0])
-                writer_input_queue.put(([minus30Times[0]], [minus30Frames[0]]))
+                to_write = ([minus30Times[0]], [minus30Frames[0]])
                 most_recent_write_time = minus30Times[0]
+        writer_parent_conn.send(pickle.dumps(to_write))
         print(f"it took {datetime.now() - st} for putting in the write input queue")
 
         if select.select([sys.stdin], [], [], 0)[0]:
             if sys.stdin.read(1) == 'q':
                 print("got q going to start exiting")
-                model_input_queue.put(None)
-                writer_input_queue.put(None)
+                model_parent_conn.send(None)
+                writer_parent_conn.send(None)
                 print("sent Nones, now going to wait 20 seconds for the other workers to exit")
                 time.sleep(20)
                 print("exiting now")

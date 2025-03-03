@@ -44,7 +44,7 @@ sys.stdout.flush()
 
 
 # Define the codec and create a VideoWriter object
-def writer_worker(input_queue, output_queue):
+def writer_worker(child_conn):
     print("in writer worker")
     sys.stdout.flush()
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
@@ -55,8 +55,10 @@ def writer_worker(input_queue, output_queue):
     startNewVideo = True
     numAddedFrames = 0
     while True:
-        fromQueue = input_queue.get()  # Get frame from the input
-        if fromQueue is None:  # None is the signal to exit
+        if not child_conn.poll():
+            break
+        from_pipe = pickle.loads(child_conn.recv())  # Get frame from the input
+        if from_pipe is None:  # None is the signal to exit
             print("exiting writer worker")
             sys.stdout.flush()
             if len(timestamps) == 0:
@@ -76,7 +78,7 @@ def writer_worker(input_queue, output_queue):
             output.release()
             break
 
-        newTimestmaps, newFrames =  fromQueue
+        newTimestmaps, newFrames =  from_pipe
         if len(newTimestmaps) == 0:
             print("empty list")
             continue

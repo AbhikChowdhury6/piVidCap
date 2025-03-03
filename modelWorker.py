@@ -8,13 +8,15 @@ sys.path.append(repoPath + "piVidCap/")
 from deviceInfo import modelName
 
 
-def model_worker(input_queue, output_queue):
+def model_worker(child_conn):
     print("in model worker")
     sys.stdout.flush()
     model = YOLO(modelName)
 
     while True:
-        frame = input_queue.get()  # Get frame from the input queue
+        if not child_conn.poll():
+            break
+        frame = pickle.loads(child_conn.recv()) 
         if frame is None:  # None is the signal to exit
             print("exiting model worker")
             sys.stdout.flush()
@@ -41,7 +43,7 @@ def model_worker(input_queue, output_queue):
             
             #print(f"sending {ret}")
             sys.stdout.flush()
-            output_queue.put(ret)
+            child_conn.send(pickle.dumps(ret))
             del r
             del frame
         except Exception as e:
