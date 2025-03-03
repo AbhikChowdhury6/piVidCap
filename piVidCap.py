@@ -168,17 +168,19 @@ if __name__ == "__main__":
             to_write = (minus30Times + myTimesBuffer,
                         minus30Frames + myFrameBuffer)
             most_recent_write_time = myTimesBuffer[-1]
+            writer_parent_conn.send(pickle.dumps(to_write))
         elif mr or last_mr:
             print("sending last 15 secs")
             to_write = (myTimesBuffer, myFrameBuffer)
             most_recent_write_time = myTimesBuffer[-1]
+            writer_parent_conn.send(pickle.dumps(to_write))
         else:
             print("trying to only send 30s old frame")
             if len(minus30Frames) > 0 and minus30Times[0] > most_recent_write_time:
                 print(minus30Times[0])
                 to_write = ([minus30Times[0]], [minus30Frames[0]])
                 most_recent_write_time = minus30Times[0]
-        writer_parent_conn.send(pickle.dumps(to_write))
+                writer_parent_conn.send(pickle.dumps(to_write))
         print(f"it took {datetime.now() - st} for putting in the write input queue")
 
         if select.select([sys.stdin], [], [], 0)[0]:
