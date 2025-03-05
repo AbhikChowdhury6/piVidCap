@@ -1,44 +1,173 @@
 import cv2
 import torch
 from datetime import datetime, timedelta
-import bisect
+import pandas as pd
+import os
+import sys
+
+repoPath = "/home/pi/Documents/"
+sys.path.append(repoPath + "piVidCap/")
+
+
+if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
+    from deviceInfo import deviceInfo
+else:
+    from collections import OrderedDict
+    keys = ["responsiblePartyName", "instanceName", "developingPartyName", "deviceName", "dataType", "dataSource"]
+    values = ["abhik", "notSet", "abhik", "unknown", "mp4", "piVidCap"]
+    deviceInfo = OrderedDict(zip(keys, values))
+
+deviceName = "_".join(deviceInfo.values())
+if deviceInfo["instanceName"] == "notSet":
+    print("no instance name set")
+    sys.stdout.flush()
+print(f"device name is {deviceName}")
+sys.stdout.flush()
+
+
+user = os.getenv("USER", "pi")
+baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
+                deviceName + "_"
+
 
 #frame_index is the latest frame
-def writer(frame_buffer, time_buffer, person_buffer, frame_index):
-    """ Reads the latest frame from the shared buffer and displays it. """
+def writer(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
+    print("in writer worker")
+    sys.stdout.flush()
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')
+    frameWidthHeight = (0,0)
+
+    numAddedFrames = 0
+    first = True
+    def dt_to_fnString(dt):
+        return dt.astimezone(ZoneInfo("UTC")).strftime('%Y-%m-%dT%H%M%S,%f%z')
+    
+    def full_base_file_name(tsList):
+        s = baseFilePath + tsList[0].strftime('%Y-%m-%d%z') + "/"
+        s += dt_to_fnString(tsList[0]) + "_" + dt_to_fnString(titsListmestamps[-1])
+        return s
+
+    def writeTSDf(location, tsList):
+        tsdf = pd.DataFrame(data=tsList, columns=['sampleDT'])
+        tsdf = tsdf.set_index('sampleDT')
+        tsdf.to_parquet(location, compression='gzip')
+    
+    def exitVideo(output, tsList, tempFilePath):
+        output.release()
+        
+        fbfn = full_base_file_name(tsList) 
+        os.rename(tempFilePath, fbfn + ".mp4")
+        writeTSDf(fbfn + ".parquet.gzip")
+        print(f"finished writing the file {tempFilePath}")
+        return []
+
+    def startNewVideo(tsList, tempFilePath):
+        os.makedirs(tempFilePath[:-7], exist_ok=True)
+        if os.path.exists(tempFilePath):
+                os.remove(tempFilePath)
+        
+        output = cv2.VideoWriter(tempFilePath, 
+                        fourcc, 
+                        30.0, 
+                        frameWidthHeight)
+        
+        return output
+        
+
+    model_result = False
+    timestamps = []
     while True:
         # wait till a round 15 seconds and then
         st = datetime.now()
         secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000)
         print(f"waiting {secondsToWait} till {timedelta(seconds=urrTime + secondsToWait)}")
         time.sleep(secondsToWait)
-        # check if we should save the last 299, 149 or 1 frames
-        pbi = frame_index // 150
-        prevPbi = (pbi + 2) % 3
-
-        # find the indexes in the circular buffer for the -15 block and the -15 to -30
-        tsMinus15 = datetime.now().replace(microsecond=0) - timedelta(seconds=15)
-        tsMinus30 = datetime.now().replace(microsecond=0) - timedelta(seconds=30)
-        frame_index15 = -1
-        search_index = frame_index
-        while time_buffer[search_index] > tsMinus30:
-            if search_index == frame_index:
-                frame_index30 = (search_index + 449) % 450
-                break
-            
-            if frame_index15 == -1 and time_buffer[search_index] < tsMinus15:
-                frame_index15 = (search_index + 449) % 450
-
-            frame_index30 = search_index
-            search_index = (search_index + 449) % 450
         
+        
+        # check if we want to save the last 30, 15 seconds or 1 frame
+        last_mr = model_result
+        model_result = personSignal[0]
+        if model_result and not last_mr:
+            print("writing last 30 secs")
+            newFrames, newTimestamps = ctsb.get_last_30_seconds()
 
-        # save it
-        latest_idx = (frame_index[0].item() - 1) % frame_buffer.shape[0]  # Get latest frame index
-        frame = frame_buffer[latest_idx].numpy()  # Convert back to NumPy
+        elif model_result or last_mr:
+            print("writing last 15 secs")
+            newFrames, newTimestamps = ctsb.get_last_15_seconds()
 
-        cv2.imshow("Torch Shared Memory Frame", frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        else:
+            print("writing only 30s old frame")
+            newFrames, newTimestamps = ctsb.get_last_30_seconds()
+            if len(newTimestamps) > 0:
+                newFrames = [newFrames[0]]
+                newTimestamps = [newTimestamps[0]]
+        
+        if len(newTimestamps) == 0:
+            continue
+
+
+        # initialize stream parameters if we haven't
+        if first:
+            first = False    
+            frameWidthHeight = (newFrames[0].shape[1], newFrames[0].shape[0])
+        
+        # check if we have to make a new file
+        if startNewVideo:
+            startNewVideo = False
+            tempFilePath = baseFilePath + newTimestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
+            output = startNewVideo(newTimestamps, tempFilePath)
+
+        # if crosses midnight close the file and start a new one
+        if len(timestamps) == 0:
+            firstTimestamp = newTimestmaps[0]
+        else:
+            firstTimestamp = timestamps[0]
+        
+        if firstTimestamp.day < newTimestmaps[-1].day:
+            print(f"crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            sys.stdout.flush()
+
+            cutoffFrameIndex = len(newFrames)
+            while crossesMidnight and firstTimestamp.day < newTimestmaps[cutoffFrameIndex-1].day:
+                cutoffFrameIndex -= 1
+            cutoffFrameIndex -= 1
+
+            # write and exit the previous days video
+            for frame in newFrames[:cutoffFrameIndex]:
+                output.write(frame)
+            timestamps.extend(newTimestmaps[:cutoffFrameIndex])
+            timestamps = exitVideo(output, timestamps, tempFilePath)
+
+            # start and write the new day
+            timestamps.extend(newTimestmaps[cutoffFrameIndex:])
+            tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
+            output = startNewVideo(timestamps, tempFilePath)
+            for frame in newFrames[cutoffFrameIndex:]:
+                output.write(frame)
+        
+        else:
+            # else just add to the file
+            st = datetime.now()
+            for frame in newFrames:
+                output.write(frame)
+            timestamps.extend(newTimestmaps)
+            numAddedFrames += len(newFrames)
+            print(f"have {numAddedFrames} frames in the current video")
+            print(f"it took {datetime.now() - st} to write the frames")
+            sys.stdout.flush()
+
+            # check if the file is too big and close it if it is
+            if len(timestamps) >= 1800:
+                timestamps = exitVideo(output, timestamps, tempFilePath)
+                startNewVideo = True
+        
+        if exitSignal[0] == 1:
+            print("writer worker got exit signal")
+            sys.stdout.flush()
+            timestamps = exitVideo(output, timestamps, tempFilePath)
             break
 
-    cv2.destroyAllWindows()
+
+
+    print("writer worker exiting")
+    sys.stdout.flush()

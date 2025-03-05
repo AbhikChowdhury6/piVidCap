@@ -185,7 +185,7 @@ def writer_worker(child_conn):
         sys.stdout.flush()
 
         # if the file got too big write it
-        if numAddedFrames + len(newFrames) >= 1800:
+        if numAddedFrames >= 1800:
             base_file_name = dt_to_fnString(timestamps[0]) + "_" + dt_to_fnString(timestamps[-1])
             
             # close the output and name video

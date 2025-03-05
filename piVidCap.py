@@ -3,13 +3,7 @@ import torch
 import gc
 from datetime import datetime, timedelta
 
-BUFFER_SIZE = 450
-HEIGHT = 1080
-WIDTH = 1920
-CHANNELS = 3
-DTYPE = torch.uint8
-
-def pi_vid_cap(frame_buffer, time_buffer, frame_index):
+def pi_vid_cap(ctsb: CircularTimeSeriesBuffer, exitSignal):
     """ Captures frames and writes to the shared buffer in a circular fashion. """
     st = datetime.now() 
     picam2 = Picamera2()
@@ -31,24 +25,27 @@ def pi_vid_cap(frame_buffer, time_buffer, frame_index):
     st = datetime.now()
     secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000)
     print(f"waiting {secondsToWait} till {timedelta(seconds=urrTime + secondsToWait)}")
+    sys.stdout.flush()
     time.sleep(secondsToWait)
-
-    frame_index[0] = -1
 
     while True:
         idx = frame_index[0].item()
         
         frameTime = datetime.now().astimezone()
-        frame_buffer[frame_index] = picam2.capture_array()
-        cv2.putText(frame_buffer[frame_index], frameTS, (10, 50),
+        ctsb.append(picam2.capture_array(), frameTime.astimezone(ZoneInfo("UTC")))
+        
+        frameTS = datetime.now().strftime("%Y-%m-%d %H:%M:%S%z")
+        cv2.putText(ctsb[ctsb.lastidx()], frameTS, (10, 50),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, 
                 (0, 255, 0), 2, cv2.LINE_AA)
 
-        time_buffer[frame_index] = frameTime.astimezone(ZoneInfo("UTC"))
-        frameTS = datetime.now().strftime("%Y-%m-%d %H:%M:%S%z")
+        if exitSignal[0] == 1:
+            print("piVidCap got exit signal")
+            sys.stdout.flush()
+            break
 
         delayTill100ms()
-        # Update frame index
-        frame_index[0] = (idx + 1) % BUFFER_SIZE
 
     cap.release()
+    print("piVidCap exiting")
+    sys.stdout.flush()

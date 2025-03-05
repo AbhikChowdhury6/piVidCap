@@ -18,6 +18,7 @@ import torch.multiprocessing as mp
 
 from modelWorker import model_worker
 from writerWorker import writer_worker
+from piVidCap import pi_vid_cap
 from deviceInfo import subSample
 
 #i'd like this to be a timestamp synced buffer
@@ -41,8 +42,12 @@ class CircularTimeSeriesBuffer:
     def __setitem__(self, index, value):
         """Set value and timestamp at a circular index."""
         index = index % self.size  # Ensure circular indexing
-        self.data_buffer[index] = value[0]  # Assume value is a tuple (data, timestamp)
-        self.time_buffer[index] = int(value[1].replace(tzinfo=timezone.utc).timestamp() * 1e9 + value[1].microsecond * 1e3)
+        if index == self.nextidx:
+            self.append(value[0], value[1])
+        else:
+            self.data_buffer[index] = value[0]  # Assume value is a tuple (data, timestamp)
+            self.time_buffer[index] = int(value[1].replace(tzinfo=timezone.utc).timestamp() * 1e9 + value[1].microsecond * 1e3)
+    
 
     def __getitem__(self, index):
         """Retrieve (value, timestamp) from a circular index."""
@@ -57,6 +62,9 @@ class CircularTimeSeriesBuffer:
         self.nextidx = (self.nextidx + 1) % self.size  # Move to next index
         if self.nextidx == 0:
             self.wrapped = True  # Mark buffer as wrapped when cycling back
+
+    def lastidx(self):
+        return (self.nextidx + self.size -1) % self.size()
 
     def get_sorted_view(self):
         """Returns a sorted logical view of timestamps and values without copying memory."""
@@ -85,59 +93,17 @@ class CircularTimeSeriesBuffer:
         return self.get_last_n_seconds(30)
 
 
-# Example usage
-buffer = CircularTimeSeriesBuffer((450, 3), torch.float32)  # Buffer storing 3D data
-now = datetime.now(timezone.utc).replace(microsecond=123456)  # Ensure microsecond precision
-
-# Simulate inserting data
-for i in range(300):
-    buffer.append(torch.tensor([i, i + 1, i + 2]), now - timedelta(seconds=i))
-
-# Retrieve last 15s and 30s of data
-values_15s, timestamps_15s = buffer.get_last_15_seconds()
-values_30s, timestamps_30s = buffer.get_last_30_seconds()
-
-# Convert timestamps back to datetime with microsecond precision
-timestamps_15s = [datetime.fromtimestamp(ts.item() / 1e9, tz=timezone.utc) for ts in timestamps_15s]
-timestamps_30s = [datetime.fromtimestamp(ts.item() / 1e9, tz=timezone.utc) for ts in timestamps_30s]
-
-print("Last 15 seconds:", len(values_15s), timestamps_15s[:3])
-print("Last 30 seconds:", len(values_30s), timestamps_30s[:3])
-
-# Example usage
-buffer = CircularTimeSeriesBuffer((450, 3), torch.float32)  # Buffer storing 3D data
-now = datetime.now().replace(microsecond=0)
-
-# Simulate inserting data
-for i in range(300):
-    buffer.append(torch.tensor([i, i + 1, i + 2]), now - timedelta(seconds=i))
-
-# Retrieve last 15s and 30s of data
-values_15s, timestamps_15s = buffer.get_last_15_seconds()
-values_30s, timestamps_30s = buffer.get_last_30_seconds()
-
-print("Last 15 seconds:", values_15s.shape, timestamps_15s.shape)
-print("Last 30 seconds:", values_30s.shape, timestamps_30s.shape)
-
-
 
 # Define buffer properties
 BUFFER_SIZE = 450  # Maximum number of frames stored
 HEIGHT = 1080  # Frame height
 WIDTH = 1920   # Frame width
 CHANNELS = 3   # RGB color channels
-DTYPE = np.uint8
+DTYPE = torch.uint8
 
-# Compute shared memory size
-frame_size = HEIGHT * WIDTH * CHANNELS
-total_size = BUFFER_SIZE * frame_size
-
-frame_buffer = torch.zeros((BUFFER_SIZE, HEIGHT, WIDTH, CHANNELS), dtype=DTYPE).share_memory_()
-frame_index = torch.zeros(1, dtype=torch.int64).share_memory_()  # Single index tracker
+tsVidBuffer = CircularTimeSeriesBuffer((BUFFER_SIZE, HEIGHT, WIDTH, CHANNELS), DTYPE)
 exitSignal = torch.zeros(1, dtype=torch.int64).share_memory_()
-time_buffer = torch.zeros(BUFFER_SIZE, dtype="datetime64[ns]").share_memory_()
 personSignal = torch.zeros(1, dtype=type(True)).share_memory_()
-
 
 
 
@@ -147,23 +113,26 @@ def health_checks():
         print(f"is model alive?: {model_process.is_alive()}")
         print(f"is writer alive?: {writer_process.is_alive()}")
         print("one of the processes died exiting everything")
-        model_parent_conn.send(pickle.dumps(None))
-        writer_parent_conn.send(pickle.dumps(None))
+        closeOut()
         return False
     return True
+
+def closeOut():
+    exitSignal[0] = 1
+    print("sent Nones, now going to wait 20 seconds for the other workers to exit")
+    time.sleep(20)
+    print("exiting now")
+    sys.exit()
 
 
 if __name__ == "__main__":
     while True:
+
+        health_checks()
         
         if select.select([sys.stdin], [], [], 0)[0]:
             if sys.stdin.read(1) == 'q':
                 print("got q going to start exiting")
-                model_parent_conn.send(pickle.dumps(None))
-                writer_parent_conn.send(pickle.dumps(None))
-                print("sent Nones, now going to wait 20 seconds for the other workers to exit")
-                time.sleep(20)
-                print("exiting now")
-                sys.exit()
-        
-        delayTill100ms()
+                closeOut()
+                
+        time.sleep(1)
