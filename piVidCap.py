@@ -37,7 +37,7 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffer, exitSignal):
 
     st = datetime.now()
     secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000)
-    print(f"vidCap waiting {secondsToWait} till {timedelta(seconds=st + secondsToWait)} to start")
+    print(f"vidCap waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)} to start")
     sys.stdout.flush()
     time.sleep(secondsToWait)
 

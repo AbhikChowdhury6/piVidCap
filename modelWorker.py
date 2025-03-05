@@ -24,7 +24,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
         # wait till a 
         st = datetime.now()
         secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000)
-        print(f"model waiting {secondsToWait} till {timedelta(seconds=st + secondsToWait)}")
+        print(f"model waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
 
         if exitSignal[0] == 1:

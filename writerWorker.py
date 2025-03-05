@@ -74,7 +74,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
         # wait till a round 15 seconds and then
         st = datetime.now()
         secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000)
-        print(f" writer waiting {secondsToWait} till {timedelta(seconds=st + secondsToWait)}")
+        print(f" writer waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
         
         
