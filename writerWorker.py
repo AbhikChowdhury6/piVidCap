@@ -7,7 +7,7 @@ import sys
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
-
+from circularTimeSeriesBuffer import CircularTimeSeriesBuffer
 
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import deviceInfo
@@ -24,40 +24,32 @@ if deviceInfo["instanceName"] == "notSet":
 print(f"device name is {deviceName}")
 sys.stdout.flush()
 
-
 user = os.getenv("USER", "pi")
 baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
                 deviceName + "_"
 
 
-#frame_index is the latest frame
 def writer(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
     print("in writer worker")
     sys.stdout.flush()
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
     frameWidthHeight = (0,0)
-
-    numAddedFrames = 0
-    first = True
     def dt_to_fnString(dt):
         return dt.astimezone(ZoneInfo("UTC")).strftime('%Y-%m-%dT%H%M%S,%f%z')
     
-    def full_base_file_name(tsList):
-        s = baseFilePath + tsList[0].strftime('%Y-%m-%d%z') + "/"
-        s += dt_to_fnString(tsList[0]) + "_" + dt_to_fnString(titsListmestamps[-1])
-        return s
-
-    def writeTSDf(location, tsList):
-        tsdf = pd.DataFrame(data=tsList, columns=['sampleDT'])
-        tsdf = tsdf.set_index('sampleDT')
-        tsdf.to_parquet(location, compression='gzip')
-    
     def exitVideo(output, tsList, tempFilePath):
         output.release()
-        
-        fbfn = full_base_file_name(tsList) 
+
+        # rename video
+        fbfn = baseFilePath + tsList[0].strftime('%Y-%m-%d%z') + "/"
+        fbfn += dt_to_fnString(tsList[0]) + "_" + dt_to_fnString(titsListmestamps[-1])
         os.rename(tempFilePath, fbfn + ".mp4")
-        writeTSDf(fbfn + ".parquet.gzip")
+        
+        # write timestamps 
+        tsdf = pd.DataFrame(data=tsList, columns=['sampleDT'])
+        tsdf = tsdf.set_index('sampleDT')
+        tsdf.to_parquet(fbfn + ".parquet.gzip", compression='gzip')
+
         print(f"finished writing the file {tempFilePath}")
         return []
 
@@ -76,11 +68,13 @@ def writer(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
 
     model_result = False
     timestamps = []
+    first = True
+    startNewVideo = True
     while True:
         # wait till a round 15 seconds and then
         st = datetime.now()
         secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000)
-        print(f"waiting {secondsToWait} till {timedelta(seconds=urrTime + secondsToWait)}")
+        print(f" writer waiting {secondsToWait} till {timedelta(seconds=st + secondsToWait)}")
         time.sleep(secondsToWait)
         
         
