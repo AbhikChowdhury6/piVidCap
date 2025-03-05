@@ -1,6 +1,6 @@
 import cv2
 import torch
-import np
+import numpy as np
 import gc
 from datetime import datetime, timedelta
 
