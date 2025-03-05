@@ -41,7 +41,7 @@ writer_process.start()
 
 def closeOut():
     exitSignal[0] = 1
-    print("sent Nones, now going to wait 20 seconds for the other workers to exit")
+    print("set exit signal to 1, now going to wait 20 seconds for the other workers to exit")
     time.sleep(20)
     print("exiting now")
     sys.exit()

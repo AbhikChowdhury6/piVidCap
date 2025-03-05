@@ -1,3 +1,4 @@
+from picamera2 import Picamera2
 import cv2
 import torch
 import numpy as np
@@ -41,7 +42,12 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffer, exitSignal):
     sys.stdout.flush()
     time.sleep(secondsToWait)
 
-    while True:        
+    while True:
+        if exitSignal[0] == 1:
+            print("piVidCap got exit signal")
+            sys.stdout.flush()
+            break
+       
         frameTime = datetime.now().astimezone()
 
         if subSample == 1:
@@ -54,11 +60,6 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffer, exitSignal):
         cv2.putText(ctsb[ctsb.lastidx()], frameTS, (10, 50),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, 
                 (0, 255, 0), 2, cv2.LINE_AA)
-
-        if exitSignal[0] == 1:
-            print("piVidCap got exit signal")
-            sys.stdout.flush()
-            break
 
         delayTill100ms()
 

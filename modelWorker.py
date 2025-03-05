@@ -21,16 +21,15 @@ def model_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
     model = YOLO(modelName)
 
     while True:
-        # wait till a 
-        st = datetime.now()
-        secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000)
-        print(f"model waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
-        time.sleep(secondsToWait)
-
         if exitSignal[0] == 1:
             print("model worker got exit signal")
             sys.stdout.flush()
             break
+
+        st = datetime.now()
+        secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000)
+        print(f"model waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
+        time.sleep(secondsToWait)
 
         frames = ctsb.get_last_15_seconds()
         if len(frames) == 0:

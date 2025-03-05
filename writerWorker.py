@@ -72,6 +72,12 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
     first = True
     startNewVideo = True
     while True:
+        if exitSignal[0] == 1:
+            print("writer worker got exit signal")
+            sys.stdout.flush()
+            timestamps = exitVideo(output, timestamps, tempFilePath)
+            break
+        
         # wait till a round 15 seconds and then
         st = datetime.now()
         secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000)
@@ -156,11 +162,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
                 timestamps = exitVideo(output, timestamps, tempFilePath)
                 startNewVideo = True
         
-        if exitSignal[0] == 1:
-            print("writer worker got exit signal")
-            sys.stdout.flush()
-            timestamps = exitVideo(output, timestamps, tempFilePath)
-            break
+        
 
 
 
