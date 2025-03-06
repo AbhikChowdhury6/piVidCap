@@ -51,17 +51,17 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffer, exitSignal):
             break
        
         frameTime = datetime.now().astimezone()
-
         if subSample == 1:
-            ctsb.append(picam2.capture_array(), frameTime.astimezone(ZoneInfo("UTC")))
+            frame = picam2.capture_array()
         else:
             frame = np.ascontiguousarray(picam2.capture_array()[::subSample, ::subSample, :])
-            ctsb.append(frame, frameTime.astimezone(ZoneInfo("UTC")))
-        
+            
         frameTS = datetime.now().strftime("%Y-%m-%d %H:%M:%S%z")
-        cv2.putText(ctsb[ctsb.lastidx()], frameTS, (10, 50),
+        cv2.putText(frame, frameTS, (10, 50),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, 
                 (0, 255, 0), 2, cv2.LINE_AA)
+
+        ctsb.append(frame, frameTime.astimezone(ZoneInfo("UTC")))
 
         delayTill100ms()
 
