@@ -15,8 +15,9 @@ class CircularTimeSeriesBuffer:
     def __setitem__(self, index, value):
         """Set value and timestamp at a circular index."""
         index = index % self.size  # Ensure circular indexing
-        self.data_buffer[index] = value[0]  # Assume value is a tuple (data, timestamp)
-        self.time_buffer[index] = int(value[1].replace(tzinfo=timezone.utc).timestamp() * 1e9 + value[1].microsecond * 1e3)
+        self.data_buffer[index] = torch.tensor(value[0])  # Assume value is a tuple (data, timestamp)
+        self.time_buffer[index] = torch.tensor(int(value[1].replace(tzinfo=timezone.utc).timestamp() * 1e9 
+                                                + value[1].microsecond * 1e3))
             
     def __getitem__(self, index):
         """Retrieve (value, timestamp) from a circular index."""
