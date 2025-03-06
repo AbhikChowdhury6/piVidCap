@@ -7,6 +7,8 @@ import sys
 import gc
 from datetime import datetime, timedelta
 import time
+from zoneinfo import ZoneInfo
+
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
