@@ -65,6 +65,5 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffer, exitSignal):
 
         delayTill100ms()
 
-    cap.release()
     print("piVidCap exiting")
     sys.stdout.flush()

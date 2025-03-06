@@ -31,7 +31,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
         print(f"model waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
 
-        frames = ctsb.get_last_15_seconds()
+        frames, times = ctsb.get_last_15_seconds()
         if len(frames) == 0:
             continue
 
