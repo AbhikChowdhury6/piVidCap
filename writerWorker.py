@@ -118,7 +118,7 @@ def writer_worker(input_queue, output_queue):
             sys.stdout.flush()
             
             cutoffFrameIndex = len(newFrames)
-            while crossesMidnight and firstTimestamp.day < newTimestmaps[cutoffFrameIndex-1].day:
+            while firstTimestamp.day < newTimestmaps[cutoffFrameIndex-1].day:
                 cutoffFrameIndex -= 1
             cutoffFrameIndex -= 1
 
