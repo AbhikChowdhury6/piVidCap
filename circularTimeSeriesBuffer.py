@@ -34,7 +34,7 @@ class CircularTimeSeriesBuffer:
             self.wrapped = True  # Mark buffer as wrapped when cycling back
 
     def lastidx(self):
-        return (self.nextidx + self.size -1) % self.size()
+        return (self.nextidx + self.size -1) % self.size
 
     def get_sorted_view(self):
         """Returns a sorted logical view of timestamps and values without copying memory."""
