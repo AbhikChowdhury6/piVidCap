@@ -124,27 +124,27 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
 
         # if crosses midnight close the file and start a new one
         if len(timestamps) == 0:
-            firstTimestamp = newTimestmaps[0]
+            firstTimestamp = newTimestamps[0]
         else:
             firstTimestamp = timestamps[0]
         
-        if firstTimestamp.day < newTimestmaps[-1].day:
+        if firstTimestamp.day < newTimestamps[-1].day:
             print(f"crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             sys.stdout.flush()
 
             cutoffFrameIndex = len(newFrames)
-            while firstTimestamp.day < newTimestmaps[cutoffFrameIndex-1].day:
+            while firstTimestamp.day < newTimestamps[cutoffFrameIndex-1].day:
                 cutoffFrameIndex -= 1
             cutoffFrameIndex -= 1
 
             # write and exit the previous days video
             for frame in newFrames[:cutoffFrameIndex]:
                 output.write(frame)
-            timestamps.extend(newTimestmaps[:cutoffFrameIndex])
+            timestamps.extend(newTimestamps[:cutoffFrameIndex])
             timestamps = exitVideo(output, timestamps, tempFilePath)
 
             # start and write the new day
-            timestamps.extend(newTimestmaps[cutoffFrameIndex:])
+            timestamps.extend(newTimestamps[cutoffFrameIndex:])
             tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
             output = startNewVideo(timestamps, tempFilePath)
             for frame in newFrames[cutoffFrameIndex:]:
@@ -155,7 +155,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
             st = datetime.now()
             for frame in newFrames:
                 output.write(frame)
-            timestamps.extend(newTimestmaps)
+            timestamps.extend(newTimestamps)
             numAddedFrames += len(newFrames)
             print(f"have {numAddedFrames} frames in the current video")
             print(f"it took {datetime.now() - st} to write the frames")
