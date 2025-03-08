@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timedelta
 import time
 from ultralytics import YOLO
+import torchvision.transforms as T
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
@@ -36,11 +37,27 @@ def model_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
         if len(frames) == 0:
             continue
 
-        frame = frames[0].permute(2, 0, 1).unsqueeze(0)
+        frame = frames[0].permute(2, 0, 1)
+
+        target_size=(640, 640)
+        c, h, w = frame.shape
+        target_h, target_w = target_size
+
+        scale = min(target_w / w, target_h / h)
+        new_w, new_h = int(w * scale), int(h * scale)
+        
+        transform_resize = T.Resize((new_h, new_w))
+        resized_image = transform_resize(frame)
+        
+        pad_w = (target_w - new_w) // 2
+        pad_h = (target_h - new_h) // 2
+
+        transform_pad = T.Pad((pad_w, pad_h, target_w - new_w - pad_w, target_h - new_h - pad_h), fill=0)
+        padded_image = transform_pad(resized_image)
 
         try:
             st = datetime.now()
-            r = model(frame, verbose=False)
+            r = model(padded_image.unsqueeze(0), verbose=False)
             print(f"it took {datetime.now() - st} for the model to run")
 
             indexesOfPeople = [i for i, x in enumerate(r[0].boxes.cls) if x == 0]

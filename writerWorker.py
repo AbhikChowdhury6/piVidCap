@@ -70,7 +70,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
     model_result = False
     timestamps = []
     first = True
-    startNewVideo = True
+    tryStartNewVideo = True
     while True:
         if exitSignal[0] == 1:
             print("writer worker got exit signal")
@@ -117,8 +117,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
             frameWidthHeight = (newFrames[0].shape[1], newFrames[0].shape[0])
         
         # check if we have to make a new file
-        if startNewVideo:
-            startNewVideo = False
+        if tryStartNewVideo:
+            tryStartNewVideo = False
             tempFilePath = baseFilePath + newTimestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
             output = startNewVideo(newTimestamps, tempFilePath)
 
@@ -164,7 +164,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
             # check if the file is too big and close it if it is
             if len(timestamps) >= 1800:
                 timestamps = exitVideo(output, timestamps, tempFilePath)
-                startNewVideo = True
+                tryStartNewVideo = True
         
         
 
