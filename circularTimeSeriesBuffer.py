@@ -37,7 +37,9 @@ class CircularTimeSeriesBuffer:
         print("in append")
         sys.stdout.flush()
         self[self.nextidx] = (value, timestamp)  # Use __setitem__
+        print(f"self.nextidx before incrementing {self.nextidx}")
         self.nextidx = (self.nextidx + 1) % self.size  # Move to next index
+        print(f"self.nextidx after incrementing {self.nextidx}")
         if self.nextidx == 0:
             self.wrapped = True  # Mark buffer as wrapped when cycling back
 
