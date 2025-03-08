@@ -7,7 +7,7 @@ class CircularTimeSeriesBuffer:
     def __init__(self, shape, DTYPE):
         print("initializing")
         self.size = torch.zeros(1, dtype=torch.int32).share_memory_()
-        self.size = shape[0]  # Number of time steps
+        self.size[0] = shape[0]  # Number of time steps
         self.nextidx = torch.zeros(1, dtype=torch.int32).share_memory_()  # Most recent index (insertion point)
         self.wrapped = torch.zeros(1, dtype=torch.bool).share_memory_()
         self.wrapped[0] = False  # Tracks if buffer has wrapped around
