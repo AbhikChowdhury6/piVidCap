@@ -4,6 +4,7 @@ import sys
 import os
 import torch
 import torch.multiprocessing as mp
+import datetime
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
@@ -48,7 +49,9 @@ def closeOut():
 
 
 if __name__ == "__main__":
+    print("in main")
     while True:
+        print("in mainloop")
         if not (model_process.is_alive() and writer_process.is_alive()
                 and vidCap_process.is_alive()):
             print(f"is vidCap alive?: {vidCap_process.is_alive()}")

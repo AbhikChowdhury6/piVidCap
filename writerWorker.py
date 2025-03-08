@@ -104,7 +104,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
                 newTimestamps = [newTimestamps[0]]
         
 
-        print(f"len of new timestamps in writer{len(newTimestamps)}")
+        print(f"len of new timestamps in writer {len(newTimestamps)}")
         print(f"len of timestamps {len(timestamps)}")
         sys.stdout.flush()
         if len(newTimestamps) == 0:
