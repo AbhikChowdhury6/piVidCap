@@ -49,7 +49,8 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffer, exitSignal):
             print("piVidCap got exit signal")
             sys.stdout.flush()
             break
-       
+
+        print("going to get frame")
         frameTime = datetime.now().astimezone()
         if subSample == 1:
             frame = picam2.capture_array()
@@ -60,6 +61,7 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffer, exitSignal):
         cv2.putText(frame, frameTS, (10, 50),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, 
                 (0, 255, 0), 2, cv2.LINE_AA)
+        print("frame is captured and written on")
 
         ctsb.append(frame, frameTime.astimezone(ZoneInfo("UTC")))
 
