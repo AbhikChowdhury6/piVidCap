@@ -4,7 +4,7 @@ import sys
 import os
 import torch
 import torch.multiprocessing as mp
-import datetime
+from datetime import datetime
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
