@@ -36,7 +36,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
         if len(frames) == 0:
             continue
 
-        frame = frames[0].transpose(2, 0, 1).unsqueeze(0)
+        frame = frames[0].permute(2, 0, 1).unsqueeze(0)
 
         try:
             st = datetime.now()
