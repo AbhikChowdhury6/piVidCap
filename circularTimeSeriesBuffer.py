@@ -6,13 +6,15 @@ import sys
 class CircularTimeSeriesBuffer:
     def __init__(self, shape, DTYPE):
         print("initializing")
+        self.size = torch.zeros(1, dtype=torch.int32).share_memory_()
         self.size = shape[0]  # Number of time steps
-        self.nextidx = 0  # Most recent index (insertion point)
-        self.wrapped = False  # Tracks if buffer has wrapped around
+        self.nextidx = torch.zeros(1, dtype=torch.int32).share_memory_()  # Most recent index (insertion point)
+        self.wrapped = torch.zeros(1, dtype=torch.bool).share_memory_()
+        self.wrapped[0] = False  # Tracks if buffer has wrapped around
 
         # Shared memory buffers
         self.data_buffer = torch.zeros(shape, dtype=DTYPE).share_memory_()
-        self.time_buffer = torch.zeros(self.size, dtype=torch.int64).share_memory_()  # Store timestamps in ns
+        self.time_buffer = torch.zeros(self.size[0], dtype=torch.int64).share_memory_()  # Store timestamps in ns
         print("initialized")
         sys.stdout.flush()
 
@@ -20,14 +22,14 @@ class CircularTimeSeriesBuffer:
         """Set value and timestamp at a circular index."""
         print("in set item")
         sys.stdout.flush()
-        index = index % self.size  # Ensure circular indexing
+        index = index % self.size[0]  # Ensure circular indexing
         self.data_buffer[index] = torch.tensor(value[0])  # Assume value is a tuple (data, timestamp)
         self.time_buffer[index] = torch.tensor(int(value[1].replace(tzinfo=timezone.utc).timestamp() * 1e9 
                                                 + value[1].microsecond * 1e3))
             
     def __getitem__(self, index):
         """Retrieve (value, timestamp) from a circular index."""
-        index = index % self.size  # Ensure circular indexing
+        index = index % self.size[0]  # Ensure circular indexing
         ts_ns = self.time_buffer[index].item()  # Get timestamp in ns
         timestamp = datetime.fromtimestamp(ts_ns / 1e9, tz=timezone.utc)  # Convert back to datetime
         return self.data_buffer[index], timestamp
@@ -36,27 +38,27 @@ class CircularTimeSeriesBuffer:
         """Append a new data point with a timezone-aware timestamp (microsecond precision)."""
         print("in append")
         sys.stdout.flush()
-        self[self.nextidx] = (value, timestamp)  # Use __setitem__
-        print(f"self.nextidx before incrementing {self.nextidx}")
-        self.nextidx = (self.nextidx + 1) % self.size  # Move to next index
-        print(f"self.nextidx after incrementing {self.nextidx}")
-        if self.nextidx == 0:
-            self.wrapped = True  # Mark buffer as wrapped when cycling back
+        self[self.nextidx[0]] = (value, timestamp)  # Use __setitem__
+        print(f"self.nextidx before incrementing {self.nextidx[0]}")
+        self.nextidx[0] = (self.nextidx[0] + 1) % self.size[0]  # Move to next index
+        print(f"self.nextidx after incrementing {self.nextidx[0]}")
+        if self.nextidx[0] == 0:
+            self.wrapped[0] = True  # Mark buffer as wrapped when cycling back
 
     def lastidx(self):
-        return (self.nextidx + self.size -1) % self.size
+        return (self.nextidx[0] + self.size[0] -1) % self.size[0]
 
     def get_sorted_view(self):
         """Returns a sorted logical view of timestamps and values without copying memory."""
-        if not self.wrapped:
-            return self.data_buffer[:self.nextidx], self.time_buffer[:self.nextidx]
+        if not self.wrapped[0]:
+            return self.data_buffer[:self.nextidx[0]], self.time_buffer[:self.nextidx[0]]
         else:
-            indices = torch.cat((torch.arange(self.nextidx, self.size), torch.arange(0, self.nextidx)))
+            indices = torch.cat((torch.arange(self.nextidx[0], self.size[0]), torch.arange(0, self.nextidx[0])))
             return self.data_buffer[indices], self.time_buffer[indices]
 
     def get_last_n_seconds(self, seconds):
         """Retrieve the last `seconds` worth of data & timestamps (with nanosecond precision)."""
-        if self.nextidx == 0 and not self.wrapped:
+        if self.nextidx[0] == 0 and not self.wrapped[0]:
             return torch.empty(0), torch.empty(0)  # No data in buffer
 
         sorted_values, sorted_timestamps = self.get_sorted_view()
