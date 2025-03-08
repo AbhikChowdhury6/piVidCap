@@ -1,9 +1,11 @@
 import torch
 from datetime import datetime, timedelta, timezone
+import sys
 
 
 class CircularTimeSeriesBuffer:
     def __init__(self, shape, DTYPE):
+        print("initializing")
         self.size = shape[0]  # Number of time steps
         self.nextidx = 0  # Most recent index (insertion point)
         self.wrapped = False  # Tracks if buffer has wrapped around
@@ -12,10 +14,12 @@ class CircularTimeSeriesBuffer:
         self.data_buffer = torch.zeros(shape, dtype=DTYPE).share_memory_()
         self.time_buffer = torch.zeros(self.size, dtype=torch.int64).share_memory_()  # Store timestamps in ns
         print("initialized")
+        sys.stdout.flush()
 
     def __setitem__(self, index, value):
         """Set value and timestamp at a circular index."""
         print("in set item")
+        sys.stdout.flush()
         index = index % self.size  # Ensure circular indexing
         self.data_buffer[index] = torch.tensor(value[0])  # Assume value is a tuple (data, timestamp)
         self.time_buffer[index] = torch.tensor(int(value[1].replace(tzinfo=timezone.utc).timestamp() * 1e9 
@@ -31,6 +35,7 @@ class CircularTimeSeriesBuffer:
     def append(self, value, timestamp):
         """Append a new data point with a timezone-aware timestamp (microsecond precision)."""
         print("in append")
+        sys.stdout.flush()
         self[self.nextidx] = (value, timestamp)  # Use __setitem__
         self.nextidx = (self.nextidx + 1) % self.size  # Move to next index
         if self.nextidx == 0:
