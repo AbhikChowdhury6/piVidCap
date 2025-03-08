@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import sys
 import time
+import numpy as np
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
@@ -139,6 +140,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
 
             # write and exit the previous days video
             for frame in newFrames[:cutoffFrameIndex]:
+                frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
+                frame = frame.astype(np.uint8)
                 output.write(frame)
             timestamps.extend(newTimestamps[:cutoffFrameIndex])
             timestamps = exitVideo(output, timestamps, tempFilePath)
@@ -148,12 +151,16 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
             tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
             output = startNewVideo(timestamps, tempFilePath)
             for frame in newFrames[cutoffFrameIndex:]:
+                frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
+                frame = frame.astype(np.uint8)
                 output.write(frame)
         
         else:
             # else just add to the file
             st = datetime.now()
             for frame in newFrames:
+                frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
+                frame = frame.astype(np.uint8)
                 output.write(frame)
             timestamps.extend(newTimestamps)
             numAddedFrames += len(newFrames)
