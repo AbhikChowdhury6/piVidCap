@@ -5,7 +5,7 @@ import sys
 
 class CircularTimeSeriesBuffer:
     def __init__(self, shape, DTYPE):
-        print("initializing")
+        #print("initializing")
         self.size = torch.zeros(1, dtype=torch.int32).share_memory_()
         self.size[0] = shape[0]  # Number of time steps
         self.nextidx = torch.zeros(1, dtype=torch.int32).share_memory_()  # Most recent index (insertion point)
@@ -15,12 +15,12 @@ class CircularTimeSeriesBuffer:
         # Shared memory buffers
         self.data_buffer = torch.zeros(shape, dtype=DTYPE).share_memory_()
         self.time_buffer = torch.zeros(self.size[0], dtype=torch.int64).share_memory_()  # Store timestamps in ns
-        print("initialized")
+        #print("initialized")
         sys.stdout.flush()
 
     def __setitem__(self, index, value):
         """Set value and timestamp at a circular index."""
-        print("in set item")
+        #print("in set item")
         sys.stdout.flush()
         index = index % self.size[0]  # Ensure circular indexing
         self.data_buffer[index] = torch.tensor(value[0])  # Assume value is a tuple (data, timestamp)
@@ -36,12 +36,12 @@ class CircularTimeSeriesBuffer:
 
     def append(self, value, timestamp):
         """Append a new data point with a timezone-aware timestamp (microsecond precision)."""
-        print("in append")
+        #print("in append")
         sys.stdout.flush()
         self[self.nextidx[0]] = (value, timestamp)  # Use __setitem__
-        print(f"self.nextidx before incrementing {self.nextidx[0]}")
+        #print(f"self.nextidx before incrementing {self.nextidx[0]}")
         self.nextidx[0] = (self.nextidx[0] + 1) % self.size[0]  # Move to next index
-        print(f"self.nextidx after incrementing {self.nextidx[0]}")
+        #print(f"self.nextidx after incrementing {self.nextidx[0]}")
         if self.nextidx[0] == 0:
             self.wrapped[0] = True  # Mark buffer as wrapped when cycling back
 
@@ -66,7 +66,8 @@ class CircularTimeSeriesBuffer:
 
         # Binary search for the earliest timestamp >= ts_threshold_ns
         idx = torch.searchsorted(sorted_timestamps, torch.tensor(ts_threshold_ns), side="left").item()
-        return sorted_values[idx:], sorted_timestamps[idx:]
+        dtList = [datetime.fromtimestamp(ts_ns / 1e9, tz=timezone.utc) for ts_ns in sorted_timestamps[idx:]]
+        return sorted_values[idx:], dtList
 
     def get_last_15_seconds(self):
         return self.get_last_n_seconds(15)
