@@ -67,7 +67,7 @@ if __name__ == "__main__":
         
         print(f"")
         print(f"{datetime.now()}")
-        print(f"buffer size is {tsVidBuffer.size}")
+        print(f"buffer size is {tsVidBuffer.nextidx}")
         print(f"person signal is {personSignal}")
 
                 
