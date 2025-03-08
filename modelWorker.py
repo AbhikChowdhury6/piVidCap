@@ -32,6 +32,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
         time.sleep(secondsToWait)
 
         frames, times = ctsb.get_last_15_seconds()
+        print(f"len of frames in model{len(frames)}")
         if len(frames) == 0:
             continue
 

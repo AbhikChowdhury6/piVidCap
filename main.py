@@ -61,5 +61,11 @@ if __name__ == "__main__":
             if sys.stdin.read(1) == 'q':
                 print("got q going to start exiting")
                 closeOut()
+        
+        print(f"")
+        print(f"{datetime.now()}")
+        print(f"buffer size is {tsVidBuffer.size}")
+        print(f"person signal is {personSignal}")
+
                 
         time.sleep(1)
