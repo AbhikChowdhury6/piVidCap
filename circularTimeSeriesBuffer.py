@@ -66,7 +66,7 @@ class CircularTimeSeriesBuffer:
 
         # Binary search for the earliest timestamp >= ts_threshold_ns
         idx = torch.searchsorted(sorted_timestamps, torch.tensor(ts_threshold_ns), side="left").item()
-        dtList = [datetime.fromtimestamp(ts_ns / 1e9, tz=timezone.utc) for ts_ns in sorted_timestamps[idx:]]
+        dtList = [datetime.fromtimestamp(ts_ns.item() / 1e9, tz=timezone.utc) for ts_ns in sorted_timestamps[idx:]]
         return sorted_values[idx:], dtList
 
     def get_last_15_seconds(self):
