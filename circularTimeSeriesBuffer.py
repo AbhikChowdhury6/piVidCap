@@ -67,10 +67,13 @@ class CircularTimeSeriesBuffer:
             return torch.empty(0), torch.empty(0)  # No data in buffer
 
         sorted_values, sorted_timestamps = self.get_sorted_view()
+        print("returned from get sorted view")
+        print(f"sorted timestamps shape {sorted_timestamps.shape}")
         ts_threshold_ns = int((datetime.now(timezone.utc) - timedelta(seconds=seconds)).timestamp() * 1e9)
-
+        print("calculated ts threshold")
         # Binary search for the earliest timestamp >= ts_threshold_ns
         idx = torch.searchsorted(sorted_timestamps, torch.tensor(ts_threshold_ns), side="left").item()
+        print("finished search sorted")
         dtList = [datetime.fromtimestamp(ts_ns.item() / 1e9, tz=timezone.utc) for ts_ns in sorted_timestamps[idx:]]
         print("leaving get last n secs")
         return sorted_values[idx:], dtList

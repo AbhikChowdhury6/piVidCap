@@ -45,7 +45,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
 
         # rename video
         fbfn = baseFilePath + tsList[0].strftime('%Y-%m-%d%z') + "/"
-        fbfn += dt_to_fnString(tsList[0]) + "_" + dt_to_fnString(titsListmestamps[-1])
+        fbfn += dt_to_fnString(tsList[0]) + "_" + dt_to_fnString(tsList[-1])
         os.rename(tempFilePath, fbfn + ".mp4")
         
         # write timestamps 
