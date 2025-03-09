@@ -54,15 +54,23 @@ class CircularTimeSeriesBuffer:
     def get_sorted_view(self):
         print("in get sorted")
         """Returns a sorted logical view of timestamps and values without copying memory."""
-        if not self.wrapped[0]:
-            print("not wrapped leaving get sorted")
-            return self.data_buffer[:self.nextidx[0]], self.time_buffer[:self.nextidx[0]]
-        else:
-            local_nextidx = self.nextidx[0]
-            local_wrapped = self.wrapped[0]
-            indices = torch.cat((torch.arange(local_nextidx, self.size[0]), torch.arange(0, local_nextidx)))
-            print("wrapped leaving get sorted")
-            return self.data_buffer[indices], self.time_buffer[indices]
+        num_elements = min(300, self.size[0] if self.wrapped[0] else self.nextidx[0])
+
+        # Get the start index for the last `num_elements`
+        start_idx = (self.nextidx[0] - num_elements) % self.size[0]
+
+        if not self.wrapped[0] or start_idx < self.nextidx[0]:  
+            # Case 1: Buffer has NOT wrapped, or the slice is contiguous
+            sorted_values = self.data_buffer[start_idx:self.nextidx[0]]
+            sorted_timestamps = self.time_buffer[start_idx:self.nextidx[0]]
+        else:  
+            # Case 2: Buffer has wrapped, need to split the selection
+            indices = torch.cat((torch.arange(start_idx, self.size[0]), torch.arange(0, self.nextidx[0])))
+            sorted_values = self.data_buffer[indices]
+            sorted_timestamps = self.time_buffer[indices]
+        
+        print("leaving get sorted")
+        return sorted_values, sorted_timestamps
 
     def get_last_n_seconds(self, seconds):
         """Retrieve the last `seconds` worth of data & timestamps (with nanosecond precision)."""
