@@ -67,7 +67,11 @@ if __name__ == "__main__":
         
         print(f"")
         print(f"{datetime.now()}")
-        print(f"buffer size from main is {tsVidBuffer.nextidxs[0]}")
+        print(f"buffer size from main is {tsVidBuffer.nextidxs[tsVidBuffer.bn[0]][0]}")
+        print("using bufferNum", tsVidBuffer.bn[0])
+        print(f"nextidxs are {tsVidBuffer.nextidxs}")
+        print(f"lastbn is {tsVidBuffer.lastbn[0]}")
+        
         #print(f"person signal is {personSignal}")
 
                 

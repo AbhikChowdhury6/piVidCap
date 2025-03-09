@@ -104,6 +104,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             if onlyFirst:
                 ctsb.time_buffers[bufferNum][1:] = 0
                 ctsb.data_buffers[bufferNum][1:] = 0
+                ctsb.nextidxs[bufferNum][0] = 1
 
 
             newTimestamps = intTensorToDtList(ctsb.time_buffers[bufferNum][:ctsb.nextidxs[bufferNum][0]])
