@@ -1,6 +1,6 @@
 import cv2
 import torch
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import pandas as pd
 import os
 import sys
@@ -41,6 +41,9 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
         return dt.astimezone(ZoneInfo("UTC")).strftime('%Y-%m-%dT%H%M%S,%f%z')
     
     def exitVideo(output, tsList, tempFilePath):
+        if output is None:
+            print("output is None")
+            return
         output.release()
 
         # rename video
@@ -67,22 +70,106 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
                         frameWidthHeight)
         
         return output
+
+    def intTensorToDtList(tensor):
+        return [datetime.fromtimestamp(ts_ns.item() / 1e9, tz=timezone.utc) for ts_ns in tensor]
         
 
     model_result = False
     timestamps = []
     first = True
     tryStartNewVideo = True
+    output = None
+    tempFilePath = None
     while True:
         if exitSignal[0] == 1:
             print("writer worker got exit signal")
             sys.stdout.flush()
             timestamps = exitVideo(output, timestamps, tempFilePath)
             break
+
+        def writeCtsbBufferNum(bufferNum, onlyFirst=False):
+            nonlocal first
+            nonlocal tryStartNewVideo
+            nonlocal timestamps
+            nonlocal output
+            nonlocal tempFilePath
+
+            if ctsb.nextidx[bufferNum] == 0:
+                return
+            
+            if onlyFirst:
+                ctsb.time_buffers[bufferNum][1:] = 0
+                ctsb.data_buffers[bufferNum][1:] = 0
+
+
+            newTimestamps = intTensorToDtList(ctsb.time_buffers[bufferNum])
+
+            # initialize stream parameters if we haven't
+            if first:
+                first = False    
+                frameWidthHeight = (ctsb.data_buffers[bufferNum][0].shape[2], 
+                                    ctsb.data_buffers[bufferNum][0].shape[1])
+            
+            # check if we have to make a new file
+            if tryStartNewVideo:
+                tryStartNewVideo = False
+                tempFilePath = baseFilePath + newTimestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
+                output = startNewVideo(newTimestamps, tempFilePath)
+
+            # if crosses midnight close the file and start a new one
+            if len(timestamps) == 0:
+                firstTimestamp = newTimestamps[0]
+            else:
+                firstTimestamp = timestamps[0]
+            
+            if firstTimestamp.day < newTimestamps[-1].day:
+                print(f"crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                sys.stdout.flush()
+
+                cutoffFrameIndex = len(ctsb.data_buffers[bufferNum])
+                while firstTimestamp.day < newTimestamps[cutoffFrameIndex-1].day:
+                    cutoffFrameIndex -= 1
+                cutoffFrameIndex -= 1
+
+                # write and exit the previous days video
+                for frame in ctsb.data_buffers[bufferNum][:cutoffFrameIndex]:
+                    frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
+                    frame = frame.astype(np.uint8)
+                    output.write(frame)
+                timestamps.extend(newTimestamps[:cutoffFrameIndex])
+                timestamps = exitVideo(output, timestamps, tempFilePath)
+
+                # start and write the new day
+                timestamps.extend(newTimestamps[cutoffFrameIndex:])
+                tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
+                output = startNewVideo(timestamps, tempFilePath)
+                for frame in ctsb.data_buffers[bufferNum][cutoffFrameIndex:]:
+                    frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
+                    frame = frame.astype(np.uint8)
+                    output.write(frame)
+            
+            else:
+                # else just add to the file
+                st = datetime.now()
+                for frame in ctsb.data_buffers[bufferNum]:
+                    frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
+                    frame = frame.astype(np.uint8)
+                    output.write(frame)
+                timestamps.extend(newTimestamps)
+                print(f"have {len(timestamps)} frames in the current video")
+                print(f"it took {datetime.now() - st} to write the frames")
+                sys.stdout.flush()
+
+                # check if the file is too big and close it if it is
+                if len(timestamps) >= 1800:
+                    timestamps = exitVideo(output, timestamps, tempFilePath)
+                    tryStartNewVideo = True
+            
         
         # wait till a round 15 seconds and then
         st = datetime.now()
-        secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000)
+        secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + 1
         print(f" writer waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
         
@@ -92,90 +179,19 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
         model_result = personSignal[0]
         if model_result and not last_mr:
             print("writing last 30 secs")
-            newFrames, newTimestamps = ctsb.get_last_30_seconds()
-
+            writeCtsbBufferNum((ctsb.lastbn[0] + 2) % 3)
+            writeCtsbBufferNum(ctsb.lastbn[0])
         elif model_result or last_mr:
             print("writing last 15 secs")
-            newFrames, newTimestamps = ctsb.get_last_15_seconds()
+            writeCtsbBufferNum(ctsb.lastbn[0])
 
         else:
             print("writing only 30s old frame")
-            newFrames, newTimestamps = ctsb.get_last_30_seconds()
-            if len(newTimestamps) > 0:
-                newFrames = [newFrames[0]]
-                newTimestamps = [newTimestamps[0]]
+            writeCtsbBufferNum((ctsb.lastbn[0] + 2) % 3, True)
         
 
-        print(f"len of new timestamps in writer {len(newTimestamps)}")
         print(f"len of timestamps {len(timestamps)}")
         sys.stdout.flush()
-        if len(newTimestamps) == 0:
-            continue
-
-
-        # initialize stream parameters if we haven't
-        if first:
-            first = False    
-            frameWidthHeight = (newFrames[0].shape[1], newFrames[0].shape[0])
-        
-        # check if we have to make a new file
-        if tryStartNewVideo:
-            tryStartNewVideo = False
-            tempFilePath = baseFilePath + newTimestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
-            output = startNewVideo(newTimestamps, tempFilePath)
-
-        # if crosses midnight close the file and start a new one
-        if len(timestamps) == 0:
-            firstTimestamp = newTimestamps[0]
-        else:
-            firstTimestamp = timestamps[0]
-        
-        if firstTimestamp.day < newTimestamps[-1].day:
-            print(f"crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            sys.stdout.flush()
-
-            cutoffFrameIndex = len(newFrames)
-            while firstTimestamp.day < newTimestamps[cutoffFrameIndex-1].day:
-                cutoffFrameIndex -= 1
-            cutoffFrameIndex -= 1
-
-            # write and exit the previous days video
-            for frame in newFrames[:cutoffFrameIndex]:
-                frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
-                frame = frame.astype(np.uint8)
-                output.write(frame)
-            timestamps.extend(newTimestamps[:cutoffFrameIndex])
-            timestamps = exitVideo(output, timestamps, tempFilePath)
-
-            # start and write the new day
-            timestamps.extend(newTimestamps[cutoffFrameIndex:])
-            tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
-            output = startNewVideo(timestamps, tempFilePath)
-            for frame in newFrames[cutoffFrameIndex:]:
-                frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
-                frame = frame.astype(np.uint8)
-                output.write(frame)
-        
-        else:
-            # else just add to the file
-            st = datetime.now()
-            for frame in newFrames:
-                frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
-                frame = frame.astype(np.uint8)
-                output.write(frame)
-            timestamps.extend(newTimestamps)
-            print(f"have {len(timestamps)} frames in the current video")
-            print(f"it took {datetime.now() - st} to write the frames")
-            sys.stdout.flush()
-
-            # check if the file is too big and close it if it is
-            if len(timestamps) >= 1800:
-                timestamps = exitVideo(output, timestamps, tempFilePath)
-                tryStartNewVideo = True
-        
-        
-
-
 
     print("writer worker exiting")
     sys.stdout.flush()

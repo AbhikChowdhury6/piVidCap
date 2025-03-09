@@ -20,7 +20,7 @@ else:
     subSample = 3 #default to 480p ish
 
 # Define buffer properties
-BUFFER_SIZE = 450  # Maximum number of frames stored
+BUFFER_SIZE = 152  # Maximum number of frames stored
 HEIGHT = 1080 // subSample # Frame height
 WIDTH = 1920 // subSample  # Frame width
 CHANNELS = 3   # RGB color channels

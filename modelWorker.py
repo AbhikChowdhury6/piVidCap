@@ -33,12 +33,12 @@ def model_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
         print(f"model waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
 
-        frames, times = ctsb.get_last_15_seconds()
-        print(f"len of frames in model {len(frames)}")
-        if len(frames) == 0:
+        frame = ctsb.data_buffers[ctsb.bn[0]][0]
+        print(f"len of frames in model {len(frame)}")
+        if len(frame) == 0:
             continue
 
-        frame = frames[0].cpu().numpy()  # Convert from torch tensor to numpy
+        frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
         frame = frame.astype(np.uint8)
 
         # frame = frames[0].permute(2, 0, 1)
