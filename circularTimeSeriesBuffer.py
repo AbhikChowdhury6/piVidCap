@@ -23,9 +23,9 @@ class CircularTimeSeriesBuffer:
         #print("in set item")
         sys.stdout.flush()
         index = index % self.size[0]  # Ensure circular indexing
-        self.data_buffer[index] = torch.tensor(value[0])  # Assume value is a tuple (data, timestamp)
-        self.time_buffer[index] = torch.tensor(int(value[1].replace(tzinfo=timezone.utc).timestamp() * 1e9 
-                                                + value[1].microsecond * 1e3))
+        self.data_buffer[index] = value[0]  # Assume value is a tuple (data, timestamp)
+        self.time_buffer[index] = int(value[1].replace(tzinfo=timezone.utc).timestamp() * 1e9 
+                                                + value[1].microsecond * 1e3)
             
     def __getitem__(self, index):
         """Retrieve (value, timestamp) from a circular index."""
@@ -49,15 +49,19 @@ class CircularTimeSeriesBuffer:
         return (self.nextidx[0] + self.size[0] -1) % self.size[0]
 
     def get_sorted_view(self):
+        print("in get sorted")
         """Returns a sorted logical view of timestamps and values without copying memory."""
         if not self.wrapped[0]:
+            print("not wrapped leaving get sorted")
             return self.data_buffer[:self.nextidx[0]], self.time_buffer[:self.nextidx[0]]
         else:
             indices = torch.cat((torch.arange(self.nextidx[0], self.size[0]), torch.arange(0, self.nextidx[0])))
+            print("wrapped leaving get sorted")
             return self.data_buffer[indices], self.time_buffer[indices]
 
     def get_last_n_seconds(self, seconds):
         """Retrieve the last `seconds` worth of data & timestamps (with nanosecond precision)."""
+        print("in get last n secs")
         if self.nextidx[0] == 0 and not self.wrapped[0]:
             return torch.empty(0), torch.empty(0)  # No data in buffer
 
@@ -67,6 +71,7 @@ class CircularTimeSeriesBuffer:
         # Binary search for the earliest timestamp >= ts_threshold_ns
         idx = torch.searchsorted(sorted_timestamps, torch.tensor(ts_threshold_ns), side="left").item()
         dtList = [datetime.fromtimestamp(ts_ns.item() / 1e9, tz=timezone.utc) for ts_ns in sorted_timestamps[idx:]]
+        print("leaving get last n secs")
         return sorted_values[idx:], dtList
 
     def get_last_15_seconds(self):
