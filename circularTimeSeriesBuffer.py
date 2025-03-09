@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from datetime import datetime, timedelta, timezone
 import sys
+from torch.multiprocessing import Lock
 
 
 class CircularTimeSeriesBuffer:
@@ -16,6 +17,7 @@ class CircularTimeSeriesBuffer:
         # Shared memory buffers
         self.data_buffer = torch.zeros(shape, dtype=DTYPE).share_memory_()
         self.time_buffer = torch.zeros(self.size[0], dtype=torch.int64).share_memory_()  # Store timestamps in ns
+        self.lock = Lock()
         #print("initialized")
         sys.stdout.flush()
 
@@ -56,7 +58,9 @@ class CircularTimeSeriesBuffer:
             print("not wrapped leaving get sorted")
             return self.data_buffer[:self.nextidx[0]], self.time_buffer[:self.nextidx[0]]
         else:
-            indices = torch.cat((torch.arange(self.nextidx[0], self.size[0]), torch.arange(0, self.nextidx[0])))
+            local_nextidx = self.nextidx[0]
+            local_wrapped = self.wrapped[0]
+            indices = torch.cat((torch.arange(local_nextidx, self.size[0]), torch.arange(0, local_nextidx)))
             print("wrapped leaving get sorted")
             return self.data_buffer[indices], self.time_buffer[indices]
 
@@ -65,8 +69,8 @@ class CircularTimeSeriesBuffer:
         print("in get last n secs")
         if self.nextidx[0] == 0 and not self.wrapped[0]:
             return torch.empty(0), torch.empty(0)  # No data in buffer
-
-        sorted_values, sorted_timestamps = self.get_sorted_view()
+        with self.lock:
+            sorted_values, sorted_timestamps = self.get_sorted_view()
         print("returned from get sorted view")
         print(f"sorted timestamps shape {sorted_timestamps.shape}")
         ts_threshold_ns = int((datetime.now(timezone.utc) - timedelta(seconds=seconds)).timestamp() * 1e9)
