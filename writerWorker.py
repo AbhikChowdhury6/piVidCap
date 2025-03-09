@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import numpy as np
+from zoneinfo import ZoneInfo
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
