@@ -13,7 +13,7 @@ sys.path.append(repoPath + "piVidCap/")
 from modelWorker import model_worker
 from writerWorker import writer_worker
 from piVidCap import pi_vid_cap
-from circularTimeSeriesBuffer import CircularTimeSeriesBuffer
+from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import subSample
 else:
@@ -26,7 +26,7 @@ WIDTH = 1920 // subSample  # Frame width
 CHANNELS = 3   # RGB color channels
 DTYPE = torch.uint8
 
-tsVidBuffer = CircularTimeSeriesBuffer((BUFFER_SIZE, HEIGHT, WIDTH, CHANNELS), DTYPE)
+tsVidBuffer = CircularTimeSeriesBuffers((BUFFER_SIZE, HEIGHT, WIDTH, CHANNELS), DTYPE)
 exitSignal = torch.zeros(1, dtype=torch.int64).share_memory_()
 personSignal = torch.zeros(1, dtype=torch.int8).share_memory_()
 
