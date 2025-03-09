@@ -163,8 +163,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
                 frame = frame.astype(np.uint8)
                 output.write(frame)
             timestamps.extend(newTimestamps)
-            numAddedFrames += len(newFrames)
-            print(f"have {numAddedFrames} frames in the current video")
+            print(f"have {len(timestamps)} frames in the current video")
             print(f"it took {datetime.now() - st} to write the frames")
             sys.stdout.flush()
 
