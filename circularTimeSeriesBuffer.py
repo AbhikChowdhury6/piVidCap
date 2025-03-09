@@ -51,5 +51,5 @@ class CircularTimeSeriesBuffers:
         
         self[self.nextidxs[self.bn[0]][0]] = (value, timestamp)  # Use __setitem__
         #print(f"self.nextidx before incrementing {self.nextidx[0]}")
-        self.nextidxs[0] += 1  # Move to next index
+        self.nextidxs[self.bn[0]][0] += 1  # Move to next index
         #print(f"self.nextidx after incrementing {self.nextidx[0]}")
