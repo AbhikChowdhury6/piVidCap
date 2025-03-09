@@ -95,7 +95,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             nonlocal output
             nonlocal tempFilePath
 
-            if ctsb.nextidx[bufferNum] == 0:
+            if ctsb.nextidxs[bufferNum] == 0:
                 return
             
             if onlyFirst:

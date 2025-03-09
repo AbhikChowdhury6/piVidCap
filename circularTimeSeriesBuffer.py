@@ -47,9 +47,9 @@ class CircularTimeSeriesBuffers:
         self.lastbn[0] = self.bn[0]
         self.bn[0] = self.bufferNum()
         if self.bn[0] != self.lastbn[0]:
-            self.nextidx[self.lastbn[0]][0] = 0
+            self.nextidxs[self.lastbn[0]][0] = 0
         
-        self[self.nextidx[self.bn[0]][0]] = (value, timestamp)  # Use __setitem__
+        self[self.nextidxs[self.bn[0]][0]] = (value, timestamp)  # Use __setitem__
         #print(f"self.nextidx before incrementing {self.nextidx[0]}")
-        self.nextidx[0] += 1  # Move to next index
+        self.nextidxs[0] += 1  # Move to next index
         #print(f"self.nextidx after incrementing {self.nextidx[0]}")
