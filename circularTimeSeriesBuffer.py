@@ -19,7 +19,7 @@ class CircularTimeSeriesBuffers:
         #print("initialized")
         sys.stdout.flush()
 
-    def bufferNum():
+    def bufferNum(self):
         dt = datetime.now()
         return (dt.minute % 3 + (dt.second // 15) % 3) % 3
 
