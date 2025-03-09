@@ -12,14 +12,14 @@ from zoneinfo import ZoneInfo
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
-from circularTimeSeriesBuffer import CircularTimeSeriesBuffer
+from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import subSample
 else:
     subSample = 3 #default to 480p ish
 
 
-def pi_vid_cap(ctsb: CircularTimeSeriesBuffer, exitSignal):
+def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal):
     """ Captures frames and writes to the shared buffer in a circular fashion. """
     st = datetime.now() 
     picam2 = Picamera2()

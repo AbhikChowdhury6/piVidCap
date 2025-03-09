@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
-from circularTimeSeriesBuffer import CircularTimeSeriesBuffer
+from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import deviceInfo
@@ -32,7 +32,7 @@ baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
                 deviceName + "_"
 
 
-def writer_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
+def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
     print("in writer worker")
     sys.stdout.flush()
     fourcc = cv2.VideoWriter_fourcc(*'avc1')

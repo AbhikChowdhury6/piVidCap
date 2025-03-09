@@ -8,7 +8,7 @@ import numpy as np
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
-from circularTimeSeriesBuffer import CircularTimeSeriesBuffer
+from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import modelName
@@ -17,7 +17,7 @@ else:
 
 
 
-def model_worker(ctsb: CircularTimeSeriesBuffer, personSignal, exitSignal):
+def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
     print("in model worker")
     sys.stdout.flush()
     model = YOLO(modelName)
