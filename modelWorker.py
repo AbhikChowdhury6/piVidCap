@@ -35,8 +35,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
 
         frame = ctsb.data_buffers[ctsb.bn[0]][0]
         print(f"len of frames in model {len(frame)}")
-        if len(frame) == 0:
-            continue
+
 
         frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
         frame = frame.astype(np.uint8)

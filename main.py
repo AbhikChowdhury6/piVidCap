@@ -51,7 +51,7 @@ def closeOut():
 if __name__ == "__main__":
     print("in main")
     while True:
-        print("in mainloop")
+        #print("in mainloop")
         if not (model_process.is_alive() and writer_process.is_alive()
                 and vidCap_process.is_alive()):
             print(f"is vidCap alive?: {vidCap_process.is_alive()}")
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         print(f"")
         print(f"{datetime.now()}")
         print(f"buffer size from main is {tsVidBuffer.nextidxs[0]}")
-        print(f"person signal is {personSignal}")
+        #print(f"person signal is {personSignal}")
 
                 
         time.sleep(1)

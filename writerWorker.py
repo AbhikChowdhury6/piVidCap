@@ -64,6 +64,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         if os.path.exists(tempFilePath):
                 os.remove(tempFilePath)
         
+        print("starting a new output")
+        print(tempFilePath)
         output = cv2.VideoWriter(tempFilePath, 
                         fourcc, 
                         30.0, 
@@ -89,13 +91,14 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             break
 
         def writeCtsbBufferNum(bufferNum, onlyFirst=False):
+            print("using bufferNum", bufferNum)
             nonlocal first
             nonlocal tryStartNewVideo
             nonlocal timestamps
             nonlocal output
             nonlocal tempFilePath
 
-            if ctsb.nextidxs[bufferNum] == 0:
+            if ctsb.nextidxs[bufferNum][0] == 0:
                 return
             
             if onlyFirst:
@@ -103,7 +106,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 ctsb.data_buffers[bufferNum][1:] = 0
 
 
-            newTimestamps = intTensorToDtList(ctsb.time_buffers[bufferNum])
+            newTimestamps = intTensorToDtList(ctsb.time_buffers[bufferNum][:ctsb.nextidxs[bufferNum][0]])
 
             # initialize stream parameters if we haven't
             if first:
@@ -127,7 +130,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 print(f"crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 sys.stdout.flush()
 
-                cutoffFrameIndex = len(ctsb.data_buffers[bufferNum])
+                cutoffFrameIndex = ctsb.nextidxs[bufferNum][0]
                 while firstTimestamp.day < newTimestamps[cutoffFrameIndex-1].day:
                     cutoffFrameIndex -= 1
                 cutoffFrameIndex -= 1
@@ -141,7 +144,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 timestamps = exitVideo(output, timestamps, tempFilePath)
 
                 # start and write the new day
-                timestamps.extend(newTimestamps[cutoffFrameIndex:])
+                timestamps.extend(newTimestamps[cutoffFrameIndex:ctsb.nextidxs[bufferNum][0]])
                 tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
                 output = startNewVideo(timestamps, tempFilePath)
                 for frame in ctsb.data_buffers[bufferNum][cutoffFrameIndex:]:
@@ -152,7 +155,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             else:
                 # else just add to the file
                 st = datetime.now()
-                for frame in ctsb.data_buffers[bufferNum]:
+                for frame in ctsb.data_buffers[bufferNum][:ctsb.nextidxs[bufferNum][0]]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
                     output.write(frame)
