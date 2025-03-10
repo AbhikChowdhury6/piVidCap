@@ -148,7 +148,10 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     frame = frame.astype(np.uint8)
                     frame = np.transpose(frame, (1, 0, 2))
                     frame = np.ascontiguousarray(frame)
-                    output.write(frame)
+                    print(f"writer: frame type: {type(frame)}")
+                    success = output.write(frame)
+                    if not success:
+                        print(f"writer: Failed to write frame")
                 timestamps.extend(newTimestamps[:cutoffFrameIndex])
                 timestamps = exitVideo(output, timestamps, tempFilePath)
 
@@ -161,7 +164,10 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     frame = frame.astype(np.uint8)
                     frame = np.transpose(frame, (1, 0, 2))
                     frame = np.ascontiguousarray(frame)
-                    output.write(frame)
+                    print(f"writer: frame type: {type(frame)}")
+                    success = output.write(frame)
+                    if not success:
+                        print(f"writer: Failed to write frame")
             
             else:
                 # else just add to the file
@@ -171,8 +177,12 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     frame = frame.astype(np.uint8)
                     frame = np.transpose(frame, (1, 0, 2))
                     frame = np.ascontiguousarray(frame)
-                    print(f"writer: frame shape: {frame.shape}, dtype: {frame.dtype}")
+                    print(f"writer: frame dtype: {frame.dtype}")
+                    print(f"writer: frame type: {type(frame)}")
                     print(f"writer: frame min: {frame.min()}, max: {frame.max()}")
+                    print(f"writer: frame shape: {frame.shape}")
+                    frame = cv2.resize(frame, (1920, 1080))
+                    print(f"writer: frame shape after resize: {frame.shape}")
                     success = output.write(frame)
                     if not success:
                         print(f"writer: Failed to write frame")
