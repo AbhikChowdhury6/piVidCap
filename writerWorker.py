@@ -33,7 +33,6 @@ baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
 
 
 def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
-    cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_DEBUG)
     print("in writer worker")
     sys.stdout.flush()
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -173,6 +172,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     frame = np.transpose(frame, (1, 0, 2))
                     frame = np.ascontiguousarray(frame)
                     print(f"writer: frame shape: {frame.shape}, dtype: {frame.dtype}")
+                    print(f"writer: frame min: {frame.min()}, max: {frame.max()}")
                     success = output.write(frame)
                     if not success:
                         print(f"writer: Failed to write frame")
