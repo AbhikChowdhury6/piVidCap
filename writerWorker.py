@@ -97,6 +97,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             nonlocal timestamps
             nonlocal output
             nonlocal tempFilePath
+            nonlocal frameWidthHeight
 
             if ctsb.lengths[bufferNum][0] == 0:
                 return
