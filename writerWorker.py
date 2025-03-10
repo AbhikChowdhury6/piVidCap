@@ -196,10 +196,10 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     #print(f"writer: frame type after resize: {type(frame)}")
                     #print(f"writer: frame min after resize: {frame.min()}, max after resize: {frame.max()}")
                     success = output.write(frame)
-                    if not success:
-                        print(f"writer: Failed to write cap frame frame")
-                    else:
-                        print(f"writer: wrote cap frame frame")
+                    #if not success:
+                    #    print(f"writer: Failed to write cap frame frame")
+                    #else:
+                    #    print(f"writer: wrote cap frame frame")
                 timestamps.extend(newTimestamps)
                 print(f"writer: have {len(timestamps)} frames in the current video")
                 print(f"writer: it took {datetime.now() - st} to write the frames")
