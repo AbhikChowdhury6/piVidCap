@@ -172,8 +172,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             else:
                 # else just add to the file
                 st = datetime.now()
-                if output.isOpened():
-                    print(f"writer: output is opened")
+                #if output.isOpened():
+                #    print(f"writer: output is opened")
                     
                 for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
@@ -186,12 +186,12 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     #     print(f"writer: Failed to write test frame")
                     # else:
                     #     print(f"writer: wrote test frame")
-                    print(f"writer: frame dtype: {frame.dtype}")
-                    print(f"writer: frame type: {type(frame)}")
-                    print(f"writer: frame min: {frame.min()}, max: {frame.max()}")
-                    print(f"writer: frame shape: {frame.shape}")
+                    #print(f"writer: frame dtype: {frame.dtype}")
+                    #print(f"writer: frame type: {type(frame)}")
+                    #print(f"writer: frame min: {frame.min()}, max: {frame.max()}")
+                    #print(f"writer: frame shape: {frame.shape}")
                     frame = cv2.resize(frame, (1920, 1080))
-                    print(f"writer: frame shape after resize: {frame.shape}")
+                    #print(f"writer: frame shape after resize: {frame.shape}")
                     success = output.write(frame)
                     if not success:
                         print(f"writer: Failed to write cap frame frame")
