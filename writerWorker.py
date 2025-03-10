@@ -33,6 +33,7 @@ baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
 
 
 def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
+    cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_DEBUG)
     print("in writer worker")
     sys.stdout.flush()
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
