@@ -190,8 +190,11 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     #print(f"writer: frame type: {type(frame)}")
                     #print(f"writer: frame min: {frame.min()}, max: {frame.max()}")
                     #print(f"writer: frame shape: {frame.shape}")
-                    frame = cv2.resize(frame, (1920, 1080))
+                    #frame = cv2.resize(frame, (1920, 1080))
                     #print(f"writer: frame shape after resize: {frame.shape}")
+                    #print(f"writer: frame dtype after resize: {frame.dtype}")
+                    #print(f"writer: frame type after resize: {type(frame)}")
+                    #print(f"writer: frame min after resize: {frame.min()}, max after resize: {frame.max()}")
                     success = output.write(frame)
                     if not success:
                         print(f"writer: Failed to write cap frame frame")
