@@ -179,7 +179,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
                     #frame = np.transpose(frame, (1, 0, 2))
-                    frame = np.ascontiguousarray(frame)
+                    #frame = np.ascontiguousarray(frame)
                     #testFrame  = np.random.randint(0, 50, (1080, 1920, 3), dtype=np.uint8)
                     #success = output.write(testFrame)
                     #if not success:
@@ -190,7 +190,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     #print(f"writer: frame type: {type(frame)}")
                     #print(f"writer: frame min: {frame.min()}, max: {frame.max()}")
                     #print(f"writer: frame shape: {frame.shape}")
-                    #frame = cv2.resize(frame, (1920, 1080))
+                    frame = cv2.resize(frame, (1920, 1080))
                     #print(f"writer: frame shape after resize: {frame.shape}")
                     success = output.write(frame)
                     if not success:
