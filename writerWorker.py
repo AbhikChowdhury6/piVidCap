@@ -162,6 +162,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
+                    print(f"writer: frame shape: {frame.shape}, dtype: {frame.dtype}")
                     success = output.write(frame)
                     if not success:
                         print(f"writer: Failed to write frame")
