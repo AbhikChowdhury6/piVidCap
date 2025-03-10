@@ -69,11 +69,11 @@ if __name__ == "__main__":
         print(f"{datetime.now()}")
         print(f"buffer size from main is {tsVidBuffer.nextidxs[tsVidBuffer.bn[0]][0]}")
         print("vidcap should be using bufferNum", tsVidBuffer.bn[0])
-        #print(f"nextidxs are {tsVidBuffer.nextidxs}")
-        #print(f"lengths are {tsVidBuffer.lengths}")
+        print(f"nextidxs are {tsVidBuffer.nextidxs}")
+        print(f"lengths are {tsVidBuffer.lengths}")
         print(f"lastbn is {tsVidBuffer.lastbn[0]}")
-        
+        print(f"person signal is {personSignal}")
         #print(f"person signal is {personSignal}")
 
                 
-        time.sleep(1)
+        time.sleep(5)
