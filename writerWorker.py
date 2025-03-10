@@ -35,7 +35,7 @@ baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
 def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
     print("in writer worker")
     sys.stdout.flush()
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     frameWidthHeight = (0,0)
     def dt_to_fnString(dt):
         return dt.astimezone(ZoneInfo("UTC")).strftime('%Y-%m-%dT%H%M%S,%f%z')
@@ -147,6 +147,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
                     frame = np.transpose(frame, (1, 0, 2))
+                    frame = np.ascontiguousarray(frame)
                     output.write(frame)
                 timestamps.extend(newTimestamps[:cutoffFrameIndex])
                 timestamps = exitVideo(output, timestamps, tempFilePath)
@@ -159,6 +160,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
                     frame = np.transpose(frame, (1, 0, 2))
+                    frame = np.ascontiguousarray(frame)
                     output.write(frame)
             
             else:
@@ -168,6 +170,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
                     frame = np.transpose(frame, (1, 0, 2))
+                    frame = np.ascontiguousarray(frame)
                     print(f"writer: frame shape: {frame.shape}, dtype: {frame.dtype}")
                     success = output.write(frame)
                     if not success:
