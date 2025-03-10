@@ -146,6 +146,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 for frame in ctsb.data_buffers[bufferNum][:cutoffFrameIndex]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
+                    frame = np.transpose(frame, (1, 0, 2))
                     output.write(frame)
                 timestamps.extend(newTimestamps[:cutoffFrameIndex])
                 timestamps = exitVideo(output, timestamps, tempFilePath)
@@ -157,6 +158,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 for frame in ctsb.data_buffers[bufferNum][cutoffFrameIndex:]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
+                    frame = np.transpose(frame, (1, 0, 2))
                     output.write(frame)
             
             else:
@@ -165,6 +167,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
+                    frame = np.transpose(frame, (1, 0, 2))
                     print(f"writer: frame shape: {frame.shape}, dtype: {frame.dtype}")
                     success = output.write(frame)
                     if not success:
