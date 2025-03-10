@@ -56,7 +56,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         tsdf = tsdf.set_index('sampleDT')
         tsdf.to_parquet(fbfn + ".parquet.gzip", compression='gzip')
 
-        print(f"finished writing the file {tempFilePath}")
+        print(f"finished writing the file {fbfn}.mp4")
         return []
 
     def startNewVideo(tsList, tempFilePath):
@@ -70,6 +70,9 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                         fourcc, 
                         30.0, 
                         frameWidthHeight)
+        if not output.isOpened():
+            print(f"writer: Failed to open video writer")
+            return None
         
         return output
 
@@ -159,7 +162,9 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
-                    output.write(frame)
+                    success = output.write(frame)
+                    if not success:
+                        print(f"writer: Failed to write frame")
                 timestamps.extend(newTimestamps)
                 print(f"writer: have {len(timestamps)} frames in the current video")
                 print(f"writer: it took {datetime.now() - st} to write the frames")
