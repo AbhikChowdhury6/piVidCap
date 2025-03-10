@@ -117,8 +117,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             # initialize stream parameters if we haven't
             if first:
                 first = False    
-                frameWidthHeight = (ctsb.data_buffers[bufferNum][0].shape[0], 
-                                    ctsb.data_buffers[bufferNum][0].shape[1])
+                frameWidthHeight = (ctsb.data_buffers[bufferNum][0].shape[1], 
+                                    ctsb.data_buffers[bufferNum][0].shape[0])
                 print(f"writer: setting frameWidthHeight to {frameWidthHeight}")
             
             # check if we have to make a new file
