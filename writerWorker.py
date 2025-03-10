@@ -85,14 +85,14 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
     tempFilePath = None
     while True:
         if exitSignal[0] == 1:
-            print("writer worker got exit signal")
+            print("writer: got exit signal")
             sys.stdout.flush()
             timestamps = exitVideo(output, timestamps, tempFilePath)
             break
 
         def writeCtsbBufferNum(bufferNum, onlyFirst=False):
-            print("writer using bufferNum", bufferNum)
-            print(f"goig to try to write {ctsb.lengths[bufferNum][0]} frames")
+            print(f"writer: using bufferNum {bufferNum}")
+            print(f"writer: going to try to write {ctsb.lengths[bufferNum][0]} frames")
             nonlocal first
             nonlocal tryStartNewVideo
             nonlocal timestamps
@@ -128,7 +128,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 firstTimestamp = timestamps[0]
             
             if firstTimestamp.day < newTimestamps[-1].day:
-                print(f"crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print(f"writer: crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 sys.stdout.flush()
 
                 cutoffFrameIndex = ctsb.lengths[bufferNum][0]
@@ -161,8 +161,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     frame = frame.astype(np.uint8)
                     output.write(frame)
                 timestamps.extend(newTimestamps)
-                print(f"have {len(timestamps)} frames in the current video")
-                print(f"it took {datetime.now() - st} to write the frames")
+                print(f"writer: have {len(timestamps)} frames in the current video")
+                print(f"writer: it took {datetime.now() - st} to write the frames")
                 sys.stdout.flush()
 
                 # check if the file is too big and close it if it is
@@ -174,28 +174,30 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         # wait till a round 15 seconds and then
         st = datetime.now()
         secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + 1
-        print(f" writer waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
+        print(f"writer: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
         
         
         # check if we want to save the last 30, 15 seconds or 1 frame
         last_mr = model_result
         model_result = personSignal[0]
+        print(f"writer: model result is {model_result}")
+        print(f"writer: last_mr is {last_mr}")
         if model_result and not last_mr:
-            print("writing last 30 secs")
+            print("writer: writing last 30 secs")
             writeCtsbBufferNum((ctsb.lastbn[0] + 2) % 3)
             writeCtsbBufferNum(ctsb.lastbn[0])
         elif model_result or last_mr:
-            print("writing last 15 secs")
+            print("writer: writing last 15 secs")
             writeCtsbBufferNum(ctsb.lastbn[0])
 
         else:
-            print("writing only 30s old frame")
+            print("writer: writing only 30s old frame")
             writeCtsbBufferNum((ctsb.lastbn[0] + 2) % 3, True)
         
 
-        print(f"len of timestamps {len(timestamps)}")
+        print(f"writer: len of timestamps {len(timestamps)}")
         sys.stdout.flush()
 
-    print("writer worker exiting")
+    print("writer: writer worker exiting")
     sys.stdout.flush()

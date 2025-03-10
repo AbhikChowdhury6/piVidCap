@@ -24,16 +24,17 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
 
     while True:
         if exitSignal[0] == 1:
-            print("model worker got exit signal")
+            print("model: got exit signal")
             sys.stdout.flush()
             break
 
         st = datetime.now()
         secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + 1
-        print(f"model waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
+        print(f"model: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
 
         frame = ctsb.data_buffers[ctsb.bn[0]][0]
+        print(f"model: using bufferNum {ctsb.bn[0]}")
         frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
         frame = frame.astype(np.uint8)
 
@@ -58,10 +59,10 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         # frame = frame.unsqueeze(0)
 
         try:
-            print("going to start running model")
+            print("model: going to start running model")
             st = datetime.now()
             r = model(frame, verbose=True)
-            print(f"it took {datetime.now() - st} for the model to run")
+            print(f"model: it took {datetime.now() - st} for the model to run")
 
             indexesOfPeople = [i for i, x in enumerate(r[0].boxes.cls) if x == 0]
             if len(indexesOfPeople) > 0:
@@ -83,5 +84,5 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             print(f"Error processing frame: {e}")
             sys.stdout.flush()
     
-    print("model worker exiting")
+    print("model: exiting")
     sys.stdout.flush()
