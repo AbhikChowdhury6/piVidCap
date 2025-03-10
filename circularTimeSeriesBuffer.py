@@ -14,6 +14,7 @@ class CircularTimeSeriesBuffers:
 
         # Shared memory buffers
         self.nextidxs = torch.zeros((3,1), dtype=torch.int32).share_memory_()  # Most recent index (insertion point)
+        self.lengths = torch.zeros((3,1), dtype=torch.int32).share_memory_()
         self.data_buffers = torch.zeros((3,) + shape, dtype=DTYPE).share_memory_()
         self.time_buffers = torch.zeros((3, self.size[0]), dtype=torch.int64).share_memory_()
         #print("initialized")
@@ -48,8 +49,10 @@ class CircularTimeSeriesBuffers:
         self.bn[0] = self.bufferNum()
         if self.bn[0] != self.lastbn[0]:
             self.nextidxs[self.lastbn[0]][0] = 0
+            self.lengths[self.bn[0]][0] = 0
         
         self[self.nextidxs[self.bn[0]][0]] = (value, timestamp)  # Use __setitem__
         #print(f"self.nextidx before incrementing {self.nextidx[0]}")
         self.nextidxs[self.bn[0]][0] = self.nextidxs[self.bn[0]][0] + 1  # Move to next index
+        self.lengths[self.bn[0]][0] = self.lengths[self.bn[0]][0] + 1
         #print(f"self.nextidx after incrementing {self.nextidx[0]}")
