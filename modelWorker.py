@@ -61,7 +61,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         try:
             print("model: going to start running model")
             st = datetime.now()
-            r = model(frame, verbose=True)
+            r = model(frame, verbose=False)
             print(f"model: it took {datetime.now() - st} for the model to run")
 
             indexesOfPeople = [i for i, x in enumerate(r[0].boxes.cls) if x == 0]
