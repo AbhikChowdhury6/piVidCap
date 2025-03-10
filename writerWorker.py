@@ -59,13 +59,15 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         print(f"finished writing the file {fbfn}.mp4")
         return []
 
-    def startNewVideo(tsList, tempFilePath):
+    def startNewVideo(tempFilePath):
         os.makedirs(tempFilePath[:-7], exist_ok=True)
         if os.path.exists(tempFilePath):
                 os.remove(tempFilePath)
         
         print("starting a new output")
         print(tempFilePath)
+        print(f"writer: frameWidthHeight: {frameWidthHeight}")
+        print(f"writer: fourcc: {fourcc}")
         output = cv2.VideoWriter(tempFilePath, 
                         fourcc, 
                         30.0, 
@@ -115,14 +117,15 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             # initialize stream parameters if we haven't
             if first:
                 first = False    
-                frameWidthHeight = (ctsb.data_buffers[bufferNum][0].shape[2], 
+                frameWidthHeight = (ctsb.data_buffers[bufferNum][0].shape[0], 
                                     ctsb.data_buffers[bufferNum][0].shape[1])
+                print(f"writer: setting frameWidthHeight to {frameWidthHeight}")
             
             # check if we have to make a new file
             if tryStartNewVideo:
                 tryStartNewVideo = False
                 tempFilePath = baseFilePath + newTimestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
-                output = startNewVideo(newTimestamps, tempFilePath)
+                output = startNewVideo(tempFilePath)
 
             # if crosses midnight close the file and start a new one
             if len(timestamps) == 0:
@@ -150,7 +153,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 # start and write the new day
                 timestamps.extend(newTimestamps[cutoffFrameIndex:ctsb.lengths[bufferNum][0]])
                 tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
-                output = startNewVideo(timestamps, tempFilePath)
+                output = startNewVideo(tempFilePath)
                 for frame in ctsb.data_buffers[bufferNum][cutoffFrameIndex:]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
