@@ -185,15 +185,15 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         print(f"writer: last_mr is {last_mr}")
         if model_result and not last_mr:
             print("writer: writing last 30 secs")
-            writeCtsbBufferNum((ctsb.lastbn[0] + 2) % 3)
-            writeCtsbBufferNum(ctsb.lastbn[0])
+            writeCtsbBufferNum((ctsb.bn[0] + 1) % 3)
+            writeCtsbBufferNum((ctsb.bn[0] + 2) % 3)
         elif model_result or last_mr:
             print("writer: writing last 15 secs")
-            writeCtsbBufferNum(ctsb.lastbn[0])
+            writeCtsbBufferNum((ctsb.bn[0] + 2) % 3)
 
         else:
             print("writer: writing only 30s old frame")
-            writeCtsbBufferNum((ctsb.lastbn[0] + 2) % 3, True)
+            writeCtsbBufferNum((ctsb.bn[0] + 1) % 3, True)
         
 
         print(f"writer: len of timestamps {len(timestamps)}")
