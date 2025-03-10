@@ -180,6 +180,10 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     frame = frame.astype(np.uint8)
                     frame = np.transpose(frame, (1, 0, 2))
                     frame = np.ascontiguousarray(frame)
+                    testFrame  = np.random.randint(0, 50, (1080, 1920, 3), dtype=np.uint8)
+                    success = output.write(testFrame)
+                    if not success:
+                        print(f"writer: Failed to write test frame")
                     print(f"writer: frame dtype: {frame.dtype}")
                     print(f"writer: frame type: {type(frame)}")
                     print(f"writer: frame min: {frame.min()}, max: {frame.max()}")
@@ -188,7 +192,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     print(f"writer: frame shape after resize: {frame.shape}")
                     success = output.write(frame)
                     if not success:
-                        print(f"writer: Failed to write frame")
+                        print(f"writer: Failed to write cap frame frame")
                 timestamps.extend(newTimestamps)
                 print(f"writer: have {len(timestamps)} frames in the current video")
                 print(f"writer: it took {datetime.now() - st} to write the frames")
