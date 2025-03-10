@@ -180,7 +180,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         
         # check if we want to save the last 30, 15 seconds or 1 frame
         last_mr = model_result
-        model_result = personSignal[0]
+        model_result = personSignal[0].clone()
         print(f"writer: model result is {model_result}")
         print(f"writer: last_mr is {last_mr}")
         if model_result and not last_mr:

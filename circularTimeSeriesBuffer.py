@@ -45,7 +45,7 @@ class CircularTimeSeriesBuffers:
         #print("in append")
         #sys.stdout.flush()
         # get the current buffer number to use, and reset the old one if we switched
-        self.lastbn[0] = self.bn[0]
+        self.lastbn[0] = self.bn[0].clone()
         self.bn[0] = self.bufferNum()
         if self.bn[0] != self.lastbn[0]:
             self.nextidxs[self.lastbn[0]][0] = 0
