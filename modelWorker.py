@@ -39,7 +39,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         frame = frame.astype(np.uint8)
 
         st = datetime.now()
-        frame_sum = sum(frame)
+        frame_sum = np.sum(frame)
         print(f"model: it took {datetime.now() - st} for frame sum to run")
         print(f"model: frame sum is {frame_sum}")
 
