@@ -38,26 +38,6 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
         frame = frame.astype(np.uint8)
 
-        # frame = frames[0].permute(2, 0, 1)
-
-        # target_size=(640, 640)
-        # c, h, w = frame.shape
-        # target_h, target_w = target_size
-
-        # scale = min(target_w / w, target_h / h)
-        # new_w, new_h = int(w * scale), int(h * scale)
-        
-        # transform_resize = T.Resize((new_h, new_w))
-        # frame = transform_resize(frame)
-        
-        # pad_w = (target_w - new_w) // 2
-        # pad_h = (target_h - new_h) // 2
-
-        # transform_pad = T.Pad((pad_w, pad_h, target_w - new_w - pad_w, target_h - new_h - pad_h), fill=0)
-        # frame = transform_pad(frame)
-
-        # frame = frame.unsqueeze(0)
-
         try:
             #print("model: going to start running model")
             st = datetime.now()

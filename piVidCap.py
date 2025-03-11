@@ -8,6 +8,7 @@ import gc
 from datetime import datetime, timedelta
 import time
 from zoneinfo import ZoneInfo
+import tzlocal
 
 
 repoPath = "/home/pi/Documents/"
@@ -57,7 +58,7 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal):
         else:
             frame = np.ascontiguousarray(picam2.capture_array()[::subSample, ::subSample, :])
             
-        frameTS = datetime.now().strftime("%Y-%m-%d %H:%M:%S%z")
+        frameTS = datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d %H:%M:%S%z")
         cv2.putText(frame, frameTS, (10, 50),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, 
                 (0, 255, 0), 2, cv2.LINE_AA)
