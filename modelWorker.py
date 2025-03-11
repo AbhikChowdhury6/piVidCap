@@ -29,12 +29,12 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             break
 
         st = datetime.now()
-        secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + 1
-        print(f"model: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
+        secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + .5
+        #print(f"model: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
 
         frame = ctsb.data_buffers[ctsb.bn[0]][0]
-        print(f"model: using bufferNum {ctsb.bn[0]}")
+        #print(f"model: using bufferNum {ctsb.bn[0]}")
         frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
         frame = frame.astype(np.uint8)
 
@@ -59,7 +59,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         # frame = frame.unsqueeze(0)
 
         try:
-            print("model: going to start running model")
+            #print("model: going to start running model")
             st = datetime.now()
             r = model(frame, verbose=False)
             print(f"model: it took {datetime.now() - st} for the model to run")
