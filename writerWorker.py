@@ -137,8 +137,11 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 print(f"writer: crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 sys.stdout.flush()
 
-                cutoffFrameIndex = ctsb.lengths[bufferNum][0]
-                while firstTimestamp.day < newTimestamps[cutoffFrameIndex-1].day:
+                cutoffFrameIndex = len(newTimestamps) -1
+                print(cutoffFrameIndex)
+                print(len(newTimestamps))
+                print(ctsb.lengths[bufferNum][0])
+                while firstTimestamp.day < newTimestamps[cutoffFrameIndex].day:
                     cutoffFrameIndex -= 1
                 cutoffFrameIndex -= 1
 
@@ -146,12 +149,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 for frame in ctsb.data_buffers[bufferNum][:cutoffFrameIndex]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
-                    frame = np.transpose(frame, (1, 0, 2))
-                    frame = np.ascontiguousarray(frame)
-                    print(f"writer: frame type: {type(frame)}")
                     success = output.write(frame)
-                    if not success:
-                        print(f"writer: Failed to write frame")
                 timestamps.extend(newTimestamps[:cutoffFrameIndex])
                 timestamps = exitVideo(output, timestamps, tempFilePath)
 
@@ -162,44 +160,17 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 for frame in ctsb.data_buffers[bufferNum][cutoffFrameIndex:]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
-                    frame = np.transpose(frame, (1, 0, 2))
-                    frame = np.ascontiguousarray(frame)
-                    print(f"writer: frame type: {type(frame)}")
                     success = output.write(frame)
-                    if not success:
-                        print(f"writer: Failed to write frame")
             
             else:
                 # else just add to the file
                 st = datetime.now()
-                #if output.isOpened():
-                #    print(f"writer: output is opened")
                     
                 for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
-                    #frame = np.transpose(frame, (1, 0, 2))
-                    #frame = np.ascontiguousarray(frame)
-                    #testFrame  = np.random.randint(0, 50, (1080, 1920, 3), dtype=np.uint8)
-                    #success = output.write(testFrame)
-                    #if not success:
-                    #     print(f"writer: Failed to write test frame")
-                    # else:
-                    #     print(f"writer: wrote test frame")
-                    #print(f"writer: frame dtype: {frame.dtype}")
-                    #print(f"writer: frame type: {type(frame)}")
-                    #print(f"writer: frame min: {frame.min()}, max: {frame.max()}")
-                    #print(f"writer: frame shape: {frame.shape}")
-                    #frame = cv2.resize(frame, (1920, 1080))
-                    #print(f"writer: frame shape after resize: {frame.shape}")
-                    #print(f"writer: frame dtype after resize: {frame.dtype}")
-                    #print(f"writer: frame type after resize: {type(frame)}")
-                    #print(f"writer: frame min after resize: {frame.min()}, max after resize: {frame.max()}")
                     success = output.write(frame)
-                    #if not success:
-                    #    print(f"writer: Failed to write cap frame frame")
-                    #else:
-                    #    print(f"writer: wrote cap frame frame")
+
                 timestamps.extend(newTimestamps)
                 print(f"writer: have {len(timestamps)} frames in the current video")
                 print(f"writer: it took {datetime.now() - st} to write the frames")
