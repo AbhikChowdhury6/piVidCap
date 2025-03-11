@@ -38,6 +38,17 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
         frame = frame.astype(np.uint8)
 
+        st = datetime.now()
+        frame_sum = sum(frame)
+        print(f"model: it took {datetime.now() - st} for frame sum to run")
+        print(f"model: frame sum is {frame_sum}")
+
+        #if frame_sum < 1000000:
+        #    print("model: frame sum is too low, skipping")
+        #    sys.stdout.flush()
+        #    personSignal[0] = 0
+        #    continue
+
         try:
             #print("model: going to start running model")
             st = datetime.now()
