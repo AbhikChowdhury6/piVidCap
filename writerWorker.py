@@ -91,7 +91,6 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
     output = None
     tempFilePath = None
     while True:
-        print()
         if exitSignal[0] == 1:
             print("writer: got exit signal")
             sys.stdout.flush()
@@ -149,7 +148,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             
             if firstTimestamp.day == newTimestamps[-1].day:
                 # else just add to the file
-                st = datetime.now()
+                # st = datetime.now()
                     
                 for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
@@ -157,8 +156,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                     success = output.write(frame)
 
                 timestamps.extend(newTimestamps)
-                print(f"writer: have {len(timestamps)} frames in the current video")
-                print(f"writer: it took {datetime.now() - st} to write the frames")
+                #print(f"writer: have {len(timestamps)} frames in the current video")
+                #print(f"writer: it took {datetime.now() - st} to write the frames")
                 sys.stdout.flush()
 
                 # check if the file is too big and close it if it is
@@ -205,20 +204,28 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 frame = frame.astype(np.uint8)
                 success = output.write(frame)
 
-            
-        # wait till a about round 15 seconds and then
-        st = datetime.now()
-        secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + .2
-        #print(f"writer: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
-        time.sleep(secondsToWait)
+
+        print()
+
+        # wait if the last write took less than 15 secs
+        if first:
+            writeStartTime = datetime.now()
+
+        if datetime.now() - writeStartTime < timedelta(seconds=15):
+            # wait till a about round 15 seconds and then
+            st = datetime.now()
+            secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + .2
+            #print(f"writer: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
+            time.sleep(secondsToWait)
         
         
+        writeStartTime = datetime.now()
         # check if we want to save the last 30, 15 seconds or 1 frame
         last_last_mr = last_mr
         last_mr = model_result
         model_result = personSignal[0].clone()
         print(f"writer: model result is {model_result}")
-        print(f"writer: last_mr is {last_mr}")
+        # print(f"writer: last_mr is {last_mr}")
         if model_result and not last_mr:
             print("writer: writing last 30 secs")
             writeCtsbBufferNum((ctsb.bn[0] + 1) % 3)
@@ -234,7 +241,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             print("dont even need to wrtie 30s old frame since we already did")
         
 
-        #print(f"writer: len of timestamps {len(timestamps)}")
+        print(f"writer: have {len(timestamps)} frames in the current video")
+        print(f"writer: it took {datetime.now() - writeStartTime} to write the frames")
         sys.stdout.flush()
 
     print("writer: writer worker exiting")
