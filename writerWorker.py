@@ -96,7 +96,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             break
 
         def writeCtsbBufferNum(bufferNum, onlyFirst=False):
-            #print(f"writer: using bufferNum {bufferNum}")
+            print(f"writer: using bufferNum {bufferNum}")
             print()
             print(datetime.now())
             print(f"writer: {ctsb.lengths[bufferNum][0]} frames in this buffer")
@@ -115,6 +115,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
 
 
             newTimestamps = intTensorToDtList(ctsb.time_buffers[bufferNum][:ctsb.lengths[bufferNum][0]])
+            print("the first timestamp is", newTimestamps[0])
+            print("the last timestamp is", newTimestamps[-1])
 
             # initialize stream parameters if we haven't
             if first:
@@ -196,7 +198,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             
         # wait till a about round 15 seconds and then
         st = datetime.now()
-        secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + 3.5
+        secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + .2
         #print(f"writer: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
         
@@ -205,17 +207,17 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         last_mr = model_result
         model_result = personSignal[0].clone()
         print(f"writer: model result is {model_result}")
-        #print(f"writer: last_mr is {last_mr}")
+        print(f"writer: last_mr is {last_mr}")
         if model_result and not last_mr:
-            #print("writer: writing last 30 secs")
+            print("writer: writing last 30 secs")
             writeCtsbBufferNum((ctsb.bn[0] + 1) % 3)
             writeCtsbBufferNum((ctsb.bn[0] + 2) % 3)
         elif model_result or last_mr:
-            #print("writer: writing last 15 secs")
+            print("writer: writing last 15 secs")
             writeCtsbBufferNum((ctsb.bn[0] + 2) % 3)
 
         else:
-            #print("writer: writing only 30s old frame")
+            print("writer: writing only 30s old frame")
             writeCtsbBufferNum((ctsb.bn[0] + 1) % 3, True)
         
 

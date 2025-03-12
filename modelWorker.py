@@ -29,7 +29,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             break
 
         st = datetime.now()
-        secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + .5
+        secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + .1
         #print(f"model: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
 
