@@ -22,6 +22,8 @@ class CircularTimeSeriesBuffers:
 
     def bufferNum(self):
         dt = datetime.now()
+        print(dt)
+        print(f"bufferNum returning {dt.minute % 3 + (dt.second // 15) % 3}")
         return (dt.minute % 3 + (dt.second // 15) % 3) % 3
 
     def __setitem__(self, index, value):

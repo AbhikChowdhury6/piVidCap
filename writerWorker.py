@@ -89,6 +89,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
     output = None
     tempFilePath = None
     while True:
+        print()
         if exitSignal[0] == 1:
             print("writer: got exit signal")
             sys.stdout.flush()
@@ -97,7 +98,6 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
 
         def writeCtsbBufferNum(bufferNum, onlyFirst=False):
             print(f"writer: using bufferNum {bufferNum}")
-            print()
             print(datetime.now())
             print(f"writer: {ctsb.lengths[bufferNum][0]} frames in this buffer")
             nonlocal first
@@ -117,6 +117,10 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             newTimestamps = intTensorToDtList(ctsb.time_buffers[bufferNum][:ctsb.lengths[bufferNum][0]])
             print("the first timestamp is", newTimestamps[0])
             print("the last timestamp is", newTimestamps[-1])
+
+            testTimestamps = intTensorToDtList(ctsb.time_buffers[bufferNum][:ctsb.lengths[bufferNum][0]] + 1)
+            print("the first test timestamp is", testTimestamps[0])
+            print("the last test timestamp is", testTimestamps[-1])
 
             # initialize stream parameters if we haven't
             if first:
