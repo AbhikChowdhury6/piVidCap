@@ -97,8 +97,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             break
 
         def writeCtsbBufferNum(bufferNum, onlyFirst=False):
-            #print(f"writer: using bufferNum {bufferNum}")
-            print(datetime.now())
+            print(f"writer: using bufferNum {bufferNum}")
+            print(f"the current time is: {datetime.now()}")
             #print(f"writer: {ctsb.lengths[bufferNum][0]} frames in this buffer")
             nonlocal first
             nonlocal tryStartNewVideo
@@ -118,6 +118,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             #print(f"len of new timestamps is {len(newTimestamps)}")
             #print("the first timestamps are" + " ".join([t.strftime("%S.%f") for t in newTimestamps[:20]]))
             #print("the last timestamps are " + " ".join([t.strftime("%S.%f") for t in newTimestamps[-20:]]))
+            print(f"the first timestamp is {newTimestamps[0]}")
+            print(f"the last timestamp is {newTimestamps[-1]}")
 
 
 
