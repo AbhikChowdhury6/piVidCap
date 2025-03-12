@@ -21,9 +21,9 @@ class CircularTimeSeriesBuffers:
         sys.stdout.flush()
 
     def bufferNum(self, timestamp):
-        print(f"current dt: {datetime.now()}")
-        print(f"frameTimestamp: {timestamp}")
-        print(f"bufferNum returning {(timestamp.minute % 3 + (timestamp.second // 15) % 3) % 3}")
+        #print(f"current dt: {datetime.now()}")
+        #print(f"frameTimestamp: {timestamp}")
+        #print(f"bufferNum returning {(timestamp.minute % 3 + (timestamp.second // 15) % 3) % 3}")
         return (timestamp.minute % 3 + (timestamp.second // 15) % 3) % 3
 
     def __setitem__(self, index, value):

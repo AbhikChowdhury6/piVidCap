@@ -97,9 +97,9 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             break
 
         def writeCtsbBufferNum(bufferNum, onlyFirst=False):
-            print(f"writer: using bufferNum {bufferNum}")
+            #print(f"writer: using bufferNum {bufferNum}")
             print(datetime.now())
-            print(f"writer: {ctsb.lengths[bufferNum][0]} frames in this buffer")
+            #print(f"writer: {ctsb.lengths[bufferNum][0]} frames in this buffer")
             nonlocal first
             nonlocal tryStartNewVideo
             nonlocal timestamps
@@ -115,9 +115,9 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
 
 
             newTimestamps = intTensorToDtList(ctsb.time_buffers[bufferNum][:ctsb.lengths[bufferNum][0]])
-            print(f"len of new timestamps is {len(newTimestamps)}")
-            print("the first timestamps are" + " ".join([t.strftime("%S.%f") for t in newTimestamps[:20]]))
-            print("the last timestamps are " + " ".join([t.strftime("%S.%f") for t in newTimestamps[-20:]]))
+            #print(f"len of new timestamps is {len(newTimestamps)}")
+            #print("the first timestamps are" + " ".join([t.strftime("%S.%f") for t in newTimestamps[:20]]))
+            #print("the last timestamps are " + " ".join([t.strftime("%S.%f") for t in newTimestamps[-20:]]))
 
 
 
@@ -207,6 +207,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         
         
         # check if we want to save the last 30, 15 seconds or 1 frame
+        last_last_mr = last_mr
         last_mr = model_result
         model_result = personSignal[0].clone()
         print(f"writer: model result is {model_result}")
@@ -219,9 +220,11 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             print("writer: writing last 15 secs")
             writeCtsbBufferNum((ctsb.bn[0] + 2) % 3)
 
-        else:
+        elif not last_last_mr:
             print("writer: writing only 30s old frame")
             writeCtsbBufferNum((ctsb.bn[0] + 1) % 3, True)
+        else:
+            print("dont even need to wrtie 30s old frame since we already did")
         
 
         #print(f"writer: len of timestamps {len(timestamps)}")
