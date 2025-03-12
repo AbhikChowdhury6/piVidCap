@@ -23,8 +23,8 @@ class CircularTimeSeriesBuffers:
     def bufferNum(self, timestamp):
         print(f"current dt: {datetime.now()}")
         print(f"frameTimestamp: {timestamp}")
-        print(f"bufferNum returning {(dt.minute % 3 + (dt.second // 15) % 3) % 3}")
-        return (dt.minute % 3 + (dt.second // 15) % 3) % 3
+        print(f"bufferNum returning {(timestamp.minute % 3 + (timestamp.second // 15) % 3) % 3}")
+        return (timestamp.minute % 3 + (timestamp.second // 15) % 3) % 3
 
     def __setitem__(self, index, value):
         """Set value and timestamp at a circular index."""
