@@ -83,6 +83,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         
 
     model_result = False
+    last_mr = False
+    last_last_mr = False
     timestamps = []
     first = True
     tryStartNewVideo = True
@@ -106,6 +108,9 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             nonlocal output
             nonlocal tempFilePath
             nonlocal frameWidthHeight
+            nonlocal model_result
+            nonlocal last_mr
+            nonlocal last_last_mr
 
             if ctsb.lengths[bufferNum][0] == 0:
                 return
