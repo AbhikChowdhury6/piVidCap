@@ -135,36 +135,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             else:
                 firstTimestamp = timestamps[0]
             
-            if firstTimestamp.day < newTimestamps[-1].day:
-                print(f"writer: crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                sys.stdout.flush()
-
-                cutoffFrameIndex = len(newTimestamps) -1
-                print(cutoffFrameIndex)
-                print(len(newTimestamps))
-                print(ctsb.lengths[bufferNum][0])
-                while firstTimestamp.day < newTimestamps[cutoffFrameIndex].day:
-                    cutoffFrameIndex -= 1
-                cutoffFrameIndex -= 1
-
-                # write and exit the previous days video
-                for frame in ctsb.data_buffers[bufferNum][:cutoffFrameIndex]:
-                    frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
-                    frame = frame.astype(np.uint8)
-                    success = output.write(frame)
-                timestamps.extend(newTimestamps[:cutoffFrameIndex])
-                timestamps = exitVideo(output, timestamps, tempFilePath)
-
-                # start and write the new day
-                timestamps.extend(newTimestamps[cutoffFrameIndex:ctsb.lengths[bufferNum][0]])
-                tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
-                output = startNewVideo(tempFilePath)
-                for frame in ctsb.data_buffers[bufferNum][cutoffFrameIndex:]:
-                    frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
-                    frame = frame.astype(np.uint8)
-                    success = output.write(frame)
-            
-            else:
+            if firstTimestamp.day == newTimestamps[-1].day:
                 # else just add to the file
                 st = datetime.now()
                     
@@ -182,8 +153,47 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 if len(timestamps) >= 1800:
                     timestamps = exitVideo(output, timestamps, tempFilePath)
                     tryStartNewVideo = True
+                return
             
         
+            print(f"writer: crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            sys.stdout.flush()
+
+            cutoffFrameIndex = len(newTimestamps) -1
+            print(cutoffFrameIndex)
+            print(len(newTimestamps))
+            print(ctsb.lengths[bufferNum][0])
+            # if only writing one frame
+            if ctsb.lengths[bufferNum][0] == 1:
+                timestamps = exitVideo(output, timestamps, tempFilePath)
+                timestamps.extend(newTimestamps[0])
+                output = startNewVideo(tempFilePath)
+                frame = ctsb.data_buffers[bufferNum][0]
+                frame = frame.astype(np.uint8)
+                success = output.write(frame)
+                return
+
+            while firstTimestamp.day < newTimestamps[cutoffFrameIndex].day:
+                cutoffFrameIndex -= 1
+            cutoffFrameIndex -= 1
+
+            # write and exit the previous days video
+            for frame in ctsb.data_buffers[bufferNum][:cutoffFrameIndex]:
+                frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
+                frame = frame.astype(np.uint8)
+                success = output.write(frame)
+            timestamps.extend(newTimestamps[:cutoffFrameIndex])
+            
+            # start and write the new day
+            timestamps.extend(newTimestamps[cutoffFrameIndex:ctsb.lengths[bufferNum][0]])
+            tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
+            output = startNewVideo(tempFilePath)
+            for frame in ctsb.data_buffers[bufferNum][cutoffFrameIndex:]:
+                frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
+                frame = frame.astype(np.uint8)
+                success = output.write(frame)
+
+            
         # wait till a about round 15 seconds and then
         st = datetime.now()
         secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + 3.5
