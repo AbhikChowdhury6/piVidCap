@@ -115,8 +115,9 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
 
 
             newTimestamps = intTensorToDtList(ctsb.time_buffers[bufferNum][:ctsb.lengths[bufferNum][0]])
-            print("the first timestamps are" + " ".join([t.strftime("%s.%f") for t in newTimestamps[:10]]))
-            print("the last timestamps are" + " ".join([t.strftime("%s.%f") for t in newTimestamps[-10:]]))
+            print(f"len of new timestamps is {len(newTimestamps)}")
+            print("the first timestamps are" + " ".join([t.strftime("%S.%f") for t in newTimestamps[:20]]))
+            print("the last timestamps are " + " ".join([t.strftime("%S.%f") for t in newTimestamps[-20:]]))
 
 
 
