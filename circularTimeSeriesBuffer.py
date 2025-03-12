@@ -20,9 +20,9 @@ class CircularTimeSeriesBuffers:
         #print("initialized")
         sys.stdout.flush()
 
-    def bufferNum(self):
-        dt = datetime.now()
-        print(dt)
+    def bufferNum(self, timestamp):
+        print(f"current dt: {dt}")
+        print(f"frameTimestamp: {timestamp}")
         print(f"bufferNum returning {(dt.minute % 3 + (dt.second // 15) % 3) % 3}")
         return (dt.minute % 3 + (dt.second // 15) % 3) % 3
 
@@ -48,7 +48,7 @@ class CircularTimeSeriesBuffers:
         #sys.stdout.flush()
         # get the current buffer number to use, and reset the old one if we switched
         self.lastbn[0] = self.bn[0].clone()
-        self.bn[0] = self.bufferNum()
+        self.bn[0] = self.bufferNum(timestamp)
         if self.bn[0] != self.lastbn[0]:
             self.nextidxs[self.lastbn[0]][0] = 0
             self.lengths[self.bn[0]][0] = 0
