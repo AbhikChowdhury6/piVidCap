@@ -32,8 +32,7 @@ class CircularTimeSeriesBuffers:
         #sys.stdout.flush()
         index = index % self.size[0]  # Ensure circular indexing
         self.data_buffers[self.bn[0]][index] = torch.tensor(value[0])  # Assume value is a tuple (data, timestamp)
-        self.time_buffers[self.bn[0]][index] = torch.tensor(int(value[1].replace(tzinfo=timezone.utc).timestamp() * 1e9 
-                                                + value[1].microsecond * 1e3))
+        self.time_buffers[self.bn[0]][index] = torch.tensor(int(value[1].replace(tzinfo=timezone.utc).timestamp() * 1e9))
             
     def __getitem__(self, index):
         """Retrieve (value, timestamp) from a circular index."""
