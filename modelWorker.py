@@ -43,10 +43,10 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         frame_sum = np.sum(frame)
         #print(f"model: it took {datetime.now() - st} for frame sum to run")
         print(f"model: frame sum is {frame_sum}")
-        print(f"model: frame shape is {frame.shape}")
-        print(f"model: frame size over shape is {frame_sum / frame.shape}")
+        print(f"model: frame shape is {frame.size}")
+        print(f"model: frame size over shape is {frame_sum / frame.size}")
 
-        if frame_sum / frame.shape < noRecThresh:
+        if frame_sum / frame.size < noRecThresh:
             print("model: frame sum is too low, skipping")
             sys.stdout.flush()
             personSignal[0] = 0
