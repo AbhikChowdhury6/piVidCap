@@ -40,7 +40,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
 
         st = datetime.now()
         frame_sum = np.sum(frame)
-        print(f"model: it took {datetime.now() - st} for frame sum to run")
+        #print(f"model: it took {datetime.now() - st} for frame sum to run")
         print(f"model: frame sum is {frame_sum}")
 
         #if frame_sum < 1000000:

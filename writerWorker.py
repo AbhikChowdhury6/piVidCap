@@ -98,7 +98,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             break
 
         def writeCtsbBufferNum(bufferNum, onlyFirst=False):
-            print(f"writer: using bufferNum {bufferNum}")
+            #print(f"writer: using bufferNum {bufferNum}")
             print(f"the current time is: {datetime.now()}")
             #print(f"writer: {ctsb.lengths[bufferNum][0]} frames in this buffer")
             nonlocal first
@@ -122,8 +122,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             #print(f"len of new timestamps is {len(newTimestamps)}")
             #print("the first timestamps are" + " ".join([t.strftime("%S.%f") for t in newTimestamps[:20]]))
             #print("the last timestamps are " + " ".join([t.strftime("%S.%f") for t in newTimestamps[-20:]]))
-            print(f"the first timestamp is {newTimestamps[0]}")
-            print(f"the last timestamp is {newTimestamps[-1]}")
+            #print(f"the first timestamp is {newTimestamps[0]}")
+            #print(f"the last timestamp is {newTimestamps[-1]}")
 
 
 
@@ -177,7 +177,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             # if only writing one frame
             if ctsb.lengths[bufferNum][0] == 1:
                 timestamps = exitVideo(output, timestamps, tempFilePath)
-                timestamps.extend(newTimestamps[0])
+                timestamps.append(newTimestamps[0])
                 output = startNewVideo(tempFilePath)
                 frame = ctsb.data_buffers[bufferNum][0]
                 frame = frame.astype(np.uint8)
@@ -217,6 +217,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + .2
             #print(f"writer: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
             time.sleep(secondsToWait)
+        else:
+            print("it took longer than 15s to write, not waiting")
         
         
         writeStartTime = datetime.now()
