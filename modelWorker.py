@@ -11,9 +11,10 @@ sys.path.append(repoPath + "piVidCap/")
 from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
-    from deviceInfo import modelName
+    from deviceInfo import modelName, noRecThresh
 else:
     modelName = "yolo11s.pt" #default to the small model
+    noRecThresh = 8
 
 
 
@@ -42,12 +43,14 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         frame_sum = np.sum(frame)
         #print(f"model: it took {datetime.now() - st} for frame sum to run")
         print(f"model: frame sum is {frame_sum}")
+        print(f"model: frame shape is {frame.shape}")
+        print(f"model: frame size over shape is {frame_sum / frame.shape}")
 
-        #if frame_sum < 1000000:
-        #    print("model: frame sum is too low, skipping")
-        #    sys.stdout.flush()
-        #    personSignal[0] = 0
-        #    continue
+        if frame_sum / frame.shape < noRecThresh:
+            print("model: frame sum is too low, skipping")
+            sys.stdout.flush()
+            personSignal[0] = 0
+            continue
 
         try:
             #print("model: going to start running model")

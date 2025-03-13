@@ -19,3 +19,6 @@ subSample = 1
 # yolo11s.pt is another big jump
 # the smallest one: yolo11n.pt
 modelName = "yolo11x.pt"
+
+
+noRecThresh = 8
