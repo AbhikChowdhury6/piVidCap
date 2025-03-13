@@ -90,6 +90,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
     tryStartNewVideo = True
     output = None
     tempFilePath = None
+    leftOverTime = timedelta(seconds=0)
     while True:
         if exitSignal[0] == 1:
             print("writer: got exit signal")
@@ -98,9 +99,9 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             break
 
         def writeCtsbBufferNum(bufferNum, onlyFirst=False):
-            #print(f"writer: using bufferNum {bufferNum}")
+            print(f"writer: using bufferNum {bufferNum}")
             print(f"the current time is: {datetime.now()}")
-            #print(f"writer: {ctsb.lengths[bufferNum][0]} frames in this buffer")
+            print(f"writer: {ctsb.lengths[bufferNum][0]} frames in this buffer")
             nonlocal first
             nonlocal tryStartNewVideo
             nonlocal timestamps
@@ -122,8 +123,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             #print(f"len of new timestamps is {len(newTimestamps)}")
             #print("the first timestamps are" + " ".join([t.strftime("%S.%f") for t in newTimestamps[:20]]))
             #print("the last timestamps are " + " ".join([t.strftime("%S.%f") for t in newTimestamps[-20:]]))
-            #print(f"the first timestamp is {newTimestamps[0]}")
-            #print(f"the last timestamp is {newTimestamps[-1]}")
+            print(f"the first timestamp is {newTimestamps[0]}")
+            print(f"the last timestamp is {newTimestamps[-1]}")
 
 
 
@@ -211,14 +212,18 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         if first:
             writeStartTime = datetime.now()
 
-        if datetime.now() - writeStartTime < timedelta(seconds=15):
+        runTime = datetime.now() - writeStartTime
+        if runTime + leftOverTime < timedelta(seconds=15):
+            leftOverTime = timedelta(seconds=0)
             # wait till a about round 15 seconds and then
             st = datetime.now()
             secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + .2
-            #print(f"writer: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
+            print(f"writer: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
             time.sleep(secondsToWait)
         else:
             print("it took longer than 15s to write, not waiting")
+            leftOverTime = (runTime + leftOverTime) - timedelta(seconds=15)
+            print(f"{leftOverTime} behind")
         
         
         writeStartTime = datetime.now()
