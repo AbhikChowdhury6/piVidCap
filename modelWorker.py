@@ -14,7 +14,7 @@ if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import modelName, noRecThresh
 else:
     modelName = "yolo11s.pt" #default to the small model
-    noRecThresh = 8
+    noRecThresh = 15
 
 
 
@@ -39,15 +39,10 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
         frame = frame.astype(np.uint8)
 
-        st = datetime.now()
-        frame_sum = np.sum(frame)
-        #print(f"model: it took {datetime.now() - st} for frame sum to run")
-        print(f"model: frame sum is {frame_sum}")
-        print(f"model: frame shape is {frame.shape}")
-        print(f"model: frame size is {frame.size}")
-        print(f"model: frame sum over size is {frame_sum / frame.size}")
+        m = frame.mean()
+        print(f"model: frame mean is {m}")
 
-        if frame_sum / frame.size < noRecThresh:
+        if m < noRecThresh:
             print("model: frame sum is too low, skipping")
             sys.stdout.flush()
             personSignal[0] = 0
