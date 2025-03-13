@@ -14,7 +14,7 @@ if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import modelName, noRecThresh
 else:
     modelName = "yolo11s.pt" #default to the small model
-    noRecThresh = 15
+    noRecThresh = 5
 
 
 

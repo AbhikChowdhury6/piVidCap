@@ -52,7 +52,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         os.rename(tempFilePath, fbfn + ".mp4")
         
         # write timestamps 
-        tsdf = pd.DataFrame(data=tsList, columns=['sampleDT'])
+        tsdf = pd.DataFrame(data=zip(tsList, range(len(tsList))), columns=['sampleDT', 'videoIndex'])
         tsdf = tsdf.set_index('sampleDT')
         tsdf.to_parquet(fbfn + ".parquet.gzip", compression='gzip')
 
