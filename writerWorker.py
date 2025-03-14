@@ -43,8 +43,13 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
     def exitVideo(output, tsList, tempFilePath):
         if output is None:
             print("output is None")
-            return
+            return []
         output.release()
+
+        if len(tsList) == 0:
+            print('new video empty')
+            os.remove(tempFilePath)
+            return []
 
         # rename video
         fbfn = baseFilePath + tsList[0].strftime('%Y-%m-%d%z') + "/"
