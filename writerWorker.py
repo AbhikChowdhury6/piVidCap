@@ -182,6 +182,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 timestamps.append(newTimestamps[0])
                 output = startNewVideo(tempFilePath)
                 frame = ctsb.data_buffers[bufferNum][0]
+                frame = frame.cpu().numpy()
                 frame = frame.astype(np.uint8)
                 success = output.write(frame)
                 return
@@ -196,6 +197,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 frame = frame.astype(np.uint8)
                 success = output.write(frame)
             timestamps.extend(newTimestamps[:cutoffFrameIndex])
+            timestamps = exitVideo(output, timestamps, tempFilePath)
             
             # start and write the new day
             timestamps.extend(newTimestamps[cutoffFrameIndex:ctsb.lengths[bufferNum][0]])
