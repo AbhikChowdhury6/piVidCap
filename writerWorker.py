@@ -177,12 +177,9 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             print(f"writer: crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             sys.stdout.flush()
 
-            cutoffFrameIndex = len(newTimestamps) -1
-            print(cutoffFrameIndex)
-            print(len(newTimestamps))
-            print(ctsb.lengths[bufferNum][0])
             # if only writing one frame
             if ctsb.lengths[bufferNum][0] == 1:
+                print("only writing one frame")
                 timestamps = exitVideo(output, timestamps, tempFilePath)
                 timestamps.append(newTimestamps[0])
                 output = startNewVideo(tempFilePath)
@@ -192,7 +189,20 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
                 success = output.write(frame)
                 return
 
-            while firstTimestamp.day < newTimestamps[cutoffFrameIndex].day:
+            cutoffFrameIndex = len(newTimestamps) -1
+            print(f"cutoffFrameIndex {cutoffFrameIndex}")
+            print(f"len(newTimestamps) {len(newTimestamps)}")
+            print(f"ctsb.lengths[bufferNum][0] {ctsb.lengths[bufferNum][0]}")
+            print(f"newTimestamps[0] {newTimestamps[0]}")
+            print(f"newTimestamps[-1] {newTimestamps[-1]}")
+            print(f"newTimestamps[147] {newTimestamps[147]}")
+            print(f"newTimestamps[148] {newTimestamps[148]}")
+            print(f"newTimestamps[149] {newTimestamps[149]}")
+            print(f"newTimestamps[cutoffFrameIndex] {newTimestamps[cutoffFrameIndex]}")
+            
+
+            while firstTimestamp.day < newTimestamps[cutoffFrameIndex].day and not cutoffFrameIndex == 1:
+                print(f"cutoffFrameIndex {cutoffFrameIndex}")
                 cutoffFrameIndex -= 1
             cutoffFrameIndex -= 1
 
