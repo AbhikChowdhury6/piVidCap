@@ -177,51 +177,15 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             print(f"writer: crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             sys.stdout.flush()
 
-            # if only writing one frame
-            if ctsb.lengths[bufferNum][0] == 1:
-                print("only writing one frame")
-                timestamps = exitVideo(output, timestamps, tempFilePath)
-                timestamps.append(newTimestamps[0])
-                output = startNewVideo(tempFilePath)
-                frame = ctsb.data_buffers[bufferNum][0]
-                frame = frame.cpu().numpy()
-                frame = frame.astype(np.uint8)
-                success = output.write(frame)
-                return
-
-            cutoffFrameIndex = len(newTimestamps) -1
-            print(f"cutoffFrameIndex {cutoffFrameIndex}")
-            print(f"len(newTimestamps) {len(newTimestamps)}")
-            print(f"ctsb.lengths[bufferNum][0] {ctsb.lengths[bufferNum][0]}")
-            print(f"newTimestamps[0] {newTimestamps[0]}")
-            print(f"newTimestamps[-1] {newTimestamps[-1]}")
-            print(f"newTimestamps[147] {newTimestamps[147]}")
-            print(f"newTimestamps[148] {newTimestamps[148]}")
-            print(f"newTimestamps[149] {newTimestamps[149]}")
-            print(f"newTimestamps[cutoffFrameIndex] {newTimestamps[cutoffFrameIndex]}")
-            
-
-            while firstTimestamp.day < newTimestamps[cutoffFrameIndex].day and not cutoffFrameIndex == 1:
-                print(f"cutoffFrameIndex {cutoffFrameIndex}")
-                cutoffFrameIndex -= 1
-            cutoffFrameIndex -= 1
-
-            # write and exit the previous days video
-            for frame in ctsb.data_buffers[bufferNum][:cutoffFrameIndex]:
-                frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
-                frame = frame.astype(np.uint8)
-                success = output.write(frame)
-            timestamps.extend(newTimestamps[:cutoffFrameIndex])
             timestamps = exitVideo(output, timestamps, tempFilePath)
-            
-            # start and write the new day
-            timestamps.extend(newTimestamps[cutoffFrameIndex:ctsb.lengths[bufferNum][0]])
+            timestamps.extend(newTimestamps)
             tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
             output = startNewVideo(tempFilePath)
-            for frame in ctsb.data_buffers[bufferNum][cutoffFrameIndex:]:
-                frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
-                frame = frame.astype(np.uint8)
-                success = output.write(frame)
+            for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
+                    frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
+                    frame = frame.astype(np.uint8)
+                    success = output.write(frame)
+
 
 
         print()
