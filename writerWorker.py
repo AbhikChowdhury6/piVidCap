@@ -35,7 +35,7 @@ baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
 def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
     print("in writer worker")
     sys.stdout.flush()
-    fourcc = cv2.VideoWriter_fourcc(*'avc1')
+    fourcc = cv2.VideoWriter_fourcc(*'FFV1')
     frameWidthHeight = (0,0)
     def dt_to_fnString(dt):
         return dt.astimezone(ZoneInfo("UTC")).strftime('%Y-%m-%dT%H%M%S,%f%z')
