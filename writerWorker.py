@@ -12,6 +12,8 @@ repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
 from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 
+extension = ".mkv"
+
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import deviceInfo
 else:
@@ -54,7 +56,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         # rename video
         fbfn = baseFilePath + tsList[0].strftime('%Y-%m-%d%z') + "/"
         fbfn += dt_to_fnString(tsList[0]) + "_" + dt_to_fnString(tsList[-1])
-        os.rename(tempFilePath, fbfn + ".mp4")
+        os.rename(tempFilePath, fbfn + extension)
         
         # write timestamps 
         data = [(ts, i, tsList[0], tsList[-1]) for i, ts in enumerate(tsList)]
@@ -62,7 +64,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
         tsdf = tsdf.set_index('sampleDT')
         tsdf.to_parquet(fbfn + ".parquet.gzip", compression='gzip')
 
-        print(f"finished writing the file {fbfn}.mp4")
+        print(f"finished writing the file {fbfn + extension}")
         return []
 
     def startNewVideo(tempFilePath):
@@ -144,7 +146,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             # check if we have to make a new file
             if tryStartNewVideo:
                 tryStartNewVideo = False
-                tempFilePath = baseFilePath + newTimestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
+                tempFilePath = baseFilePath + newTimestamps[0].strftime('%Y-%m-%d%z') + "/new" + extension
                 output = startNewVideo(tempFilePath)
 
             # if crosses midnight close the file and start a new one
@@ -179,7 +181,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
 
             timestamps = exitVideo(output, timestamps, tempFilePath)
             timestamps.extend(newTimestamps)
-            tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new.mp4"
+            tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new" + extension
             output = startNewVideo(tempFilePath)
             for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
