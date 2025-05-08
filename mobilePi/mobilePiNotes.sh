@@ -22,13 +22,15 @@ sudo nano /etc/systemd/system/pwmtest.service
 # WantedBy=multi-user.target
 
 #vision cap
-# sudo nano /etc/systemd/system/visioncap.service
+sudo nano /etc/systemd/system/visioncap.service
 # [Unit]
 # Description=Run piVidCap in conda env
 # After=network.target
 
 # [Service]
-# ExecStart=/home/pi/miniforge3/envs/vision/bin/python /home/pi/Documents/piVidCap/main.py
+# ExecStartPre=/usr/bin/rm -f /tmp/vision_input
+# ExecStartPre=/usr/bin/mkfifo /tmp/vision_input
+# ExecStart=/bin/bash -c "exec 3<>/tmp/vision_input; /home/pi/miniforge3/envs/vision/bin/python /home/pi/Documents/piVidCap/main.py <&3"
 # WorkingDirectory=/home/pi/Documents/piVidCap
 # User=pi
 # Restart=on-failure
@@ -37,6 +39,13 @@ sudo nano /etc/systemd/system/pwmtest.service
 
 # [Install]
 # WantedBy=multi-user.target
+
+
+#to send q
+echo q > /tmp/vision_input
+
+# to start again
+sudo systemctl restart visioncap.service
 
 
 #ups hat
