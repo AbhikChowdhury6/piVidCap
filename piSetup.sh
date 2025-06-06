@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 
-# copy key with ssh-copy-id uploadingGuest@192.168.1.113
+# copy key with ssh-copy-id pi@192.168.1.113
 # ssh in
 
 # sudo apt update
@@ -40,7 +40,6 @@ sudo apt install -y libcamera-dev
 sudo apt install -y libkms++-dev libfmt-dev libdrm-dev
 
 pip install --upgrade pip
-pip install wheel keyboard
 pip install rpi-libcamera rpi-kms picamera2 av
 # libcamera was a bit ahead of rpi-libcamera so i got this form pypi
 # pip install rpi-libcamera -C setup-args="-Dversion=unknown"

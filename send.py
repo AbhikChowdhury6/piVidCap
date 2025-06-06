@@ -32,7 +32,7 @@ logger.addHandler(handler)
 print(f"the time started is {datetime.now()}")
 # logger.info(f"the time started is {datetime.now()}")
 
-serverip = "192.168.1.113"
+serverip = "10.0.0.12"
 
 pathToCollectedData = "/home/" + os.getlogin() + "/Documents/collectedData/"
 
