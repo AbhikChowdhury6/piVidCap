@@ -7,6 +7,8 @@ keys = ["responsiblePartyName", "instanceName", "developingPartyName", "deviceNa
 #values = ["abhik", "bathroompi", "abhik", "piCam-raspberryPi5-Camv3noir", "mp4", "piVidCap"]
 #values = ["abhik", "kitchenpi", "abhik", "piCam-raspberryPi5-Camv3120noir", "mp4", "piVidCap"]
 #values = ["abhik", "testpi", "abhik", "piCam-raspberryPi5-Camv3120noir", "mp4", "piVidCap"]
+#values = ["abhik", "testpi4b", "abhik", "piCam-raspberryPi4-wideAnglenoir", "mp4", "piVidCap"]
+
 values = ["abhik", "notSet", "abhik", "unknown", "mp4", "piVidCap"]
 deviceInfo = OrderedDict(zip(keys, values))
 

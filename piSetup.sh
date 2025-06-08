@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 
-# copy key with ssh-copy-id pi@192.168.1.113
+# copy key with ssh-copy-id pi@10.0.0.12
 # ssh in
 
 # sudo apt update
@@ -30,8 +30,8 @@ rm Miniforge3-Linux-aarch64.sh
 source ~/.bashrc
 
 source ~/miniforge3/etc/profile.d/conda.sh
-conda create --name vision
-source activate vision
+conda create --name vision311 python=3.11
+source activate vision311
 conda install -y ultralytics pytorch torchvision pyarrow fastparquet tzlocal
 
 sudo apt update && sudo apt upgrade -y
@@ -47,11 +47,11 @@ pip install rpi-libcamera rpi-kms picamera2 av
 
 mkdir -p ~/Documents/collectedData
 ssh-keygen -t rsa
-ssh-copy-id uploadingGuest@192.168.1.113
+ssh-copy-id uploadingGuest@10.0.0.12
 
 
 # add activating the vision environment to the .bashrc
-echo "source /home/pi/miniforge3/bin/activate vision" >> /home/pi/.bashrc
+echo "source /home/pi/miniforge3/bin/activate vision311" >> /home/pi/.bashrc
 
 # there's been a bug where the model inferece stops working ## <- written on 12/26/24
 # with no detections or a bunch of random detections
@@ -64,16 +64,17 @@ echo "source /home/pi/miniforge3/bin/activate vision" >> /home/pi/.bashrc
 # on pi
 # libcamera-vid --width 1920 --height 1080 -t 0 --inline --listen -o tcp://0.0.0.0:8888
 # on installing machine
-# mpv --fps=40 --demuxer-lavf-probesize=32 tcp://192.168.1.25:8888/
+# mpv --fps=40 --demuxer-lavf-probesize=32 tcp://10.0.0.11:8888/
 
 
 # add the chron job to send the files
 crontab -e
 #0 8 * * * /home/pi/miniforge3/envs/vision/bin/python3.12 /home/pi/Documents/piVidCap/send.py
 
+sudo reboot
 
 #code to run capture
-# python /home/pi/Documents/piVidCap/piVidCap.py -1
+# python /home/pi/Documents/piVidCap/main.py
 
 # try adding to rc.local
 # sudo nano /etc/rc.local
