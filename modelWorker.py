@@ -35,17 +35,18 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
                     #print(f"the most confident recognition was {maxPersonConf}")
                     sys.stdout.flush()
                     if maxPersonConf > .25:
-                        personSignal[0] = 1
+                        return 1
                     else:
-                        personSignal[0] = 0
+                        return 0
                 else:
-                    personSignal[0] = 0
+                    return 0
                     #print("didn't see anyone")
                     sys.stdout.flush()
 
             except Exception as e:
                 print(f"Error processing frame: {e}")
                 sys.stdout.flush()
+                return 0
 
         def getFrameMeanresult(self, ctsb):
             frame = ctsb.data_buffers[ctsb.bn[0]][0]
