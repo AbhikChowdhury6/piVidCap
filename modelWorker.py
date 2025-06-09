@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import time
 import torchvision.transforms as T
 import numpy as np
-from ultralytics import YOLO
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
@@ -23,31 +22,6 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
     sys.stdout.flush()
 
     class detect:
-        def getYOLOresult(self, frame):
-            frame = ctsb.data_buffers[ctsb.bn[0]][0]
-            frame = frame.cpu().numpy().astype(np.uint8)
-            r = self.model(frame, verbose=False)
-            try:
-                indexesOfPeople = [i for i, x in enumerate(r[0].boxes.cls) if x == 0]
-                if len(indexesOfPeople) > 0:
-                    #print(f"saw {len(indexesOfPeople)} people")
-                    sys.stdout.flush()
-                    maxPersonConf = max([r[0].boxes.conf[i] for i in indexesOfPeople])
-                    #print(f"the most confident recognition was {maxPersonConf}")
-                    sys.stdout.flush()
-                    if maxPersonConf > .25:
-                        return 1
-                    else:
-                        return 0
-                else:
-                    return 0
-                    #print("didn't see anyone")
-                    sys.stdout.flush()
-
-            except Exception as e:
-                print(f"Error processing frame: {e}")
-                sys.stdout.flush()
-                return 0
 
         def getFrameMeanresult(self, ctsb):
             frame = ctsb.data_buffers[ctsb.bn[0]][0]
@@ -78,9 +52,6 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
 
         def __init__(self, capType):
             self.recType = capType.split('-')[0]
-            if self.recType == 'yolo':
-                self.model = YOLO(capType.split('-')[1])
-                self.getResult = self.getYOLOresult
             
             if self.recType == 'frameMean':
                 self.thresh = int(capType.split('-')[1])
