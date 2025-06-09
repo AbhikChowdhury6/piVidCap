@@ -54,25 +54,25 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
             sys.stdout.flush()
             break
 
-        #print("going to get frame")
-        frameTime = datetime.now().astimezone()
-        if subSample == 1:
-            frame = picam2.capture_array()
-        else:
-            frame = np.ascontiguousarray(picam2.capture_array()[::subSample, ::subSample, :])
+        # #print("going to get frame")
+        # frameTime = datetime.now().astimezone()
+        # if subSample == 1:
+        #     frame = picam2.capture_array()
+        # else:
+        #     frame = np.ascontiguousarray(picam2.capture_array()[::subSample, ::subSample, :])
 
-        #if rotate == 1:
-            #frame = cv2.rotate(picam2.capture_array(), rotate)
+        # #if rotate == 1:
+        #     #frame = cv2.rotate(picam2.capture_array(), rotate)
             
-        frameTS = datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d %H:%M:%S%z")
-        cv2.putText(frame, frameTS, (10, 50),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, 
-                (0, 255, 0), 2, cv2.LINE_AA)
-        #print("frame is captured and written on")
-        #print(frameTS)
+        # frameTS = datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d %H:%M:%S%z")
+        # cv2.putText(frame, frameTS, (10, 50),
+        #         cv2.FONT_HERSHEY_SIMPLEX, 1, 
+        #         (0, 255, 0), 2, cv2.LINE_AA)
+        # #print("frame is captured and written on")
+        # #print(frameTS)
 
-        #print(f"nextidx from piVidCap is {ctsb.nextidx[0]} before append")
-        ctsb.append(frame, frameTime.astimezone(ZoneInfo("UTC")))
+        # #print(f"nextidx from piVidCap is {ctsb.nextidx[0]} before append")
+        # ctsb.append(frame, frameTime.astimezone(ZoneInfo("UTC")))
         #print(f"nextidx from piVidCap is {ctsb.nextidx[0]} after append")
 
         #manually set
