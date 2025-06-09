@@ -54,7 +54,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
             print(f"MODEL: FrameMeanresult: {m}\t threshold: {self.thresh}")
             sys.stdout.flush()
             
-            return m > self.thresh
+            return int(m > self.thresh)
         
         def getDiffresult(self, ctsb):
             #do the sum of the diff squared
@@ -68,7 +68,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
             print(f"MODEL: sqDiffMeanresult: {avgsqDiff}\t threshold: {self.thresh}")
             sys.stdout.flush()
 
-            return avgsqDiff > self.thresh
+            return int(avgsqDiff > self.thresh)
 
 
 
