@@ -38,7 +38,7 @@ dLvl[0] = debugLvl
 vidCap_process = mp.Process(target=pi_vid_cap, args=(tsVidBuffer, exitSignal, dLvl))
 vidCap_process.start()
 
-model_process = mp.Process(target=model_worker, args=(tsVidBuffer, personSignal, exitSignal))
+model_process = mp.Process(target=model_worker, args=(tsVidBuffer, personSignal, exitSignal, dLvl))
 model_process.start()
 
 writer_process = mp.Process(target=writer_worker, args=(tsVidBuffer, personSignal, exitSignal))
