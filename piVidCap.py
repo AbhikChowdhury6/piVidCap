@@ -10,12 +10,18 @@ import time
 from zoneinfo import ZoneInfo
 import tzlocal
 
+buffSecs = 5
+capHz = 8
+maxWidth = 1296
+maxHeight = 972
+
+rotate = 1
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
 from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
-    from deviceInfo import subSample
+    from deviceInfo import subSample, buffSecs, capHz, maxWidth, maxHeight, rotate
 else:
     subSample = 3 #default to 480p ish
 
@@ -24,7 +30,7 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal):
     """ Captures frames and writes to the shared buffer in a circular fashion. """
     st = datetime.now() 
     picam2 = Picamera2()
-    video_config = picam2.create_video_configuration(main={"size": (1920, 1080), "format": "RGB888"})
+    video_config = picam2.create_video_configuration(main={"size": (maxWidth, maxHeight), "format": "RGB888"})
     picam2.configure(video_config)
     picam2.start()
     print(f"The cap took {datetime.now()  - st} to initialize")
@@ -35,12 +41,12 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal):
     del frame
     gc.collect()
     
-    def delayTill100ms(): # a bit offset to compensate for read lag
-        msToDelay = 100 - ((datetime.now().microsecond / 1000) % 100)
+    def delayTillHzms(): # a bit offset to compensate for read lag
+        msToDelay = (1000/capHz) - ((datetime.now().microsecond / 1000) % (1000/capHz))
         time.sleep(msToDelay/1000)
 
     st = datetime.now()
-    secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000)
+    secondsToWait = ((buffSecs-1) - (st.second % buffSecs)) + (1 - st.microsecond/1_000_000)
     print(f"vidCap waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)} to start")
     sys.stdout.flush()
     time.sleep(secondsToWait)
@@ -57,6 +63,9 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal):
             frame = picam2.capture_array()
         else:
             frame = np.ascontiguousarray(picam2.capture_array()[::subSample, ::subSample, :])
+
+        if rotate == 1:
+            cv2.rotate(picam2.capture_array(), rotate)
             
         frameTS = datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d %H:%M:%S%z")
         cv2.putText(frame, frameTS, (10, 50),
@@ -75,7 +84,7 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal):
         #print(f"nextidx from piVidCap is {ctsb.nextidx} after append")
         
 
-        delayTill100ms()
+        delayTillHzms()
 
     print("piVidCap exiting")
     sys.stdout.flush()

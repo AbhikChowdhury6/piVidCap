@@ -15,28 +15,36 @@ from writerWorker import writer_worker
 from piVidCap import pi_vid_cap
 from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
-    from deviceInfo import subSample
+    from deviceInfo import subSample, debugLvl, buffSecs, capHz, maxWidth, maxHeight
 else:
     subSample = 3 #default to 480p ish
 
+buffSecs = 5
+capHz = 8
+maxWidth = 1296
+maxHeight = 972
+
+
 # Define buffer properties
-BUFFER_SIZE = 152  # Maximum number of frames stored
-HEIGHT = 1080 // subSample # Frame height
-WIDTH = 1920 // subSample  # Frame width
+BUFFER_SIZE = (buffSecs * capHz) + 3  # Maximum number of frames stored
+HEIGHT = maxHeight // subSample # Frame height
+WIDTH = maxWidth // subSample  # Frame width
 CHANNELS = 3   # RGB color channels
 DTYPE = torch.uint8
 
 tsVidBuffer = CircularTimeSeriesBuffers((BUFFER_SIZE, HEIGHT, WIDTH, CHANNELS), DTYPE)
 exitSignal = torch.zeros(1, dtype=torch.int64).share_memory_()
 personSignal = torch.zeros(1, dtype=torch.int8).share_memory_()
+dLvl = torch.zeros(1, dtype=torch.int8).share_memory_()
+dLvl[0] = debugLvl
 
-vidCap_process = mp.Process(target=pi_vid_cap, args=(tsVidBuffer, exitSignal))
+vidCap_process = mp.Process(target=pi_vid_cap, args=(tsVidBuffer, exitSignal, dLvl))
 vidCap_process.start()
 
-model_process = mp.Process(target=model_worker, args=(tsVidBuffer, personSignal, exitSignal))
+model_process = mp.Process(target=model_worker, args=(tsVidBuffer, personSignal, exitSignal, dLvl))
 model_process.start()
 
-writer_process = mp.Process(target=writer_worker, args=(tsVidBuffer, personSignal, exitSignal))
+writer_process = mp.Process(target=writer_worker, args=(tsVidBuffer, personSignal, exitSignal, dLvl))
 writer_process.start()
 
 

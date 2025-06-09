@@ -12,6 +12,7 @@ repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
 from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 
+buffSecs = 5
 extension = ".mp4"
 
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
@@ -192,44 +193,44 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
 
         print()
 
-        # wait if the last write took less than 15 secs
+        # wait if the last write took less than buffSecs secs
         if first:
             writeStartTime = datetime.now()
 
         runTime = datetime.now() - writeStartTime
-        if runTime + leftOverTime < timedelta(seconds=15):
+        if runTime + leftOverTime < timedelta(seconds=buffSecs):
             leftOverTime = timedelta(seconds=0)
-            # wait till a about round 15 seconds and then
+            # wait till a about round buffSecs seconds and then
             st = datetime.now()
-            secondsToWait = (14 - (st.second % 15)) + (1 - st.microsecond/1_000_000) + .2
+            secondsToWait = ((buffSecs-1) - (st.second % buffSecs)) + (1 - st.microsecond/1_000_000) + .2
             print(f"writer: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
             time.sleep(secondsToWait)
         else:
-            print("it took longer than 15s to write, not waiting")
-            leftOverTime = (runTime + leftOverTime) - timedelta(seconds=15)
+            print(f"it took longer than {buffSecs}s to write, not waiting")
+            leftOverTime = (runTime + leftOverTime) - timedelta(seconds=buffSecs)
             print(f"{leftOverTime} behind")
         
         
         writeStartTime = datetime.now()
-        # check if we want to save the last 30, 15 seconds or 1 frame
+        # check if we want to save the last 2buffSecs, 1buffSecs or 1 frame
         last_last_mr = last_mr
         last_mr = model_result
         model_result = personSignal[0].clone()
         print(f"writer: model result is {model_result}")
         # print(f"writer: last_mr is {last_mr}")
         if model_result and not last_mr:
-            print("writer: writing last 30 secs")
+            print(f"writer: writing last {2*buffSecs} secs")
             writeCtsbBufferNum((ctsb.bn[0] + 1) % 3)
             writeCtsbBufferNum((ctsb.bn[0] + 2) % 3)
         elif model_result or last_mr:
-            print("writer: writing last 15 secs")
+            print(f"writer: writing last {buffSecs} secs")
             writeCtsbBufferNum((ctsb.bn[0] + 2) % 3)
 
         elif not last_last_mr:
-            print("writer: writing only 30s old frame")
+            print(f"writer: writing only {2*buffSecs}s old frame")
             writeCtsbBufferNum((ctsb.bn[0] + 1) % 3, True)
         else:
-            print("dont even need to wrtie 30s old frame since we already did")
+            print(f"dont even need to wrtie {2*buffSecs}s old frame since we already did")
         
 
         print(f"writer: have {len(timestamps)} frames in the current video")
