@@ -17,7 +17,8 @@ from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import subSample, debugLvl, buffSecs, capHz, maxWidth, maxHeight
 else:
-    subSample = 3 #default to 480p ish
+    print("error no deviceInfo found")
+    sys.exit()
 
 
 

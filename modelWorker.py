@@ -24,7 +24,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
     class detect:
         def getYOLOresult(self, frame):
             frame = ctsb.data_buffers[ctsb.bn[0]][0]
-            frame - frame.cpu().numpy().astype(np.uint8)
+            frame = frame.cpu().numpy().astype(np.uint8)
             r = self.model(frame, verbose=False)
             try:
                 indexesOfPeople = [i for i, x in enumerate(r[0].boxes.cls) if x == 0]
