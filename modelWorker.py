@@ -18,7 +18,7 @@ else:
 
 
 def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debugLvl):
-    print("in model worker")
+    print(f"in model worker  PID: {os.getpid()}")
     sys.stdout.flush()
 
     class detect:
@@ -58,7 +58,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
         
         def getDiffresult(self, ctsb):
             #do the sum of the diff squared
-            firstFrame = ctsb.data_buffers[ctsb.bn[0]][0]
+            firstFrame = ctsb.data_buffers[ctsb.lastbn[0]][0]
             firstFrame = firstFrame.cpu().numpy().astype(np.uint8)
             lastFrame = ctsb.data_buffers[ctsb.bn[0]][ctsb.lengths[ctsb.bn[0]]]
             lastFrame = lastFrame.cpu().numpy().astype(np.uint8)

@@ -33,7 +33,7 @@ baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
 
 
 def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debugLvl):
-    print("in writer worker")
+    print(f"in writer worker  PID: {os.getpid()}")
     sys.stdout.flush()
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
     frameWidthHeight = (0,0)

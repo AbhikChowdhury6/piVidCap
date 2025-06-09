@@ -21,7 +21,7 @@ else:
 
 
 def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
-    print("in vidCap worker")
+    print(f"in piVidCap worker  PID: {os.getpid()}")
     sys.stdout.flush()
 
     """ Captures frames and writes to the shared buffer in a circular fashion. """
