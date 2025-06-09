@@ -12,16 +12,13 @@ repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
 from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 
-buffSecs = 5
 extension = ".mp4"
 
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
-    from deviceInfo import deviceInfo
+    from deviceInfo import deviceInfo, buffSecs
 else:
-    from collections import OrderedDict
-    keys = ["responsiblePartyName", "instanceName", "developingPartyName", "deviceName", "dataType", "dataSource"]
-    values = ["abhik", "notSet", "abhik", "unknown", "mp4", "piVidCap"]
-    deviceInfo = OrderedDict(zip(keys, values))
+    print("error no deviceInfo found")
+    sys.exit()
 
 deviceName = "_".join(deviceInfo.values())
 if deviceInfo["instanceName"] == "notSet":

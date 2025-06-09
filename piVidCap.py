@@ -16,10 +16,14 @@ from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import subSample, buffSecs, capHz, maxWidth, maxHeight, rotate
 else:
-    subSample = 3 #default to 480p ish
+    print("error no deviceInfo found")
+    sys.exit()
 
 
 def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
+    print("in vidCap worker")
+    sys.stdout.flush()
+
     """ Captures frames and writes to the shared buffer in a circular fashion. """
     st = datetime.now() 
     picam2 = Picamera2()

@@ -11,7 +11,7 @@ from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
     from deviceInfo import capType, buffSecs
-else   :
+else:
     print("error no deviceInfo found")
     sys.exit()
 
