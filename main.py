@@ -35,7 +35,7 @@ personSignal = torch.zeros(1, dtype=torch.int8).share_memory_()
 dLvl = torch.zeros(1, dtype=torch.int8).share_memory_()
 dLvl[0] = debugLvl
 
-vidCap_process = mp.Process(target=pi_vid_cap, args=(tsVidBuffer, exitSignal))
+vidCap_process = mp.Process(target=pi_vid_cap, args=(tsVidBuffer, exitSignal, dLvl))
 vidCap_process.start()
 
 model_process = mp.Process(target=model_worker, args=(tsVidBuffer, personSignal, exitSignal))
