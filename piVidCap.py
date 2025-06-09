@@ -69,7 +69,7 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
                 cv2.FONT_HERSHEY_SIMPLEX, 1, 
                 (0, 255, 0), 2, cv2.LINE_AA)
         #print("frame is captured and written on")
-        #print(frameTS)
+        print(frameTS)
 
         # #print(f"nextidx from piVidCap is {ctsb.nextidx[0]} before append")
         ctsb.append(frame, frameTime.astimezone(ZoneInfo("UTC")))
