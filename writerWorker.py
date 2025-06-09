@@ -35,7 +35,7 @@ baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
                 deviceName + "_"
 
 
-def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
+def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debugLvl):
     print("in writer worker")
     sys.stdout.flush()
     fourcc = cv2.VideoWriter_fourcc(*'avc1')

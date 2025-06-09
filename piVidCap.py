@@ -10,13 +10,6 @@ import time
 from zoneinfo import ZoneInfo
 import tzlocal
 
-buffSecs = 5
-capHz = 8
-maxWidth = 1296
-maxHeight = 972
-
-rotate = 1
-
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
 from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
@@ -26,7 +19,7 @@ else:
     subSample = 3 #default to 480p ish
 
 
-def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal):
+def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
     """ Captures frames and writes to the shared buffer in a circular fashion. """
     st = datetime.now() 
     picam2 = Picamera2()
