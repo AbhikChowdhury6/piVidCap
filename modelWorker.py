@@ -21,8 +21,8 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
     sys.stdout.flush()
 
     class detect:
-        def getYOLOresult(self, frame):
-            frame = ctsb.data_buffers[ctsb.bn[0]][0]
+        def getYOLOresult(self):
+            frame = self.ctsb.data_buffers[ctsb.bn[0]][0]
             frame = frame.cpu().numpy().astype(np.uint8)
             r = self.model(frame, verbose=False)
             try:
@@ -47,8 +47,8 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
                 sys.stdout.flush()
                 return 0
 
-        def getFrameMeanresult(self, ctsb):
-            frame = ctsb.data_buffers[ctsb.bn[0]][0]
+        def getFrameMeanresult(self):
+            frame = self.ctsb.data_buffers[ctsb.bn[0]][0]
             frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
             frame = frame.astype(np.uint8)
 
@@ -58,11 +58,11 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
             
             return int(m > self.thresh)
         
-        def getDiffresult(self, ctsb):
+        def getDiffresult(self):
             #do the sum of the diff squared
-            firstFrame = ctsb.data_buffers[ctsb.lastbn[0]][0]
+            firstFrame = self.ctsb.data_buffers[ctsb.lastbn[0]][0]
             firstFrame = firstFrame.cpu().numpy().astype(np.uint8)
-            lastFrame = ctsb.data_buffers[ctsb.bn[0]][ctsb.lengths[ctsb.bn[0]]]
+            lastFrame = selfctsb.data_buffers[ctsb.bn[0]][ctsb.lengths[ctsb.bn[0]]]
             lastFrame = lastFrame.cpu().numpy().astype(np.uint8)
             sqDiff = (lastFrame - firstFrame) ** 2
 
@@ -74,7 +74,8 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
 
 
 
-        def __init__(self, capType):
+        def __init__(self, capType, ctsb):
+            self.ctsb = ctsb
             self.recType = capType.split('-')[0]
             if self.recType == 'yolo':
                 from ultralytics import YOLO
@@ -90,7 +91,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
                 self.getResult = self.getDiffresult
         
     
-    d = detect(capType)
+    d = detect(capType, ctsb)
 
     while True:
         if exitSignal[0] == 1:
@@ -103,7 +104,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
         #print(f"model: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
         st = datetime.now()
-        personSignal[0] = d.getResult(ctsb)
+        personSignal[0] = d.getResult()
 
         print(f"model: it took {datetime.now() - st} for the model to run")
         sys.stdout.flush()
