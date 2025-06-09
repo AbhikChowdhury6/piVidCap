@@ -21,10 +21,8 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
     sys.stdout.flush()
 
     class detect:
-        def getYOLOresult(self):
-            frame = self.ctsb.data_buffers[ctsb.bn[0]][0]
-            frame = frame.cpu().numpy().astype(np.uint8)
-            r = self.model(frame, verbose=False)
+        def getYOLOresult(self, firstFrame, lastFrame):
+            r = self.model(firstFrame, verbose=False)
             try:
                 indexesOfPeople = [i for i, x in enumerate(r[0].boxes.cls) if x == 0]
                 if len(indexesOfPeople) > 0:
@@ -47,23 +45,15 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
                 sys.stdout.flush()
                 return 0
 
-        def getFrameMeanresult(self):
-            frame = self.ctsb.data_buffers[ctsb.bn[0]][0]
-            frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
-            frame = frame.astype(np.uint8)
-
-            m = frame.mean()
+        def getFrameMeanresult(self, firstFrame, lastFrame):
+            m = firstFrame.mean()
             print(f"MODEL: FrameMeanresult: {m}\t threshold: {self.thresh}")
             sys.stdout.flush()
             
             return int(m > self.thresh)
         
-        def getDiffresult(self):
+        def getDiffresult(self, firstFrame, lastFrame):
             #do the sum of the diff squared
-            firstFrame = self.ctsb.data_buffers[ctsb.lastbn[0]][0]
-            firstFrame = firstFrame.cpu().numpy().astype(np.uint8)
-            lastFrame = selfctsb.data_buffers[ctsb.bn[0]][ctsb.lengths[ctsb.bn[0]]]
-            lastFrame = lastFrame.cpu().numpy().astype(np.uint8)
             sqDiff = (lastFrame - firstFrame) ** 2
 
             avgsqDiff = sqDiff.mean()
@@ -74,8 +64,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
 
 
 
-        def __init__(self, capType, ctsb):
-            self.ctsb = ctsb
+        def __init__(self, capType):
             self.recType = capType.split('-')[0]
             if self.recType == 'yolo':
                 from ultralytics import YOLO
@@ -104,7 +93,13 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
         #print(f"model: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
         st = datetime.now()
-        personSignal[0] = d.getResult()
+
+        firstFrame = ctsb.data_buffers[ctsb.lastbn[0]][0]
+        firstFrame = firstFrame.cpu().numpy().astype(np.uint8)
+        lastFrame = ctsb.data_buffers[ctsb.bn[0]][ctsb.lengths[ctsb.bn[0]]]
+        lastFrame = lastFrame.cpu().numpy().astype(np.uint8)
+        
+        personSignal[0] = d.getResult(firstFrame, lastFrame)
 
         print(f"model: it took {datetime.now() - st} for the model to run")
         sys.stdout.flush()
