@@ -7,7 +7,8 @@ import sys
 class CircularTimeSeriesBuffers:
     def __init__(self, shape, buffTime, DTYPE):
         #print("initializing")
-        self.buffTime = buffTime
+        #self.buffTime = torch.zeros(1, dtype=torch.int32).share_memory_()
+        #self.buffTime[0] = buffTime
         self.size = torch.zeros(1, dtype=torch.int32).share_memory_()
         self.size[0] = shape[0]  # Number of time steps
         self.lastbn = torch.zeros(1, dtype=torch.int32).share_memory_()
