@@ -80,7 +80,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
                 self.getResult = self.getDiffresult
         
     
-    d = detect(capType, ctsb)
+    d = detect(capType)
 
     while True:
         if exitSignal[0] == 1:
