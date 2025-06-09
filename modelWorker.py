@@ -100,7 +100,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
         secondsToWait = ((buffSecs-1) - (st.second % buffSecs)) + (1 - st.microsecond/1_000_000) + .1
         #print(f"model: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
         time.sleep(secondsToWait)
-
+        st = datetime.now()
         personSignal[0] = d.getResult(ctsb)
 
         print(f"model: it took {datetime.now() - st} for the model to run")
