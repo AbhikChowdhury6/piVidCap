@@ -62,7 +62,7 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
             frame = np.ascontiguousarray(picam2.capture_array()[::subSample, ::subSample, :])
 
         if rotate == 1:
-            cv2.rotate(picam2.capture_array(), rotate)
+            frame = cv2.rotate(picam2.capture_array(), rotate)
             
         frameTS = datetime.now(tzlocal.get_localzone()).strftime("%Y-%m-%d %H:%M:%S%z")
         cv2.putText(frame, frameTS, (10, 50),
