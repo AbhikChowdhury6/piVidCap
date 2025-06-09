@@ -19,10 +19,6 @@ if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
 else:
     subSample = 3 #default to 480p ish
 
-buffSecs = 5
-capHz = 8
-maxWidth = 1296
-maxHeight = 972
 
 
 # Define buffer properties
