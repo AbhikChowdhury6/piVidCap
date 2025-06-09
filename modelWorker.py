@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import time
 import torchvision.transforms as T
 import numpy as np
+from ultralytics import YOLO
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
@@ -78,7 +79,6 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
         def __init__(self, capType):
             self.recType = capType.split('-')[0]
             if self.recType == 'yolo':
-                from ultralytics import YOLO
                 self.model = YOLO(capType.split('-')[1])
                 self.getResult = self.getYOLOresult
             
