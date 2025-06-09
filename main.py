@@ -15,20 +15,25 @@ from writerWorker import writer_worker
 from piVidCap import pi_vid_cap
 from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
-    from deviceInfo import subSample
+    from deviceInfo import subSample, debugLvl, buffSecs, capHz, maxWidth, maxHeight
 else:
-    subSample = 3 #default to 480p ish
+    print("error no deviceInfo found")
+    sys.exit()
+
+
 
 # Define buffer properties
-BUFFER_SIZE = 152  # Maximum number of frames stored
-HEIGHT = 1080 // subSample # Frame height
-WIDTH = 1920 // subSample  # Frame width
+BUFFER_SIZE = (buffSecs * capHz) + 3  # Maximum number of frames stored
+HEIGHT = maxHeight // subSample # Frame height
+WIDTH = maxWidth // subSample  # Frame width
 CHANNELS = 3   # RGB color channels
 DTYPE = torch.uint8
 
-tsVidBuffer = CircularTimeSeriesBuffers((BUFFER_SIZE, HEIGHT, WIDTH, CHANNELS), DTYPE)
+tsVidBuffer = CircularTimeSeriesBuffers((BUFFER_SIZE, HEIGHT, WIDTH, CHANNELS), buffSecs, DTYPE)
 exitSignal = torch.zeros(1, dtype=torch.int64).share_memory_()
 personSignal = torch.zeros(1, dtype=torch.int8).share_memory_()
+dLvl = torch.zeros(1, dtype=torch.int8).share_memory_()
+dLvl[0] = debugLvl
 
 vidCap_process = mp.Process(target=pi_vid_cap, args=(tsVidBuffer, exitSignal))
 vidCap_process.start()
@@ -43,7 +48,7 @@ writer_process.start()
 def closeOut():
     exitSignal[0] = 1
     print("set exit signal to 1, now going to wait 20 seconds for the other workers to exit")
-    time.sleep(20)
+    time.sleep(buffSecs + 5)
     print("exiting now")
     sys.exit()
 
@@ -64,15 +69,5 @@ if __name__ == "__main__":
             if sys.stdin.read(1) == 'q':
                 print("got q going to start exiting")
                 closeOut()
-        
-        # print(f"")
-        # print(f"{datetime.now()}")
-        # print(f"buffer size from main is {tsVidBuffer.nextidxs[tsVidBuffer.bn[0]][0]}")
-        # print("vidcap should be using bufferNum", tsVidBuffer.bn[0])
-        # print(f"nextidxs are {tsVidBuffer.nextidxs}")
-        # print(f"lengths are {tsVidBuffer.lengths}")
-        # print(f"lastbn is {tsVidBuffer.lastbn[0]}")
-        # print(f"person signal is {personSignal}")
 
-                
         time.sleep(1)
