@@ -55,7 +55,7 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
             break
 
         #print("going to get frame")
-        #frameTime = datetime.now().astimezone()
+        frameTime = datetime.now().astimezone()
         if subSample == 1:
             frame = picam2.capture_array()
         else:
@@ -72,7 +72,7 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
         #print(frameTS)
 
         # #print(f"nextidx from piVidCap is {ctsb.nextidx[0]} before append")
-        # ctsb.append(frame, frameTime.astimezone(ZoneInfo("UTC")))
+        ctsb.append(frame, frameTime.astimezone(ZoneInfo("UTC")))
         #print(f"nextidx from piVidCap is {ctsb.nextidx[0]} after append")
 
         #manually set
