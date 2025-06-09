@@ -101,7 +101,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
         if exitSignal[0] == 1:
             print("writer: got exit signal")
             sys.stdout.flush()
-            timestamps = exitVideo(output, timestamps, tempFilePath)
+            #timestamps = exitVideo(output, timestamps, tempFilePath)
             break
         time.sleep(1)
 
