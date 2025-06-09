@@ -29,7 +29,7 @@ WIDTH = maxWidth // subSample  # Frame width
 CHANNELS = 3   # RGB color channels
 DTYPE = torch.uint8
 
-tsVidBuffer = CircularTimeSeriesBuffers((BUFFER_SIZE, HEIGHT, WIDTH, CHANNELS), buffSecs, DTYPE)
+tsVidBuffer = CircularTimeSeriesBuffers((BUFFER_SIZE, HEIGHT, WIDTH, CHANNELS), DTYPE)
 exitSignal = torch.zeros(1, dtype=torch.int64).share_memory_()
 personSignal = torch.zeros(1, dtype=torch.int8).share_memory_()
 dLvl = torch.zeros(1, dtype=torch.int8).share_memory_()

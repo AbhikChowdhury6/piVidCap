@@ -5,7 +5,7 @@ import sys
 
 
 class CircularTimeSeriesBuffers:
-    def __init__(self, shape, buffTime, DTYPE):
+    def __init__(self, shape, DTYPE):
         #print("initializing")
         #self.buffTime = torch.zeros(1, dtype=torch.int32).share_memory_()
         #self.buffTime[0] = buffTime
