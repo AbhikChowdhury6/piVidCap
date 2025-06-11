@@ -73,7 +73,8 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
             l.debug("first frame sum: %d", firstFrame.sum())
 
             l.debug('ctsb.lengths[buffNum] %d', ctsb.lengths[buffNum])
-            lastFrame = ctsb.data_buffers[buffNum][ctsb.lengths[buffNum]]
+            l.debug('last index ctsb.lengths[buffNum]-1 %d', ctsb.lengths[buffNum]-1)
+            lastFrame = ctsb.data_buffers[buffNum][ctsb.lengths[buffNum]-1]
             lastFrame = lastFrame.cpu().numpy().astype(np.uint8)
             l.debug("last frame sum: %d", lastFrame.sum())
 
