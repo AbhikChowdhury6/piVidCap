@@ -66,7 +66,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
         
         def getSqDiffresult(self, ctsb):
             #do the sum of the diff squared
-            buffNum = (ctsb.bn[0] + 2) % 3
+            buffNum = (ctsb.bn[0] + 1) % 3
             l.debug('buffNum %d', buffNum)
             firstFrame = ctsb.data_buffers[buffNum][0]
             firstFrame = firstFrame.cpu().numpy().astype(np.uint8)
