@@ -66,13 +66,14 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
         
         def getSqDiffresult(self, ctsb):
             #do the sum of the diff squared
-            l.debug('ctsb.bn[0] %d', ctsb.bn[0])
-            firstFrame = ctsb.data_buffers[ctsb.bn[0]][0]
+            buffNum = (ctsb.bn[0] + 2) % 3
+            l.debug('buffNum %d', buffNum)
+            firstFrame = ctsb.data_buffers[buffNum][0]
             firstFrame = firstFrame.cpu().numpy().astype(np.uint8)
             l.debug("first frame sum: %d", firstFrame.sum())
 
-            l.debug('ctsb.lengths[ctsb.bn[0]] %d', ctsb.lengths[ctsb.bn[0]])
-            lastFrame = ctsb.data_buffers[ctsb.bn[0]][ctsb.lengths[ctsb.bn[0]]]
+            l.debug('ctsb.lengths[buffNum] %d', ctsb.lengths[buffNum])
+            lastFrame = ctsb.data_buffers[buffNum][ctsb.lengths[buffNum]]
             lastFrame = lastFrame.cpu().numpy().astype(np.uint8)
             l.debug("last frame sum: %d", lastFrame.sum())
 
