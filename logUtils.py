@@ -45,7 +45,7 @@ def listener_process(queue, buffSecs, exitSignal):
     while True:
         if exitSignal[0] == 1:
             startExitTime = datetime.now()
-            while (datetime.now() - startExitTime).total_seconds < buffSecs + 2:
+            while (datetime.now() - startExitTime).total_seconds() < buffSecs + 2:
                 record = queue.get()
                 logger = logging.getLogger(record.name)
                 logger.handle(record)
