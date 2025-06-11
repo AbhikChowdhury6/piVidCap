@@ -13,16 +13,17 @@ values = ["abhik", "notSet", "abhik", "unknown", "mp4", "piVidCap"]
 
 deviceInfo = OrderedDict(zip(keys, values))
 
+
 #make this a divisor of the number of seconds in a minute
-buffSecs = 5
+buffSecs = 15
 
 capHz = 8
 
-#maxWidth = 1296
-#maxHeight = 972
+
 maxWidth = 1920
 maxHeight = 1080
 
+#can flip the image if set to 1
 rotate = -1
 
 # 1 is for 1920x1080 2MP
@@ -30,18 +31,15 @@ rotate = -1
 # 3 is for 640x360 .2MP
 subSample = 1
 
-#TODO
+
 #options for buffer saving
-# frameSum-sum just frame sum
-# diff-thresh motion between 5 seconds
+# frameMean-meanThresh just frame sum
+# sqDiff-sqDiffMeanThresh squared pixel difference in buffSecs
 # yolo-yolo11n.pt person detection
+capType = "frameMean-10"
+capType = "sqDiff-15"
 capType = "yolo-yolo11x.pt"
 
-# the biggest one: yolo11x.pt
-# yolo11l.pt should halve the inference time
-# yolo11s.pt is another big jump
-# the smallest one: yolo11n.pt
-modelName = "yolo11x.pt"
 
 #10 debug
 #20 info
@@ -49,6 +47,15 @@ modelName = "yolo11x.pt"
 #40 error
 #50 critical
 # set this number and only messages with values above it will display
-debugLvl = 1
+debugLvl = 10
+
+
+# values to make the old code work
+
+# the biggest one: yolo11x.pt
+# yolo11l.pt should halve the inference time
+# yolo11s.pt is another big jump
+# the smallest one: yolo11n.pt
+modelName = "yolo11x.pt"
 
 noRecThresh = 8

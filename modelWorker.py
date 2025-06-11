@@ -22,8 +22,9 @@ else:
 
 def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debugLvl, log_queue):
     worker_configurer(log_queue)
-    logger = logging.getLogger("model_worker")
-    logger.info("Model worker started")
+    l = logging.getLogger("model_worker")
+    l.setLevel(debugLvl[0])
+    l.info("Model worker started")
 
     class detect:
         def getYOLOresult(self, frame):
@@ -58,27 +59,27 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
             frame = frame.astype(np.uint8)
 
             m = frame.mean()
-            logger.debug("FrameMeanresult: %d\t threshold: %d", m, self.thresh)
+            l.debug("FrameMeanresult: %d\t threshold: %d", m, self.thresh)
             sys.stdout.flush()
             
             return int(m > self.thresh)
         
-        def getDiffresult(self, ctsb):
+        def getSqDiffresult(self, ctsb):
             #do the sum of the diff squared
-            logger.debug('ctsb.bn[0] %d', ctsb.bn[0])
+            l.debug('ctsb.bn[0] %d', ctsb.bn[0])
             firstFrame = ctsb.data_buffers[ctsb.bn[0]][0]
             firstFrame = firstFrame.cpu().numpy().astype(np.uint8)
-            logger.debug("first frame sum: %d", firstFrame.sum())
+            l.debug("first frame sum: %d", firstFrame.sum())
 
-            logger.debug('ctsb.lengths[ctsb.bn[0]] %d', ctsb.lengths[ctsb.bn[0]])
+            l.debug('ctsb.lengths[ctsb.bn[0]] %d', ctsb.lengths[ctsb.bn[0]])
             lastFrame = ctsb.data_buffers[ctsb.bn[0]][ctsb.lengths[ctsb.bn[0]]]
             lastFrame = lastFrame.cpu().numpy().astype(np.uint8)
-            logger.debug("last frame sum: %d", lastFrame.sum())
+            l.debug("last frame sum: %d", lastFrame.sum())
 
             sqDiff = (lastFrame - firstFrame) ** 2
 
             avgsqDiff = sqDiff.mean()
-            logger.debug("sqDiffMeanresult: %d\t threshold: %d",avgsqDiff, self.thresh)
+            l.debug("sqDiffMeanresult: %d\t threshold: %d",avgsqDiff, self.thresh)
 
             return int(avgsqDiff > self.thresh)
 
@@ -94,16 +95,16 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
                 self.thresh = int(capType.split('-')[1])
                 self.getResult = self.getFrameMeanresult
                 
-            if self.recType == 'diff':
+            if self.recType == 'sqDiff':
                 self.thresh = int(capType.split('-')[1])
-                self.getResult = self.getDiffresult
+                self.getResult = self.getSqDiffresult
         
     
     d = detect(capType)
 
     while True:
         if exitSignal[0] == 1:
-            logger.info("got exit signal")
+            l.info("got exit signal")
             sys.stdout.flush()
             break
         
@@ -114,8 +115,8 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
         st = datetime.now()
         personSignal[0] = d.getResult(ctsb)
 
-        logger.debug("it took %s for the model to run", str(datetime.now() - st))
+        l.debug("it took %s for the model to run", str(datetime.now() - st))
         sys.stdout.flush()
     
-    logger.info("exiting")
+    l.info("exiting")
     sys.stdout.flush()
