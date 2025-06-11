@@ -148,7 +148,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
                 first = False    
                 frameWidthHeight = (ctsb.data_buffers[bufferNum][0].shape[1], 
                                     ctsb.data_buffers[bufferNum][0].shape[0])
-                l.debug("writer: setting frameWidthHeight to %d", frameWidthHeight)
+                l.debug("writer: setting frameWidthHeight to %s", str(frameWidthHeight))
             
             # check if we have to make a new file
             if tryStartNewVideo:

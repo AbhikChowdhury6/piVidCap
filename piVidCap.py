@@ -27,6 +27,8 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl, log_queue)
     l = logging.getLogger("pi_vid_cap_worker")
     l.setLevel(int(debugLvl[0]))
     l.info("vid cap worker started")
+    logging.getLogger("picamera2").setLevel(logging.WARNING)
+
 
 
     """ Captures frames and writes to the shared buffer in a circular fashion. """
