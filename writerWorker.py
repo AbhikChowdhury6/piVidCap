@@ -129,12 +129,15 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
                 l.debug("zero length buffer")
                 return
             
+
             if onlyFirst:
                 l.debug("setting length of buffer to 1")
-                ctsb.lengths[bufferNum][0] = 1
+                effectiveLength = 1
+            else:
+                effectiveLength = int(ctsb.lengths[bufferNum][0].clone())
 
 
-            newTimestamps = intTensorToDtList(ctsb.time_buffers[bufferNum][:ctsb.lengths[bufferNum][0]])
+            newTimestamps = intTensorToDtList(ctsb.time_buffers[bufferNum][:effectiveLength])
             #print(f"len of new timestamps is {len(newTimestamps)}")
             #print("the first timestamps are" + " ".join([t.strftime("%S.%f") for t in newTimestamps[:20]]))
             #print("the last timestamps are " + " ".join([t.strftime("%S.%f") for t in newTimestamps[-20:]]))
@@ -166,7 +169,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
                 # else just add to the file
                 # st = datetime.now()
                     
-                for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
+                for frame in ctsb.data_buffers[bufferNum][:effectiveLength]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
                     success = output.write(frame)
@@ -190,7 +193,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
             timestamps.extend(newTimestamps)
             tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new" + extension
             output = startNewVideo(tempFilePath)
-            for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
+            for frame in ctsb.data_buffers[bufferNum][:effectiveLength]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
                     success = output.write(frame)

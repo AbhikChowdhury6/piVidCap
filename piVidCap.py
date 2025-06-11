@@ -79,16 +79,7 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl, log_queue)
         #print("frame is captured and written on")
         #print(frameTS)
 
-        # #print(f"nextidx from piVidCap is {ctsb.nextidx[0]} before append")
         ctsb.append(frame, frameTime.astimezone(ZoneInfo("UTC")))
-        #print(f"nextidx from piVidCap is {ctsb.nextidx[0]} after append")
-
-        #manually set
-        #ctsb[ctsb.nextidx] = frame
-        #print(f"nextidx from piVidCap is {ctsb.nextidx} before append")
-        #ctsb.nextidx += 1
-        #print(f"nextidx from piVidCap is {ctsb.nextidx} after append")
-        
 
         delayTillHzms()
 

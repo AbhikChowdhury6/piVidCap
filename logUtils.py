@@ -8,7 +8,7 @@ from datetime import datetime
 # and went to the LogRecord attributes section
 
 def listener_configurer(logfile_path="/home/pi/vcap.log", lvl = 10):
-    formatter = logging.Formatter('[%(asctime)s] [%(processName)s] [%(levelname)s] %(message)s')
+    formatter = logging.Formatter('[%(asctime)s] [%(filename)s] [%(funcName)s] [%(module)s] [%(name)s] [%(processName)s] [%(levelname)s] %(message)s')
 
     # File handler
     file_handler = logging.FileHandler(logfile_path)

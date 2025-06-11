@@ -2,10 +2,12 @@ import torch
 import numpy as np
 from datetime import datetime, timedelta, timezone
 import sys
+import logging
 
 
 class CircularTimeSeriesBuffers:
     def __init__(self, shape, buffTime, DTYPE):
+        self.l = logging.getLogger("pi_vid_cap_worker")
         #print("initializing")
         self.buffTime = torch.zeros(1, dtype=torch.int32).share_memory_()
         self.buffTime[0] = buffTime
@@ -54,6 +56,7 @@ class CircularTimeSeriesBuffers:
             self.nextidxs[self.lastbn[0]][0] = 0
             self.lengths[self.bn[0]][0] = 0
         
+        self.l.debug(str(int(self.bn[0])))
         self[self.nextidxs[self.bn[0]][0]] = (value, timestamp)  # Use __setitem__
         #print(f"self.nextidx before incrementing {self.nextidx[0]}")
         self.nextidxs[self.bn[0]][0] = self.nextidxs[self.bn[0]][0] + 1  # Move to next index
