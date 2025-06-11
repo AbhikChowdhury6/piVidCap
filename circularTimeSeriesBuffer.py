@@ -7,7 +7,7 @@ import logging
 
 class CircularTimeSeriesBuffers:
     def __init__(self, shape, buffTime, DTYPE):
-        self.l = logging.getLogger("pi_vid_cap_worker")
+        self.l = logging.getLogger("ctsb")
         #print("initializing")
         self.buffTime = torch.zeros(1, dtype=torch.int32).share_memory_()
         self.buffTime[0] = buffTime

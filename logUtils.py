@@ -17,7 +17,7 @@ def listener_configurer(logfile_path="/home/pi/vcap.log", lvl = 10):
     # Stream handler (stdout)
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(colorlog.ColoredFormatter(
-        '%(log_color)s[%(asctime)s] [%(filename)s] [%(funcName)s] [%(module)s] [%(name)s] [%(processName)s] [%(levelname)s] %(message)s',
+        '%(log_color)s[%(asctime)s] [%(name)s] [%(funcName)s] [%(levelname)s] %(message)s',
         log_colors={
             'DEBUG':    'cyan',
             'INFO':     'green',
