@@ -1,7 +1,7 @@
 import logging
 import logging.handlers
 import colorlog
-
+from datetime import datetime
 
 # for formatter attributes I went to 
 # https://docs.python.org/3/library/logging.html
@@ -40,9 +40,16 @@ def worker_configurer(queue, lvl = 10):
     root.addHandler(handler)
     root.setLevel(lvl)
 
-def listener_process(queue):
+def listener_process(queue, buffSecs, exitSignal):
     listener_configurer()
     while True:
+        if exitSignal[0] == 1:
+            startExitTime = datetime.now()
+            while (datetime.now() - startExitTime).total_seconds < buffSecs + 2:
+                record = queue.get()
+                logger = logging.getLogger(record.name)
+                logger.handle(record)
+            break
         try:
             record = queue.get()
             if record is None:

@@ -36,7 +36,7 @@ dLvl = torch.zeros(1, dtype=torch.int8).share_memory_()
 dLvl[0] = debugLvl
 log_queue = mp.Queue()
 
-listener = mp.Process(target=listener_process, args=(log_queue,))
+listener = mp.Process(target=listener_process, args=(log_queue, buffSecs, exitSignal))
 listener.start()
 
 vidCap_process = mp.Process(target=pi_vid_cap, args=(tsVidBuffer, exitSignal, dLvl, log_queue))
