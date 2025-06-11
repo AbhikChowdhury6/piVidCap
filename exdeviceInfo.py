@@ -43,11 +43,12 @@ capType = "yolo-yolo11x.pt"
 # the smallest one: yolo11n.pt
 modelName = "yolo11x.pt"
 
-#1 debug
-#2 info
-#3 warn
-#4 error
-#5 critical
+#10 debug
+#20 info
+#30 warn
+#40 error
+#50 critical
+# set this number and only messages with values above it will display
 debugLvl = 1
 
 noRecThresh = 8

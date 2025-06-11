@@ -11,6 +11,8 @@ from zoneinfo import ZoneInfo
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
 from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
+from logUtils import worker_configurer
+import logging
 
 extension = ".mp4"
 
@@ -32,9 +34,12 @@ baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
                 deviceName + "_"
 
 
-def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debugLvl):
-    print(f"in writer worker  PID: {os.getpid()}")
-    sys.stdout.flush()
+def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debugLvl, log_queue):
+    worker_configurer(log_queue)
+    l = logging.getLogger("writer_worker")
+    l.info("Writer worker started")
+
+
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
     frameWidthHeight = (0,0)
     def dt_to_fnString(dt):
@@ -42,12 +47,12 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
     
     def exitVideo(output, tsList, tempFilePath):
         if output is None:
-            print("output is None")
+            l.warning("output is None")
             return []
         output.release()
 
         if len(tsList) == 0:
-            print('new video empty')
+            l.warning('new video empty')
             os.remove(tempFilePath)
             return []
 
@@ -62,24 +67,25 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
         tsdf = tsdf.set_index('sampleDT')
         tsdf.to_parquet(fbfn + ".parquet.gzip", compression='gzip')
 
-        print(f"finished writing the file {fbfn + extension}")
+        l.debug("finished writing the file %s", fbfn + extension)
         return []
 
     def startNewVideo(tempFilePath):
         os.makedirs(tempFilePath[:-7], exist_ok=True)
         if os.path.exists(tempFilePath):
+                l.info("an old file was found, removing")
                 os.remove(tempFilePath)
         
-        print("starting a new output")
-        print(tempFilePath)
-        print(f"writer: frameWidthHeight: {frameWidthHeight}")
-        print(f"writer: fourcc: {fourcc}")
+        l.debug("starting a new output")
+        l.debug(tempFilePath)
+        l.debug("frameWidthHeight: %s", str(frameWidthHeight))
+        l.debug("fourcc: %s", str(fourcc))
         output = cv2.VideoWriter(tempFilePath, 
                         fourcc, 
                         30.0, 
                         frameWidthHeight)
         if not output.isOpened():
-            print(f"writer: Failed to open video writer")
+            l.error("Failed to open video writer")
             return None
         
         return output
@@ -99,15 +105,15 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
     leftOverTime = timedelta(seconds=0)
     while True:
         if exitSignal[0] == 1:
-            print("writer: got exit signal")
+            l.info("got exit signal")
             sys.stdout.flush()
             timestamps = exitVideo(output, timestamps, tempFilePath)
             break
 
         def writeCtsbBufferNum(bufferNum, onlyFirst=False):
-            print(f"writer: using bufferNum {bufferNum}")
-            print(f"the current time is: {datetime.now()}")
-            print(f"writer: {ctsb.lengths[bufferNum][0]} frames in this buffer")
+            l.debug("using bufferNum %d", bufferNum)
+            l.debug("the current time is: %s", str(datetime.now()))
+            l.debug("%d frames in this buffer", ctsb.lengths[bufferNum][0])
             nonlocal first
             nonlocal tryStartNewVideo
             nonlocal timestamps
@@ -119,9 +125,11 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
             nonlocal last_last_mr
 
             if ctsb.lengths[bufferNum][0] == 0:
+                l.debug("zero length buffer")
                 return
             
             if onlyFirst:
+                l.debug("setting length of buffer to 1")
                 ctsb.lengths[bufferNum][0] = 1
 
 
@@ -129,8 +137,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
             #print(f"len of new timestamps is {len(newTimestamps)}")
             #print("the first timestamps are" + " ".join([t.strftime("%S.%f") for t in newTimestamps[:20]]))
             #print("the last timestamps are " + " ".join([t.strftime("%S.%f") for t in newTimestamps[-20:]]))
-            print(f"the first timestamp is {newTimestamps[0]}")
-            print(f"the last timestamp is {newTimestamps[-1]}")
+            l.debug("the first timestamp is %s", str(newTimestamps[0]))
+            l.debug("the last timestamp is %s", str(newTimestamps[-1]))
 
 
 
@@ -139,7 +147,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
                 first = False    
                 frameWidthHeight = (ctsb.data_buffers[bufferNum][0].shape[1], 
                                     ctsb.data_buffers[bufferNum][0].shape[0])
-                print(f"writer: setting frameWidthHeight to {frameWidthHeight}")
+                l.debug("writer: setting frameWidthHeight to %d", frameWidthHeight)
             
             # check if we have to make a new file
             if tryStartNewVideo:
@@ -174,7 +182,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
                 return
             
         
-            print(f"writer: crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            l.info("writer: crossed midnight!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             sys.stdout.flush()
 
             timestamps = exitVideo(output, timestamps, tempFilePath)
@@ -188,7 +196,7 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
 
 
 
-        print()
+        l.info("")
 
         # wait if the last write took less than buffSecs secs
         if first:
@@ -200,12 +208,12 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
             # wait till a about round buffSecs seconds and then
             st = datetime.now()
             secondsToWait = ((buffSecs-1) - (st.second % buffSecs)) + (1 - st.microsecond/1_000_000) + .2
-            print(f"writer: waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)}")
+            l.debug("waiting %d till %s", secondsToWait, str(st + timedelta(seconds=secondsToWait)))
             time.sleep(secondsToWait)
         else:
-            print(f"it took longer than {buffSecs}s to write, not waiting")
+            l.warning("it took longer than %ds to write, not waiting", buffSecs)
             leftOverTime = (runTime + leftOverTime) - timedelta(seconds=buffSecs)
-            print(f"{leftOverTime} behind")
+            l.warning("%d behind", leftOverTime)
         
         
         writeStartTime = datetime.now()
@@ -213,26 +221,24 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, deb
         last_last_mr = last_mr
         last_mr = model_result
         model_result = personSignal[0].clone()
-        print(f"writer: model result is {model_result}")
+        l.debug("model result is %d", model_result)
         # print(f"writer: last_mr is {last_mr}")
         if model_result and not last_mr:
-            print(f"writer: writing last {2*buffSecs} secs")
+            l.debug("writing last %d secs", 2*buffSecs)
             writeCtsbBufferNum((ctsb.bn[0] + 1) % 3)
             writeCtsbBufferNum((ctsb.bn[0] + 2) % 3)
         elif model_result or last_mr:
-            print(f"writer: writing last {buffSecs} secs")
+            l.debug("writing last %d secs", buffSecs)
             writeCtsbBufferNum((ctsb.bn[0] + 2) % 3)
 
         elif not last_last_mr:
-            print(f"writer: writing only {2*buffSecs}s old frame")
+            l.debug("writing only %ds old frame", 2*buffSecs)
             writeCtsbBufferNum((ctsb.bn[0] + 1) % 3, True)
         else:
-            print(f"dont even need to wrtie {2*buffSecs}s old frame since we already did")
+            l.debug("dont even need to wrtie %ds old frame since we already did", 2*buffSecs)
         
 
-        print(f"writer: have {len(timestamps)} frames in the current video")
-        print(f"writer: it took {datetime.now() - writeStartTime} to write the frames")
-        sys.stdout.flush()
+        l.debug("have %d frames in the current video", len(timestamps))
+        l.debug("it took %s to write the frames", str(datetime.now() - writeStartTime))
 
-    print("writer: writer worker exiting")
-    sys.stdout.flush()
+    l.info("writer: writer worker exiting")

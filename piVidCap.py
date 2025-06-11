@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 import time
 from zoneinfo import ZoneInfo
 import tzlocal
+from logUtils import worker_configurer
+import logging
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
@@ -20,9 +22,11 @@ else:
     sys.exit()
 
 
-def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
-    print(f"in piVidCap worker  PID: {os.getpid()}")
-    sys.stdout.flush()
+def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl, log_queue):
+    worker_configurer(log_queue)
+    l = logging.getLogger("pi_vid_cap_worker")
+    l.info("vid cap worker started")
+
 
     """ Captures frames and writes to the shared buffer in a circular fashion. """
     st = datetime.now() 
@@ -30,11 +34,14 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
     video_config = picam2.create_video_configuration(main={"size": (maxWidth, maxHeight), "format": "RGB888"})
     picam2.configure(video_config)
     picam2.start()
-    print(f"The cap took {datetime.now()  - st} to initialize")
+    l.debug("The cap took %s to initialize", str(datetime.now()  - st))
 
     st = datetime.now()
     frame = picam2.capture_array()
-    print(f"The first Frame took {datetime.now() - st} to capture")
+    l.debug("The first Frame took %s to capture", str(datetime.now()  - st))
+    st = datetime.now()
+    frame = picam2.capture_array()
+    l.debug("The second Frame took %s to capture", str(datetime.now()  - st))
     del frame
     gc.collect()
     
@@ -44,14 +51,12 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
 
     st = datetime.now()
     secondsToWait = ((buffSecs-1) - (st.second % buffSecs)) + (1 - st.microsecond/1_000_000)
-    print(f"vidCap waiting {secondsToWait} till {st + timedelta(seconds=secondsToWait)} to start")
-    sys.stdout.flush()
+    l.debug("waiting %d till %s", secondsToWait, str(st + timedelta(seconds=secondsToWait)))
     time.sleep(secondsToWait)
 
     while True:
         if exitSignal[0] == 1:
-            print("piVidCap got exit signal")
-            sys.stdout.flush()
+            l.info("piVidCap got exit signal")
             break
 
         #print("going to get frame")
@@ -84,5 +89,4 @@ def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl):
 
         delayTillHzms()
 
-    print("piVidCap exiting")
-    sys.stdout.flush()
+    l.info("piVidCap exiting")
