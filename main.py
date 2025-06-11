@@ -50,7 +50,7 @@ writer_process.start()
 
 worker_configurer(log_queue)
 l = logging.getLogger("main")
-l.setLevel(dLvl[0])
+l.setLevel(int(dLvl[0]))
 l.info("processes started")
 
 def closeOut():

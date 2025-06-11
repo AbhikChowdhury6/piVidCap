@@ -15,7 +15,7 @@ deviceInfo = OrderedDict(zip(keys, values))
 
 
 #make this a divisor of the number of seconds in a minute
-buffSecs = 15
+buffSecs = 10
 
 capHz = 8
 
@@ -29,16 +29,16 @@ rotate = -1
 # 1 is for 1920x1080 2MP
 # 2 is for 960x540 .5MP
 # 3 is for 640x360 .2MP
-subSample = 1
+subSample = 2
 
 
 #options for buffer saving
 # frameMean-meanThresh just frame sum
 # sqDiff-sqDiffMeanThresh squared pixel difference in buffSecs
 # yolo-yolo11n.pt person detection
-capType = "frameMean-10"
+#capType = "frameMean-10"
 capType = "sqDiff-15"
-capType = "yolo-yolo11x.pt"
+#capType = "yolo-yolo11x.pt"
 
 
 #10 debug
@@ -47,7 +47,7 @@ capType = "yolo-yolo11x.pt"
 #40 error
 #50 critical
 # set this number and only messages with values above it will display
-debugLvl = 10
+debugLvl = 20
 
 
 # values to make the old code work

@@ -23,7 +23,7 @@ else:
 def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debugLvl, log_queue):
     worker_configurer(log_queue)
     l = logging.getLogger("model_worker")
-    l.setLevel(debugLvl[0])
+    l.setLevel(int(debugLvl[0]))
     l.info("Model worker started")
 
     class detect:

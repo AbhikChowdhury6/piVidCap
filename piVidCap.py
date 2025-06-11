@@ -25,7 +25,7 @@ else:
 def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl, log_queue):
     worker_configurer(log_queue)
     l = logging.getLogger("pi_vid_cap_worker")
-    l.setLevel(debugLvl[0])
+    l.setLevel(int(debugLvl[0]))
     l.info("vid cap worker started")
 
 
