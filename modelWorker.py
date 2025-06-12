@@ -84,7 +84,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             frames = ctsb.data_buffers[buffNum][::capHz]
             l.debug("num frames to look at %d", len(frames))
             
-            frames = frames.to(dtype=torch.float32)
+            frames = frames.to(dtype=torch.int16)
             frames = downsample_frames(frames, size=(360, 640))
             motion_score = compute_avg_squared_diff(frames)
             l.debug(motion_score)
@@ -92,13 +92,13 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
 
 
             firstFrame = ctsb.data_buffers[buffNum][0]
-            firstFrame = firstFrame.cpu().numpy().astype(np.uint8)
+            firstFrame = firstFrame.cpu().numpy().astype(np.int16)
             l.debug("first frame sum: %d", firstFrame.sum())
 
             l.debug('ctsb.lengths[buffNum] %d', ctsb.lengths[buffNum])
             l.debug('last index ctsb.lengths[buffNum]-1 %d', ctsb.lengths[buffNum]-1)
             lastFrame = ctsb.data_buffers[buffNum][ctsb.lengths[buffNum]-1]
-            lastFrame = lastFrame.cpu().numpy().astype(np.uint8)
+            lastFrame = lastFrame.cpu().numpy().astype(np.int16)
             l.debug("last frame sum: %d", lastFrame.sum())
 
             diffFrame = lastFrame - firstFrame
