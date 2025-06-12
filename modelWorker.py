@@ -69,7 +69,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
         l.debug("avg diffs %f", diffs.float().mean())
         l.debug(str(diffs[0]))
         thresholded = torch.where(diffs > 100, diffs, torch.zeros_like(diffs))
-        l.debug("thresholded mean %f", thresholded.mean() )
+        l.debug("thresholded mean %f", thresholded.float().mean() )
 
         animate_frames(frames, pause_time=0.7)
 
