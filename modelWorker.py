@@ -39,8 +39,10 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
 
     def compute_avg_exp_diff(frames):
         diffs = (frames[1:] - frames[:-1]).abs()  # shape: [T-1, H, W, C]
-        thresholded = torch.where(diffs > 100, diffs, torch.zeros_like(diffs)) ** 3
-        return thresholded.mean().item()  # scalar
+        l.debug("avg diffs %f", diffs.mean())
+        thresholded = torch.where(diffs > 100, diffs, torch.zeros_like(diffs))
+        l.debug("thresholded mean %f", thresholded.mean() )
+        return thresholded.mean().item()  # scal1ar
 
     class detect:
         def getYOLOresult(self, frame):
