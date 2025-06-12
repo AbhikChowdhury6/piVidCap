@@ -49,6 +49,10 @@ capType = "sqDiff-15"
 # set this number and only messages with values above it will display
 debugLvl = 20
 
+allowed_loggers=["model_worker", "ctsb", "pi_vid_cap_worker", "writer_worker", "main"]
+#allowed_loggers=[]
+allowed_funcs=["getSqDiffresult", "append", "model_worker", "writeCtsbBufferNum", "writer_worker"]
+#allowed_funcs = []
 
 # values to make the old code work
 

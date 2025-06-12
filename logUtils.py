@@ -2,17 +2,39 @@ import logging
 import logging.handlers
 import colorlog
 from datetime import datetime
+import sys
+import os
+
+repoPath = "/home/pi/Documents/"
+sys.path.append(repoPath + "piVidCap/")
+if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
+    from deviceInfo import buffSecs, allowed_loggers, allowed_funcs, debugLvl
+else:
+    print("error no deviceInfo found")
+    sys.exit()
 
 # for formatter attributes I went to 
 # https://docs.python.org/3/library/logging.html
 # and went to the LogRecord attributes section
 
-def listener_configurer(logfile_path="/home/pi/vcap.log", lvl = 10):
-    formatter = logging.Formatter('[%(asctime)s] [%(filename)s] [%(funcName)s] [%(module)s] [%(name)s] [%(processName)s] [%(levelname)s] %(message)s')
+class NameAndFunctionFilter(logging.Filter):
+    def __init__(self, allowed_loggers=None, allowed_funcs=None):
+        super().__init__()
+        self.allowed_loggers = set(allowed_loggers or [])
+        self.allowed_funcs = set(allowed_funcs or [])
+
+    def filter(self, record):
+        match_logger = (not self.allowed_loggers) or (record.name in self.allowed_loggers)
+        match_func = (not self.allowed_funcs) or (record.funcName in self.allowed_funcs)
+        return (match_logger and match_func) or record.levelno > debugLvl
+
+def listener_configurer(logfile_path="/home/pi/vcap.log"):
+    formatter = logging.Formatter('[%(asctime)s] [%(name)s] [%(funcName)s] [%(levelname)s] %(message)s')
 
     # File handler
     file_handler = logging.FileHandler(logfile_path)
     file_handler.setFormatter(formatter)
+    file_handler.addFilter(NameAndFunctionFilter(allowed_loggers, allowed_funcs))
 
     # Stream handler (stdout)
     stream_handler = logging.StreamHandler()
@@ -26,21 +48,22 @@ def listener_configurer(logfile_path="/home/pi/vcap.log", lvl = 10):
             'CRITICAL': 'bold_red',
         }
     ))
+    stream_handler.addFilter(NameAndFunctionFilter(allowed_loggers, allowed_funcs))
 
     # Root logger
     root = logging.getLogger()
     root.addHandler(file_handler)
     root.addHandler(stream_handler)
-    root.setLevel(lvl)
+    root.setLevel(debugLvl)
 
-def worker_configurer(queue, lvl = 10):
+def worker_configurer(queue):
     handler = logging.handlers.QueueHandler(queue)
     root = logging.getLogger()
     root.handlers = []  # Remove default handlers
     root.addHandler(handler)
-    root.setLevel(lvl)
+    root.setLevel(debugLvl)
 
-def listener_process(queue, buffSecs, exitSignal):
+def listener_process(queue, exitSignal):
     listener_configurer()
     while True:
         if exitSignal[0] == 1:

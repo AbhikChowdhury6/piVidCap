@@ -17,7 +17,7 @@ import logging
 extension = ".mp4"
 
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
-    from deviceInfo import deviceInfo, buffSecs
+    from deviceInfo import deviceInfo, buffSecs, debugLvl
 else:
     print("error no deviceInfo found")
     sys.exit()
@@ -34,10 +34,10 @@ baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
                 deviceName + "_"
 
 
-def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debugLvl, log_queue):
+def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_queue):
     worker_configurer(log_queue)
     l = logging.getLogger("writer_worker")
-    l.setLevel(int(debugLvl[0]))
+    l.setLevel(debugLvl[0])
     l.info("Writer worker started")
 
 

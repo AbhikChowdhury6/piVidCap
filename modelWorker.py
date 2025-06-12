@@ -13,17 +13,17 @@ from logUtils import worker_configurer
 import logging
 
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
-    from deviceInfo import capType, buffSecs
+    from deviceInfo import capType, buffSecs, debugLvl, capHz
 else:
     print("error no deviceInfo found")
     sys.exit()
 
 
 
-def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debugLvl, log_queue):
+def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_queue):
     worker_configurer(log_queue)
     l = logging.getLogger("model_worker")
-    l.setLevel(int(debugLvl[0]))
+    l.setLevel(debugLvl)
     l.info("Model worker started")
 
     class detect:
@@ -79,7 +79,6 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, debu
             l.debug("last frame sum: %d", lastFrame.sum())
 
             sqDiff = (lastFrame - firstFrame) ** 2
-
             avgsqDiff = sqDiff.mean()
             l.debug("sqDiffMeanresult: %d\t threshold: %d",avgsqDiff, self.thresh)
 

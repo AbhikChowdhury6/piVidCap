@@ -1,13 +1,23 @@
 import torch
 import numpy as np
 from datetime import datetime, timedelta, timezone
+
 import sys
 import logging
+import os
+repoPath = "/home/pi/Documents/"
+sys.path.append(repoPath + "piVidCap/")
+if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
+    from deviceInfo import debugLvl
+else:
+    print("error no deviceInfo found")
+    sys.exit()
 
 
 class CircularTimeSeriesBuffers:
     def __init__(self, shape, buffTime, DTYPE):
         self.l = logging.getLogger("ctsb")
+        self.l.setLevel(debugLvl)
         #print("initializing")
         self.buffTime = torch.zeros(1, dtype=torch.int32).share_memory_()
         self.buffTime[0] = buffTime

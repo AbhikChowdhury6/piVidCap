@@ -33,29 +33,28 @@ tsVidBuffer = CircularTimeSeriesBuffers((BUFFER_SIZE, HEIGHT, WIDTH, CHANNELS), 
 exitSignal = torch.zeros(1, dtype=torch.int64).share_memory_()
 personSignal = torch.zeros(1, dtype=torch.int8).share_memory_()
 dLvl = torch.zeros(1, dtype=torch.int8).share_memory_()
-dLvl[0] = debugLvl
 log_queue = mp.Queue()
 
-listener = mp.Process(target=listener_process, args=(log_queue, buffSecs, exitSignal))
+listener = mp.Process(target=listener_process, args=(log_queue, exitSignal))
 listener.start()
 
-vidCap_process = mp.Process(target=pi_vid_cap, args=(tsVidBuffer, exitSignal, dLvl, log_queue))
+vidCap_process = mp.Process(target=pi_vid_cap, args=(tsVidBuffer, exitSignal, log_queue))
 vidCap_process.start()
 
-model_process = mp.Process(target=model_worker, args=(tsVidBuffer, personSignal, exitSignal, dLvl, log_queue))
+model_process = mp.Process(target=model_worker, args=(tsVidBuffer, personSignal, exitSignal, log_queue))
 model_process.start()
 
-writer_process = mp.Process(target=writer_worker, args=(tsVidBuffer, personSignal, exitSignal, dLvl, log_queue))
+writer_process = mp.Process(target=writer_worker, args=(tsVidBuffer, personSignal, exitSignal, log_queue))
 writer_process.start()
 
 worker_configurer(log_queue)
 l = logging.getLogger("main")
-l.setLevel(int(dLvl[0]))
+l.setLevel(debugLvl)
 l.info("processes started")
 
 def closeOut():
     exitSignal[0] = 1
-    l.info("set exit signal to 1, now going to wait 20 seconds for the other workers to exit")
+    l.info("set exit signal to 1, now going to wait %d seconds for the other workers to exit", buffSecs + 5)
     time.sleep(buffSecs + 5)
     l.info("exiting now")
     sys.exit()

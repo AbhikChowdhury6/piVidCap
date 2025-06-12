@@ -9,23 +9,24 @@ from datetime import datetime, timedelta
 import time
 from zoneinfo import ZoneInfo
 import tzlocal
-from logUtils import worker_configurer
-import logging
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
 from circularTimeSeriesBuffer import CircularTimeSeriesBuffers
+from logUtils import worker_configurer
+import logging
+
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
-    from deviceInfo import subSample, buffSecs, capHz, maxWidth, maxHeight, rotate
+    from deviceInfo import subSample, buffSecs, capHz, maxWidth, maxHeight, rotate, debugLvl
 else:
     print("error no deviceInfo found")
     sys.exit()
 
 
-def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, debugLvl, log_queue):
+def pi_vid_cap(ctsb: CircularTimeSeriesBuffers, exitSignal, log_queue):
     worker_configurer(log_queue)
     l = logging.getLogger("pi_vid_cap_worker")
-    l.setLevel(int(debugLvl[0]))
+    l.setLevel(debugLvl)
     l.info("vid cap worker started")
     logging.getLogger("picamera2").setLevel(logging.WARNING)
 
