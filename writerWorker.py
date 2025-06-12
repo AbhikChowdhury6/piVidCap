@@ -37,7 +37,7 @@ baseFilePath = "/home/" + user + "/Documents/collectedData/" + \
 def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_queue):
     worker_configurer(log_queue)
     l = logging.getLogger("writer_worker")
-    l.setLevel(debugLvl[0])
+    l.setLevel(debugLvl)
     l.info("Writer worker started")
 
 
