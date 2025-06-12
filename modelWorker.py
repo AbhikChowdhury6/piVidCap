@@ -74,7 +74,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
         animate_frames(frames, pause_time=0.7)
 
 
-        return thresholded.mean().item()  # scal1ar
+        return thresholded.float().mean().item()  # scal1ar
 
     class detect:
         def getYOLOresult(self, frame):
