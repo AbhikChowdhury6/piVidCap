@@ -6,6 +6,7 @@ import torchvision.transforms as T
 import torch
 import numpy as np
 from ultralytics import YOLO
+import cv2
 
 import torch.nn.functional as F
 
@@ -43,6 +44,14 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
         l.debug(str(diffs[0]))
         thresholded = torch.where(diffs > 100, diffs, torch.zeros_like(diffs))
         l.debug("thresholded mean %f", thresholded.mean() )
+        for frame in frames:
+            frame = frame - frame.min()
+            frame = frame / (frame.max() + 1e-5)
+            frame = (frame * 255).astype('uint8')
+            cv2.imshow("Motion Diff", frame)
+            time.sleep(.2)
+
+
         return thresholded.mean().item()  # scal1ar
 
     class detect:
