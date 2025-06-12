@@ -71,7 +71,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
         thresholded = torch.where(diffs > 100, diffs, torch.zeros_like(diffs))
         l.debug("thresholded mean %f", thresholded.float().mean() )
 
-        animate_frames(frames, pause_time=0.7)
+        animate_frames(diffs, pause_time=0.7)
 
 
         return thresholded.float().mean().item()  # scal1ar
@@ -119,6 +119,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             buffNum = (ctsb.bn[0] + 2) % 3
             l.debug('buffNum %d', buffNum)
             frames = ctsb.data_buffers[buffNum][::capHz]
+            frames = frames[:-1]
             l.debug("num frames to look at %d", len(frames))
             
             frames = frames.to(dtype=torch.int16)
