@@ -40,6 +40,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
     def compute_avg_exp_diff(frames):
         diffs = (frames[1:] - frames[:-1]).abs()  # shape: [T-1, H, W, C]
         l.debug("avg diffs %f", diffs.mean())
+        l.debug(str(diffs[0]))
         thresholded = torch.where(diffs > 100, diffs, torch.zeros_like(diffs))
         l.debug("thresholded mean %f", thresholded.mean() )
         return thresholded.mean().item()  # scal1ar
