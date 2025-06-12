@@ -67,12 +67,11 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
     def compute_avg_exp_diff(frames):
         diffs = (frames[1:] - frames[:-1]).abs()  # shape: [T-1, H, W, C]
         l.debug("avg diffs %f", diffs.float().mean())
-        l.debug(str(diffs[0]))
+        #l.debug(str(diffs[0]))
         thresholded = torch.where(diffs > 100, diffs, torch.zeros_like(diffs))
         l.debug("thresholded mean %f", thresholded.float().mean() )
 
         animate_frames(diffs, pause_time=0.7)
-
 
         return thresholded.float().mean().item()  # scal1ar
 
@@ -122,10 +121,11 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             frames = frames[:-1]
             l.debug("num frames to look at %d", len(frames))
             
+            frames = frames[:, 30:, ...]
             frames = frames.to(dtype=torch.int16)
             frames = downsample_frames(frames, size=(45, 80))
             motion_score = compute_avg_exp_diff(frames)
-            l.debug(motion_score)
+            l.debug("motion score %f", motion_score)
 
 
 
