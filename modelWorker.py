@@ -45,6 +45,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
         thresholded = torch.where(diffs > 100, diffs, torch.zeros_like(diffs))
         l.debug("thresholded mean %f", thresholded.mean() )
         for frame in frames:
+            frame = frame.cpu().numpy()
             frame = frame - frame.min()
             frame = frame / (frame.max() + 1e-5)
             frame = (frame * 255).astype('uint8')
