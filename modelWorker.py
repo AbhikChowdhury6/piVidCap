@@ -59,7 +59,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             frame = frame.astype(np.uint8)
 
             m = frame.mean()
-            l.debug("FrameMeanresult: %d\t threshold: %d", m, self.thresh)
+            l.debug("FrameMeanresult: %f\t threshold: %d", m, self.thresh)
             sys.stdout.flush()
             
             return int(m > self.thresh)
