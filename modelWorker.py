@@ -90,7 +90,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             l.debug("num frames to look at %d", len(frames))
             
             frames = frames.to(dtype=torch.int16)
-            frames = downsample_frames(frames, size=(360, 640))
+            frames = downsample_frames(frames, size=(45, 80))
             motion_score = compute_avg_exp_diff(frames)
             l.debug(motion_score)
 
