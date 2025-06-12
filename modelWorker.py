@@ -22,16 +22,7 @@ else:
     print("error no deviceInfo found")
     sys.exit()
 
-def downsample_frames(frames, size=(360, 640)):
-    T, H, W, C = frames.shape
-    frames = frames.permute(0, 3, 1, 2).float()  # [T, C, H, W]
-    frames = F.interpolate(frames, size=size, mode='bilinear', align_corners=False)
-    return frames.permute(0, 2, 3, 1)  # [T, H, W, C]
 
-def compute_avg_exp_diff(frames):
-    diffs = (frames[1:] - frames[:-1]).abs()  # shape: [T-1, H, W, C]
-    thresholded = torch.where(diffs > 100, diffs, torch.zeros_like(diffs)) ** 3
-    return thresholded.mean().item()  # scalar
 
 
 def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_queue):
@@ -39,6 +30,17 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
     l = logging.getLogger("model_worker")
     l.setLevel(debugLvl)
     l.info("Model worker started")
+
+    def downsample_frames(frames, size=(360, 640)):
+        l.debug("frames shape %s", str(frames.shape))
+        frames = frames.permute(0, 3, 1, 2).float()  # [T, C, H, W]
+        frames = F.interpolate(frames, size=size, mode='bilinear', align_corners=False)
+        return frames.permute(0, 2, 3, 1)  # [T, H, W, C]
+
+    def compute_avg_exp_diff(frames):
+        diffs = (frames[1:] - frames[:-1]).abs()  # shape: [T-1, H, W, C]
+        thresholded = torch.where(diffs > 100, diffs, torch.zeros_like(diffs)) ** 3
+        return thresholded.mean().item()  # scalar
 
     class detect:
         def getYOLOresult(self, frame):
