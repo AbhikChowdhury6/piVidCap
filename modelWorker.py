@@ -29,8 +29,9 @@ def downsample_frames(frames, size=(360, 640)):
     return frames.permute(0, 2, 3, 1)  # [T, H, W, C]
 
 def compute_avg_squared_diff(frames):
-    diffs = (frames[1:] - frames[:-1]) ** 2  # shape: [T-1, H, W, C]
-    return diffs.mean().item()  # scalar
+    diffs = (frames[1:] - frames[:-1]).abs()  # shape: [T-1, H, W, C]
+    thresholded = torch.where(diffs > 5, diffs, torch.zeros_like(diffs))
+    return thresholded.mean().item()  # scalar
 
 
 def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_queue):
