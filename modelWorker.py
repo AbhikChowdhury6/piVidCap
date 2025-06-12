@@ -3,8 +3,12 @@ import os
 from datetime import datetime, timedelta
 import time
 import torchvision.transforms as T
+import torch
 import numpy as np
 from ultralytics import YOLO
+
+import torch.nn.functional as F
+
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
@@ -18,6 +22,15 @@ else:
     print("error no deviceInfo found")
     sys.exit()
 
+def downsample_frames(frames, size=(360, 640)):
+    T, H, W, C = frames.shape
+    frames = frames.permute(0, 3, 1, 2).float()  # [T, C, H, W]
+    frames = F.interpolate(frames, size=size, mode='bilinear', align_corners=False)
+    return frames.permute(0, 2, 3, 1)  # [T, H, W, C]
+
+def compute_avg_squared_diff(frames):
+    diffs = (frames[1:] - frames[:-1]) ** 2  # shape: [T-1, H, W, C]
+    return diffs.mean().item()  # scalar
 
 
 def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_queue):
@@ -68,6 +81,16 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             #do the sum of the diff squared
             buffNum = (ctsb.bn[0] + 2) % 3
             l.debug('buffNum %d', buffNum)
+            frames = ctsb.data_buffers[buffNum][::capHz]
+            l.debug("num frames to look at %d", len(frames))
+            
+            frames = frames.to(dtype=torch.float32)
+            frames = downsample_frames(frames, size=(360, 640))
+            motion_score = compute_avg_squared_diff(frames)
+            l.debug(motion_score)
+
+
+
             firstFrame = ctsb.data_buffers[buffNum][0]
             firstFrame = firstFrame.cpu().numpy().astype(np.uint8)
             l.debug("first frame sum: %d", firstFrame.sum())
@@ -80,7 +103,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
 
             sqDiff = (lastFrame - firstFrame) ** 2
             avgsqDiff = sqDiff.mean()
-            l.debug("sqDiffMeanresult: %d\t threshold: %d",avgsqDiff, self.thresh)
+            l.debug("sqDiffMeanresult: %f\t threshold: %d",avgsqDiff, self.thresh)
 
             return int(avgsqDiff > self.thresh)
 
