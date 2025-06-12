@@ -64,17 +64,17 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
         frames = F.interpolate(frames, size=size, mode='bilinear', align_corners=False)
         return frames.permute(0, 2, 3, 1)  # [T, H, W, C]
 
-    def compute_avg_exp_diff(frames):
+    def compute_avg_diff(frames):
         diffs = (frames[1:] - frames[:-1]).abs()  # shape: [T-1, H, W, C]
         l.debug("avg diffs %f", diffs.float().mean())
         #l.debug(str(diffs[0]))
         thresholded = torch.where(diffs > 40, diffs, torch.zeros_like(diffs))
         l.debug("thresholded mean %f", thresholded.float().mean() )
 
-        animate_frames(diffs, pause_time=0.4)
-        animate_frames(frames, pause_time=0.4)
+        #animate_frames(diffs, pause_time=0.4)
+        #animate_frames(frames, pause_time=0.4)
 
-        return thresholded.float().mean().item()  # scal1ar
+        return int(thresholded.float().mean().item() * 1000)  # scal1ar
 
     class detect:
         def getYOLOresult(self, frame):
@@ -114,7 +114,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             
             return int(m > self.thresh)
         
-        def getSqDiffresult(self, ctsb):
+        def getDiffresult(self, ctsb):
             #do the sum of the diff squared
             buffNum = (ctsb.bn[0] + 2) % 3
             l.debug('buffNum %d', buffNum)
@@ -122,32 +122,13 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             frames = frames[:-1]
             l.debug("num frames to look at %d", len(frames))
             
-            frames = frames[:, 100:, ...]
-            frames = frames.to(dtype=torch.int16)
+            frames = frames[:, 100:, ...] #crop off the timestamp
             frames = downsample_frames(frames, size=(45, 80))
-            motion_score = compute_avg_exp_diff(frames)
+            motion_score = compute_avg_diff(frames)
             l.debug("motion score %f", motion_score)
 
 
-
-            firstFrame = ctsb.data_buffers[buffNum][0]
-            firstFrame = firstFrame.cpu().numpy().astype(np.int16)
-            l.debug("first frame sum: %d", firstFrame.sum())
-
-            l.debug('ctsb.lengths[buffNum] %d', ctsb.lengths[buffNum])
-            l.debug('last index ctsb.lengths[buffNum]-1 %d', ctsb.lengths[buffNum]-1)
-            lastFrame = ctsb.data_buffers[buffNum][ctsb.lengths[buffNum]-1]
-            lastFrame = lastFrame.cpu().numpy().astype(np.int16)
-            l.debug("last frame sum: %d", lastFrame.sum())
-
-            diffFrame = lastFrame - firstFrame
-            l.debug(np.abs(diffFrame).mean())
-            sqDiff = diffFrame ** 2
-
-            avgsqDiff = sqDiff.mean()
-            l.debug("sqDiffMeanresult: %f\t threshold: %d",avgsqDiff, self.thresh)
-
-            return int(avgsqDiff > self.thresh)
+            return int(motion_score > self.thresh)
 
 
 
@@ -161,9 +142,9 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
                 self.thresh = int(capType.split('-')[1])
                 self.getResult = self.getFrameMeanresult
                 
-            if self.recType == 'sqDiff':
+            if self.recType == 'diff':
                 self.thresh = int(capType.split('-')[1])
-                self.getResult = self.getSqDiffresult
+                self.getResult = self.getDiffresult
         
     
     d = detect(capType)
