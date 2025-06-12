@@ -30,7 +30,7 @@ def downsample_frames(frames, size=(360, 640)):
 
 def compute_avg_exp_diff(frames):
     diffs = (frames[1:] - frames[:-1]).abs()  # shape: [T-1, H, W, C]
-    thresholded = torch.where(diffs > 5, diffs, torch.zeros_like(diffs)) ** 3
+    thresholded = torch.where(diffs > 100, diffs, torch.zeros_like(diffs)) ** 3
     return thresholded.mean().item()  # scalar
 
 
