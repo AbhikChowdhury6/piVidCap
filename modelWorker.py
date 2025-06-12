@@ -28,9 +28,9 @@ def downsample_frames(frames, size=(360, 640)):
     frames = F.interpolate(frames, size=size, mode='bilinear', align_corners=False)
     return frames.permute(0, 2, 3, 1)  # [T, H, W, C]
 
-def compute_avg_squared_diff(frames):
+def compute_avg_exp_diff(frames):
     diffs = (frames[1:] - frames[:-1]).abs()  # shape: [T-1, H, W, C]
-    thresholded = torch.where(diffs > 5, diffs, torch.zeros_like(diffs))
+    thresholded = torch.where(diffs > 5, diffs, torch.zeros_like(diffs)) ** 3
     return thresholded.mean().item()  # scalar
 
 
@@ -87,7 +87,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             
             frames = frames.to(dtype=torch.int16)
             frames = downsample_frames(frames, size=(360, 640))
-            motion_score = compute_avg_squared_diff(frames)
+            motion_score = compute_avg_exp_diff(frames)
             l.debug(motion_score)
 
 
