@@ -102,7 +102,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             l.debug("last frame sum: %d", lastFrame.sum())
 
             diffFrame = lastFrame - firstFrame
-            l.debug(diffFrame.abs().mean())
+            l.debug(np.abs(diffFrame).mean())
             sqDiff = diffFrame ** 2
 
             avgsqDiff = sqDiff.mean()
