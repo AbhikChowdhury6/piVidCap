@@ -10,6 +10,13 @@ import cv2
 
 import torch.nn.functional as F
 
+import matplotlib.pyplot as plt
+
+def show_image(img, title="Image"):
+    plt.imshow(img, cmap='gray' if img.ndim == 2 else None)
+    plt.title(title)
+    plt.axis('off')
+    plt.show()
 
 repoPath = "/home/pi/Documents/"
 sys.path.append(repoPath + "piVidCap/")
@@ -49,7 +56,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             frame = frame - frame.min()
             frame = frame / (frame.max() + 1e-5)
             frame = (frame * 255).astype('uint8')
-            cv2.imshow("Motion Diff", frame)
+            show_image(frame)
             time.sleep(.2)
 
 
