@@ -138,11 +138,11 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
                 self.model = YOLO(capType.split('-')[1])
                 self.getResult = self.getYOLOresult
             
-            if self.recType == 'frameMean':
+            elif self.recType == 'frameMean':
                 self.thresh = int(capType.split('-')[1])
                 self.getResult = self.getFrameMeanresult
                 
-            if self.recType == 'diff':
+            elif self.recType == 'diff':
                 self.thresh = int(capType.split('-')[1])
                 self.getResult = self.getDiffresult
         

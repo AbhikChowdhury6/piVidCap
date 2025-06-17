@@ -17,7 +17,7 @@ import logging
 extension = ".mp4"
 
 if os.path.exists(repoPath + "piVidCap/deviceInfo.py"):
-    from deviceInfo import deviceInfo, buffSecs, debugLvl
+    from deviceInfo import deviceInfo, buffSecs, capHz, debugLvl
 else:
     print("error no deviceInfo found")
     sys.exit()
@@ -115,6 +115,10 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log
             l.debug("using bufferNum %d", bufferNum)
             l.debug("the current time is: %s", str(datetime.now()))
             l.debug("%d frames in this buffer", ctsb.lengths[bufferNum][0])
+            if (ctsb.lengths[bufferNum][0] < buffSecs * capHz):
+                l.warning("number of frames is %d, expected %d if no frames were skipped",
+                          ctsb.lengths[bufferNum][0],
+                          buffSecs * capHz)
             nonlocal first
             nonlocal tryStartNewVideo
             nonlocal timestamps
