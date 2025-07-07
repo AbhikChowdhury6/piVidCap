@@ -1,8 +1,12 @@
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+
 import cv2
-import torch
 from datetime import datetime, timedelta, timezone
 import pandas as pd
-import os
 import sys
 import time
 import numpy as np

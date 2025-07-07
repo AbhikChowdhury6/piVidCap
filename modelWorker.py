@@ -1,10 +1,13 @@
 import sys
 import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
 from datetime import datetime, timedelta
 import time
 import torchvision.transforms as T
 import torch
-#torch.set_num_threads(2)
 import numpy as np
 from ultralytics import YOLO
 import cv2
@@ -59,6 +62,8 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
     l.setLevel(debugLvl)
     l.info("Model worker started")
 
+    torch.set_num_threads(1)
+
     def downsample_frames(frames, size=(360, 640)):
         l.debug("frames shape %s", str(frames.shape))
         frames = frames.permute(0, 3, 1, 2).float()  # [T, C, H, W]
@@ -88,7 +93,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
                     l.debug("saw %d people",len(indexesOfPeople))
                     sys.stdout.flush()
                     maxPersonConf = max([r[0].boxes.conf[i] for i in indexesOfPeople])
-                    l.debug("the most confident recognition was %d", maxPersonConf)
+                    l.debug("the most confident recognition was %f", maxPersonConf)
                     if maxPersonConf > .25:
                         return 1
                     else:
