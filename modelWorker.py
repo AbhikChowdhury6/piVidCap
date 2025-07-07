@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import time
 import torchvision.transforms as T
 import torch
-torch.set_num_threads(2)
+#torch.set_num_threads(2)
 import numpy as np
 from ultralytics import YOLO
 import cv2
@@ -85,23 +85,20 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
             try:
                 indexesOfPeople = [i for i, x in enumerate(r[0].boxes.cls) if x == 0]
                 if len(indexesOfPeople) > 0:
-                    #print(f"saw {len(indexesOfPeople)} people")
+                    l.debug("saw %d people",len(indexesOfPeople))
                     sys.stdout.flush()
                     maxPersonConf = max([r[0].boxes.conf[i] for i in indexesOfPeople])
-                    #print(f"the most confident recognition was {maxPersonConf}")
-                    sys.stdout.flush()
+                    l.debug("the most confident recognition was %d", maxPersonConf)
                     if maxPersonConf > .25:
                         return 1
                     else:
                         return 0
                 else:
+                    l.debug("didn't see anyone")
                     return 0
-                    #print("didn't see anyone")
-                    sys.stdout.flush()
 
             except Exception as e:
-                print(f"Error processing frame: {e}")
-                sys.stdout.flush()
+                l.debug(f"Error processing frame: {e}")
                 return 0
 
         def getFrameMeanresult(self, ctsb):
