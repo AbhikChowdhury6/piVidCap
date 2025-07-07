@@ -50,8 +50,20 @@ else:
     print("error no deviceInfo found")
     sys.exit()
 
-
-
+import io
+import contextlib
+@contextlib.contextmanager
+def capture_stdout_to_logger(logger, level=logging.DEBUG):
+    buffer = io.StringIO()
+    original_stdout = sys.stdout
+    sys.stdout = buffer
+    try:
+        yield
+    finally:
+        sys.stdout = original_stdout
+        output = buffer.getvalue().strip()
+        if output:
+            logger.log(level, output)
 
 def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_queue):
     worker_configurer(log_queue)
@@ -83,7 +95,11 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
         def getYOLOresult(self, frame):
             frame = ctsb.data_buffers[ctsb.bn[0]][0]
             frame = frame.cpu().numpy().astype(np.uint8)
-            r = self.model(frame, verbose=False)
+            if debugLvl <= logging.DEBUG:
+                with capture_stdout_to_logger(l, logging.DEBUG):
+                    r = self.model(frame, verbose=True)
+            else:
+                r = self.model(frame, verbose=False)
             try:
                 indexesOfPeople = [i for i, x in enumerate(r[0].boxes.cls) if x == 0]
                 if len(indexesOfPeople) > 0:
