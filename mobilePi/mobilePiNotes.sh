@@ -107,3 +107,27 @@ tail "$(ls -1 *.txt | sort | tail -n 1)"
 
 #make sure it can connect to chowderphone
 nmcli device wifi connect "chowderphone" password "password"
+
+
+#check clock speed with
+watch -n 1 vcgencmd measure_clock arm
+
+#check kernel messages for undervolts and the sort
+watch -n 1 "dmesg | tail"
+
+#check the vision logs
+watch -n 1 tail -n 30 visioncap.log
+
+#greatly reduce the max frequency to prevent undervolts
+sudo nano /boot/firmware/config.txt
+arm_freq=1200
+
+
+
+
+
+
+
+
+
+
