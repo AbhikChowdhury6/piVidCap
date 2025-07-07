@@ -23,22 +23,22 @@ sudo nano /etc/systemd/system/pwmtest.service
 
 #vision cap
 sudo nano /etc/systemd/system/visioncap.service
-# [Unit]
-# Description=Run piVidCap in conda env
-# After=network.target
+ [Unit]
+ Description=Run piVidCap in conda env
+ After=network.target
 
-# [Service]
-# ExecStartPre=/usr/bin/rm -f /tmp/vision_input
-# ExecStartPre=/usr/bin/mkfifo /tmp/vision_input
-# ExecStart=/bin/bash -c "exec 3<>/tmp/vision_input; /home/pi/miniforge3/envs/vision/bin/python /home/pi/Documents/piVidCap/main.py <&3"
-# WorkingDirectory=/home/pi/Documents/piVidCap
-# User=pi
-# Restart=on-failure
-# StandardOutput=append:/home/pi/visioncap.log
-# StandardError=append:/home/pi/visioncap.log
+ [Service]
+ ExecStartPre=/usr/bin/rm -f /tmp/vision_input
+ ExecStartPre=/usr/bin/mkfifo /tmp/vision_input
+ ExecStart=/bin/bash -c "exec 3<>/tmp/vision_input; /home/pi/miniforge3/envs/vision311/bin/python3.11 /home/pi/Documents/piVidCap/main.py <&3"
+ WorkingDirectory=/home/pi/Documents/piVidCap
+ User=pi
+ Restart=on-failure
+ StandardOutput=append:/home/pi/visioncap.log
+ StandardError=append:/home/pi/visioncap.log
 
-# [Install]
-# WantedBy=multi-user.target
+ [Install]
+ WantedBy=multi-user.target
 
 
 #to send q
@@ -78,17 +78,17 @@ sudo systemctl start ups.service
 
 #rotate the logs
 sudo nano /etc/logrotate.d/pi-services
-# /home/pi/pwm.log
-# /home/pi/visioncap.log
-# /home/pi/ups.log {
-#     daily
-#     rotate 7
-#     compress
-#     delaycompress
-#     missingok
-#     notifempty
-#     copytruncate
-# }
+ /home/pi/pwm.log
+ /home/pi/visioncap.log
+ /home/pi/ups.log {
+     daily
+     rotate 7
+     compress
+     delaycompress
+     missingok
+     notifempty
+     copytruncate
+ }
 
 
 # remember to set the raspi-config country to US to cut down on kernel logs
@@ -98,3 +98,12 @@ sudo apt install python3-tzlocal
 
 #to check the end of the latest text file
 tail "$(ls -1 *.txt | sort | tail -n 1)"
+
+
+
+# for the cm5 board to enable the camera put this in /boot/firmware/config.txt
+# dtoverlay=imx708,cam0
+
+
+#make sure it can connect to chowderphone
+nmcli device wifi connect "chowderphone" password "password"

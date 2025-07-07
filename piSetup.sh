@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 
-# copy key with ssh-copy-id pi@10.0.0.12
+# copy key with ssh-copy-id pi@192.168.1.XX
 # ssh in
 
 # sudo apt update
@@ -32,7 +32,7 @@ source ~/.bashrc
 source ~/miniforge3/etc/profile.d/conda.sh
 conda create --name vision311 python=3.11
 source activate vision311
-conda install -y ultralytics pytorch torchvision pyarrow fastparquet tzlocal
+conda install -y ultralytics pytorch torchvision pyarrow fastparquet tzlocal colorlog
 
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y libcap-dev libatlas-base-dev ffmpeg libopenjp2-7
@@ -40,14 +40,14 @@ sudo apt install -y libcamera-dev
 sudo apt install -y libkms++-dev libfmt-dev libdrm-dev
 
 pip install --upgrade pip
-pip install rpi-libcamera rpi-kms picamera2 av
 # libcamera was a bit ahead of rpi-libcamera so i got this form pypi
-# pip install rpi-libcamera -C setup-args="-Dversion=unknown"
+pip install rpi-libcamera -C setup-args="-Dversion=unknown"
+pip install rpi-kms picamera2 av
 
 
 mkdir -p ~/Documents/collectedData
 ssh-keygen -t rsa
-ssh-copy-id uploadingGuest@10.0.0.12
+ssh-copy-id uploadingGuest@192.168.1.20
 
 
 # add activating the vision environment to the .bashrc
@@ -64,12 +64,12 @@ echo "source /home/pi/miniforge3/bin/activate vision311" >> /home/pi/.bashrc
 # on pi
 # libcamera-vid --width 1920 --height 1080 -t 0 --inline --listen -o tcp://0.0.0.0:8888
 # on installing machine
-# mpv --fps=40 --demuxer-lavf-probesize=32 tcp://10.0.0.11:8888/
+# mpv --fps=40 --demuxer-lavf-probesize=32 tcp://192.168.1.20:8888/
 
 
 # add the chron job to send the files
 crontab -e
-#0 8 * * * /home/pi/miniforge3/envs/vision/bin/python3.12 /home/pi/Documents/piVidCap/send.py
+#0 8 * * * /home/pi/miniforge3/envs/vision311/bin/python3.11 /home/pi/Documents/piVidCap/send.py
 
 sudo reboot
 

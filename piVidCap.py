@@ -1,4 +1,10 @@
-from picamera2 import Picamera2
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from picamera2 import Picamera2
+else:
+    Picamera2 = None  # placeholder so code runs on non-Pi
+
 import cv2
 import torch
 import numpy as np

@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import time
 import torchvision.transforms as T
 import torch
+torch.set_num_threads(2)
 import numpy as np
 from ultralytics import YOLO
 import cv2
