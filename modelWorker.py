@@ -1,9 +1,6 @@
 import sys
 import os
-os.environ["OMP_NUM_THREADS"] = "1"
-os.environ["OPENBLAS_NUM_THREADS"] = "1"
-os.environ["MKL_NUM_THREADS"] = "1"
-os.environ["NUMEXPR_NUM_THREADS"] = "1"
+
 from datetime import datetime, timedelta
 import time
 import torchvision.transforms as T
@@ -62,7 +59,7 @@ def model_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log_
     l.setLevel(debugLvl)
     l.info("Model worker started")
 
-    torch.set_num_threads(1)
+    #torch.set_num_threads(1)
 
     def downsample_frames(frames, size=(360, 640)):
         l.debug("frames shape %s", str(frames.shape))
