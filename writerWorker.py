@@ -44,6 +44,8 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal, log
     l.setLevel(debugLvl)
     l.info("Writer worker started")
 
+    cv2.setNumThreads(1)
+
 
     fourcc = cv2.VideoWriter_fourcc(*'avc1')
     frameWidthHeight = (0,0)
