@@ -4,6 +4,7 @@ from collections import OrderedDict
 keys = ["responsiblePartyName", "instanceName", "developingPartyName", "deviceName", "dataType", "dataSource"]
 values = ["abhik", "notSet", "abhik", "unknown", "mp4", "piVidCap"]
 
+#values = ["abhik", "mobilepi2", "abhik", "piCam-raspberryPi5-minicamnoir", "mp4", "piVidCap"]
 #values = ["abhik", "mobilepi", "abhik", "piCam-raspberryPi5-Camv3120noir", "mp4", "piVidCap"]
 #values = ["abhik", "bedroompi", "abhik", "piCam-raspberryPi5-Camv3120", "mp4", "piVidCap"]
 #values = ["abhik", "bathroompi", "abhik", "piCam-raspberryPi5-Camv3noir", "mp4", "piVidCap"]
@@ -15,7 +16,7 @@ deviceInfo = OrderedDict(zip(keys, values))
 
 
 #make this a divisor of the number of seconds in a minute
-buffSecs = 10
+buffSecs = 15
 
 capHz = 8
 
