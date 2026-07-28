@@ -50,15 +50,21 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
 
         if len(tsList) == 0:
             print('new video empty')
-            os.remove(tempFilePath)
+            if os.path.exists(tempFilePath):
+                os.remove(tempFilePath)
+            return []
+
+        if not os.path.exists(tempFilePath):
+            print(f"writer: {tempFilePath} vanished before it could be finalized, frames lost")
             return []
 
         # rename video
         fbfn = baseFilePath + tsList[0].strftime('%Y-%m-%d%z') + "/"
+        os.makedirs(fbfn, exist_ok=True)
         fbfn += dt_to_fnString(tsList[0]) + "_" + dt_to_fnString(tsList[-1])
         os.rename(tempFilePath, fbfn + extension)
-        
-        # write timestamps 
+
+        # write timestamps
         data = [(ts, i, tsList[0], tsList[-1]) for i, ts in enumerate(tsList)]
         tsdf = pd.DataFrame(data=data, columns=['sampleDT', 'videoIndex', 'videoStartTime', 'videoEndTime'])
         tsdf = tsdf.set_index('sampleDT')
