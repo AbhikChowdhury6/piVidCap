@@ -45,8 +45,11 @@ if [ ! -f "$STATE_DOWN_SINCE" ]; then
 fi
 
 python_bin="$(resolve_env_python)"
-tmux new-window -t "$SESSION" -n "$WINDOW" "cd $REPO_DIR && exec $python_bin main.py"
-log "pividcap window missing, restarted using $python_bin"
+if tmux new-window -t "$SESSION" -n "$WINDOW" "cd $REPO_DIR && exec $python_bin main.py"; then
+    log "pividcap window missing, restarted using $python_bin"
+else
+    log "ERROR: tmux new-window failed to restart pividcap using $python_bin"
+fi
 
 down_since="$(cat "$STATE_DOWN_SINCE")"
 down_since_epoch=$(date -u -d "$down_since" +%s)
