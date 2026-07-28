@@ -158,7 +158,14 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             if firstTimestamp.day == newTimestamps[-1].day:
                 # else just add to the file
                 # st = datetime.now()
-                    
+
+                if output is None:
+                    print("writer: no open video writer, skipping this tick's frames and will retry")
+                    sys.stdout.flush()
+                    tryStartNewVideo = True
+                    timestamps = []
+                    return
+
                 for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
@@ -183,6 +190,14 @@ def writer_worker(ctsb: CircularTimeSeriesBuffers, personSignal, exitSignal):
             timestamps.extend(newTimestamps)
             tempFilePath = baseFilePath + timestamps[0].strftime('%Y-%m-%d%z') + "/new" + extension
             output = startNewVideo(tempFilePath)
+
+            if output is None:
+                print("writer: no open video writer after midnight rollover, skipping this tick's frames and will retry")
+                sys.stdout.flush()
+                tryStartNewVideo = True
+                timestamps = []
+                return
+
             for frame in ctsb.data_buffers[bufferNum][:ctsb.lengths[bufferNum][0]]:
                     frame = frame.cpu().numpy()  # Convert from torch tensor to numpy
                     frame = frame.astype(np.uint8)
