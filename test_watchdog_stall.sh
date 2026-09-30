@@ -19,6 +19,7 @@ cleanup() {
     tmux kill-session -t "$SESSION" 2>/dev/null
     pkill -f "$TMP/envs/vision/bin/python" 2>/dev/null
     pkill -f "python main.py writer_worker" 2>/dev/null
+    rm -f "$FAKE_REPO/pinned_frames" "$FAKE_REPO/camera_gone" 2>/dev/null
     rm -rf "$TMP"
 }
 trap cleanup EXIT
@@ -49,6 +50,10 @@ mode=running
 # A camera that is still unplugged means every restart comes up broken too.
 [ -f ./camera_gone ] && mode=nocamera
 frames=0
+# When ./pinned_frames exists its contents are reported verbatim as the frame
+# count, letting a test reproduce a coarse counter that reads the same on two
+# consecutive samples while the pipeline is in fact alive.
+pinned() { [ -f ./pinned_frames ] && cat ./pinned_frames; }
 trap 'mode=hung' USR1
 trap 'mode=nocamera' USR2
 while true; do
@@ -56,7 +61,7 @@ while true; do
         running)
             frames=$(( frames + 1 ))
             echo "writer: model result is 0"
-            echo "writer: have $frames frames in the current video"
+            echo "writer: have $(pinned || echo $frames) frames in the current video"
             ;;
         nocamera)
             echo "writer: model result is 0"
@@ -78,6 +83,7 @@ run_wd() {
         PYTHON_ENV_ROOT="$TMP/envs" ALERT_DEST="$TMP/alerts" \
         HOSTNAME_SHORT="testnode" \
         STALL_THRESHOLD_SECONDS="${STALL_THRESHOLD:-3}" \
+        STALL_CONFIRM_SECONDS="${STALL_CONFIRM:-1}" \
         ALERT_THRESHOLD_SECONDS="${ALERT_THRESHOLD:-6}" \
         bash "$WD"
 }
@@ -182,6 +188,31 @@ tmux kill-session -t "$SESSION" 2>/dev/null
 run_wd; rc=$?
 check "exits non-zero"             "1" "$rc"
 check "manual-intervention logged" "yes" "$([ "$(grep -c "tmux session '$SESSION' itself is missing" "$TMP/watcher.log")" -ge 1 ] && echo yes || echo no)"
+
+echo
+echo "TEST 8: a repeated counter that moves during confirmation is not a stall"
+rm -f "$FAKE_REPO/camera_gone" "$FAKE_REPO/pinned_frames"
+echo 150 > "$FAKE_REPO/pinned_frames"      # counter reads the same every sample
+start_session; reset_state; rm -f "$TMP/alerts"/*
+: > "$TMP/watcher.log"
+run_wd; sleep 4                            # baseline, then exceed the 3s threshold
+( sleep 2; echo 300 > "$FAKE_REPO/pinned_frames" ) &   # moves inside the 6s confirm
+STALL_CONFIRM=6 run_wd
+check "no stall declared"        "0" "$(grep -c 'window alive but no frames written' "$TMP/watcher.log")"
+check "non-confirmation logged"  "1" "$(grep -c 'suspected stall not confirmed' "$TMP/watcher.log")"
+check "capture left running"     "absent" "$([ -f "$TMP/down_since" ] && echo present || echo absent)"
+check "no alert marker"          "0" "$(ls -1 "$TMP/alerts" | wc -l)"
+
+echo
+echo "TEST 9: a genuinely frozen counter still confirms as a stall"
+rm -f "$FAKE_REPO/camera_gone"
+echo 500 > "$FAKE_REPO/pinned_frames"      # and nothing will move it
+start_session; reset_state; rm -f "$TMP/alerts"/*
+: > "$TMP/watcher.log"
+run_wd; sleep 4
+STALL_CONFIRM=6 run_wd
+check "stall confirmed"      "1" "$(grep -c 'window alive but no frames written' "$TMP/watcher.log")"
+check "down-since recorded"  "present" "$([ -f "$TMP/down_since" ] && echo present || echo absent)"
 
 echo
 echo "=============================="

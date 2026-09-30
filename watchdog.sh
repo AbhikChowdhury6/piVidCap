@@ -36,6 +36,10 @@ ALERT_THRESHOLD_SECONDS="${ALERT_THRESHOLD_SECONDS:-1800}"
 # moved for this long means it has stopped doing work. Kept far above one tick
 # so a slow model pass or a transient stutter can never trip it.
 STALL_THRESHOLD_SECONDS="${STALL_THRESHOLD_SECONDS:-600}"
+# Before acting on a suspected stall, re-sample after this long. Must comfortably
+# exceed one writer tick (~15s) plus the one tick the loop legitimately skips
+# right after activity ends, so a healthy pipeline always moves inside it.
+STALL_CONFIRM_SECONDS="${STALL_CONFIRM_SECONDS:-45}"
 UPLOAD_HOST="${UPLOAD_HOST:-uploadingGuest@192.168.20.64}"
 ALERT_DIR="${ALERT_DIR:-/home/uploadingGuest/pividcap_alerts}"
 # Full scp destination, overridable as one unit so the test harness can point
@@ -118,11 +122,28 @@ classify_progress() {
     now_epoch=$(date -u +%s)
     unchanged_for=$(( now_epoch - since_epoch ))
 
-    if [ "$since_epoch" -ne 0 ] && [ "$unchanged_for" -ge "$STALL_THRESHOLD_SECONDS" ]; then
-        echo "stalled $prev_since"
-    else
+    if [ "$since_epoch" -eq 0 ] || [ "$unchanged_for" -lt "$STALL_THRESHOLD_SECONDS" ]; then
         echo "unproven"
+        return
     fi
+
+    # Suspected stall. Confirm with a second sample in this same run rather
+    # than trusting the cross-run comparison: the counter is coarse and cyclic,
+    # so repeated readings are not by themselves proof that nothing moved.
+    sleep "$STALL_CONFIRM_SECONDS"
+    local recheck
+    recheck="$(progress_token)"
+    if [ "$recheck" != "$token" ]; then
+        echo "$recheck $(now_iso)" > "$STATE_PROGRESS"
+        log "suspected stall not confirmed ($token -> $recheck in ${STALL_CONFIRM_SECONDS}s), capture is live"
+        case "$recheck" in
+            frames:*) echo "capturing" ;;
+            *)        echo "unproven" ;;
+        esac
+        return
+    fi
+
+    echo "stalled $prev_since"
 }
 
 # Restarts the capture process.
